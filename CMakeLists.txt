@@ -5,8 +5,11 @@ set(CMAKE_CXX_STANDARD 14)
 
 add_executable(team19
         main.cpp
-        src/pngReader.cpp
-        src/pngReader.h)
+        src/PngReader.cpp
+        src/PngReader.h
+        src/ImageQuilting.cpp
+        src/ImageQuilting.h
+        src/ImgData.h)
 
 find_package(PNG REQUIRED)
 include_directories(${PNG_INCLUDE_DIR})

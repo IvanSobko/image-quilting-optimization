@@ -1,20 +1,23 @@
-#include "pngReader.h"
+#include "PngReader.h"
+#include "ImgData.h"
 #include <cstdio>
+#include <cstdlib>
+#include <png.h>
 
 // modified code from: https://gist.github.com/niw/5963798
-void file::read_png_file(char const *filename, png_bytepp &data, uint32_t &width, uint32_t &height) {
+void file::read_png_file(char const *filename, ImgData &data) {
     FILE *fp = fopen(filename, "rb");
     if (!fp) {
         printf("ERROR: can't open the file %s\n", filename);
         return;
     }
 
-    if (data) {
+    if (data.data) {
         printf("WARNING: already has values - will clean\n");
-        for (int y = 0; y < height; y++) {
-            free(data[y]);
+        for (int y = 0; y < data.height; y++) {
+            free(data.data[y]);
         }
-        free(data);
+        free(data.data);
     }
 
     png_structp png = png_create_read_struct(PNG_LIBPNG_VER_STRING,
@@ -33,8 +36,8 @@ void file::read_png_file(char const *filename, png_bytepp &data, uint32_t &width
     png_init_io(png, fp);
     png_read_info(png, info);
 
-    width      = png_get_image_width(png, info);
-    height     = png_get_image_height(png, info);
+    data.width  = png_get_image_width(png, info);
+    data.height = png_get_image_height(png, info);
     png_byte color_type = png_get_color_type(png, info);
     png_byte bit_depth  = png_get_bit_depth(png, info);
 
@@ -69,23 +72,23 @@ void file::read_png_file(char const *filename, png_bytepp &data, uint32_t &width
     }
 
     png_read_update_info(png, info);
-    data = (png_bytep*)malloc(sizeof(png_bytep) * height);
-    for(int y = 0; y < height; y++) {
-        data[y] = (png_byte*)malloc(png_get_rowbytes(png,info));
+    data.data = (png_bytep*)malloc(sizeof(png_bytep) * data.height);
+    for(int y = 0; y < data.height; y++) {
+        data.data[y] = (png_byte*)malloc(png_get_rowbytes(png,info));
     }
 
-    png_read_image(png, data);
+    png_read_image(png, data.data);
     fclose(fp);
     png_destroy_read_struct(&png, &info, NULL);
 }
 
-void file::write_png_file(char const *filename, png_bytepp &data, uint32_t width, uint32_t height) {
+void file::write_png_file(char const *filename, ImgData &data) {
     FILE *fp = fopen(filename, "wb");
     if (!fp) {
         printf("ERROR: can't open the file %s\n", filename);
         return;
     }
-    if (!data) {
+    if (!data.output_d) {
         printf("ERROR: nothing to save\n");
         return;
     }
@@ -108,7 +111,7 @@ void file::write_png_file(char const *filename, png_bytepp &data, uint32_t width
     png_set_IHDR(
             png,
             info,
-            width, height,
+            data.output_w, data.output_h,
             8,
             PNG_COLOR_TYPE_RGBA,
             PNG_INTERLACE_NONE,
@@ -121,13 +124,19 @@ void file::write_png_file(char const *filename, png_bytepp &data, uint32_t width
     // Use png_set_filler().
     //png_set_filler(png, 0, PNG_FILLER_AFTER);
 
-    png_write_image(png, data);
+    png_write_image(png, data.output_d);
     png_write_end(png, NULL);
 
-    for(int y = 0; y < height; y++) {
-        free(data[y]);
+    // clear both data from input and output files
+    for(int y = 0; y < data.height; y++) {
+        free(data.data[y]);
     }
-    free(data);
+    for(int y = 0; y < data.output_h; y++) {
+        free(data.output_d[y]);
+    }
+    free(data.data);
+    free(data.output_d);
+
     fclose(fp);
     png_destroy_write_struct(&png, &info);
 }
