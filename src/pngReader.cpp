@@ -1,24 +1,20 @@
 #include "pngReader.h"
-#include <cstdlib>
 #include <cstdio>
-#include <png.h>
 
-uint32_t width, height;
-png_bytep *row_pointers = NULL;
-
-void file::read_png_file(char const *filename) {
+// modified code from: https://gist.github.com/niw/5963798
+void file::read_png_file(char const *filename, png_bytepp &data, uint32_t &width, uint32_t &height) {
     FILE *fp = fopen(filename, "rb");
     if (!fp) {
         printf("ERROR: can't open the file %s\n", filename);
         return;
     }
 
-    if (row_pointers) {
+    if (data) {
         printf("WARNING: already has values - will clean\n");
         for (int y = 0; y < height; y++) {
-            free(row_pointers[y]);
+            free(data[y]);
         }
-        free(row_pointers);
+        free(data);
     }
 
     png_structp png = png_create_read_struct(PNG_LIBPNG_VER_STRING,
@@ -73,23 +69,23 @@ void file::read_png_file(char const *filename) {
     }
 
     png_read_update_info(png, info);
-    row_pointers = (png_bytep*)malloc(sizeof(png_bytep) * height);
+    data = (png_bytep*)malloc(sizeof(png_bytep) * height);
     for(int y = 0; y < height; y++) {
-        row_pointers[y] = (png_byte*)malloc(png_get_rowbytes(png,info));
+        data[y] = (png_byte*)malloc(png_get_rowbytes(png,info));
     }
 
-    png_read_image(png, row_pointers);
+    png_read_image(png, data);
     fclose(fp);
     png_destroy_read_struct(&png, &info, NULL);
 }
 
-void file::write_png_file(char const *filename) {
+void file::write_png_file(char const *filename, png_bytepp &data, uint32_t width, uint32_t height) {
     FILE *fp = fopen(filename, "wb");
     if (!fp) {
         printf("ERROR: can't open the file %s\n", filename);
         return;
     }
-    if (!row_pointers) {
+    if (!data) {
         printf("ERROR: nothing to save\n");
         return;
     }
@@ -125,13 +121,13 @@ void file::write_png_file(char const *filename) {
     // Use png_set_filler().
     //png_set_filler(png, 0, PNG_FILLER_AFTER);
 
-    png_write_image(png, row_pointers);
+    png_write_image(png, data);
     png_write_end(png, NULL);
 
     for(int y = 0; y < height; y++) {
-        free(row_pointers[y]);
+        free(data[y]);
     }
-    free(row_pointers);
+    free(data);
     fclose(fp);
     png_destroy_write_struct(&png, &info);
 }
