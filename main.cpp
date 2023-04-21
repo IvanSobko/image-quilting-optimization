@@ -13,18 +13,18 @@ void parse_args(int argc, char *argv[]) {
     for (int i = 1; i < argc; i++) {
         std::string arg = argv[i];
         std::string par = arg.substr(0, arg.find(delimiter));
-        std::string val = arg.substr(arg.find(delimiter), std::string::npos);
-        if (arg == "--input") {
+        std::string val = arg.substr(arg.find(delimiter)+1, std::string::npos);
+        if (par == "--input") {
             input_file = "../gallery/" + val;
-        } else if (arg == "--output") {
+        } else if (par == "--output") {
             output_file = "../gallery/" + val;
-        } else if (arg == "--width") {
+        } else if (par == "--width") {
             img_data.output_w = std::stoi(val);
-        } else if (arg == "--height") {
+        } else if (par == "--height") {
             img_data.output_h = std::stoi(val);
-        } else if (arg == "--blockW") {
+        } else if (par == "--blockW") {
             img_data.block_w = std::stoi(val);
-        } else if (arg == "--blockH") {
+        } else if (par == "--blockH") {
             img_data.block_h = std::stoi(val);
         }
     }
