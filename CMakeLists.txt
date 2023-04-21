@@ -11,9 +11,6 @@ add_executable(team19
         src/ImageQuilting.h
         src/ImgData.h)
 
-list(APPEND CMAKE_PREFIX_PATH "${CMAKE_CURRENT_SOURCE_DIR}/libs/libpng")
-list(APPEND CMAKE_PREFIX_PATH "${CMAKE_CURRENT_SOURCE_DIR}/libs/zlib")
-
 find_package(PNG 1.6.39 EXACT REQUIRED)
 include_directories(${PNG_INCLUDE_DIR})
 target_link_libraries(team19 ${PNG_LIBRARY})
