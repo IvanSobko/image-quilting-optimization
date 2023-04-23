@@ -4,8 +4,8 @@
 #include <string>
 
 // input parameters
-std::string input_file = "../gallery/input0.png";
-std::string output_file = "../gallery/output0.png";
+std::string input_file = "./gallery/input0.png";
+std::string output_file = "./gallery/output0.png";
 ImgData img_data;
 
 void parse_args(int argc, char *argv[]) {
@@ -15,9 +15,9 @@ void parse_args(int argc, char *argv[]) {
         std::string par = arg.substr(0, arg.find(delimiter));
         std::string val = arg.substr(arg.find(delimiter)+1, std::string::npos);
         if (par == "--input") {
-            input_file = "../gallery/" + val;
+            input_file = "./gallery/" + val;
         } else if (par == "--output") {
-            output_file = "../gallery/" + val;
+            output_file = "./gallery/" + val;
         } else if (par == "--width") {
             img_data.output_w = std::stoi(val);
         } else if (par == "--height") {
