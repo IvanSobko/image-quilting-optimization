@@ -1,6 +1,7 @@
 cmake_minimum_required(VERSION 3.23)
 project(team19)
 
+set(CMAKE_FIND_FRAMEWORK LAST)
 set(CMAKE_CXX_STANDARD 14)
 
 add_executable(team19
