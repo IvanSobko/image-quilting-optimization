@@ -3,7 +3,7 @@
 #include <random>
 #include <algorithm>
 
-ImgData ImageQuilting::synthesis() {
+ImgData ImageQuilting::Synthesis() {
     mData.output_d = (unsigned char **)malloc(sizeof(unsigned char *) * mData.output_h);
     for(int y = 0; y < mData.output_h; y++) {
         mData.output_d[y] = (unsigned char *)malloc(mData.output_w * 4);

@@ -8,8 +8,8 @@ public:
     ImageQuilting() = delete;
     ImageQuilting(const ImgData &data) { mData = data; }
 
-    ImgData synthesis();
-    void transfer() {}
+    ImgData Synthesis();
+    void Transfer() {}
 
 private:
     ImgData mData;

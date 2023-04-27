@@ -56,7 +56,7 @@ int main(int argc, char *argv[]) {
 
     // modifies img_data inside and creates output image
     ImageQuilting quilting(img_data);
-    img_data = quilting.synthesis();
+    img_data = quilting.Synthesis();
 
     file::write_png_file(output_file.c_str(), img_data);
     return 0;
