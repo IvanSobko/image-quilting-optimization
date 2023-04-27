@@ -14,11 +14,14 @@ class ImageQuilting {
    private:
     ImgData mData;
 
-    // Write a block from the source data to the output data specified by the given upper-left corners
+    // Write a block from the source data to the output data specified their upper-left corners
     void WriteBlock(int dstY, int dstX, int srcY, int srcX);
 
     // Synthesize a new texture sample by randomly choosing blocks
     ImgData RandomBlockPlacement();
+
+    // Compute the left edge overlap between two left and right blocks specified by their upper-left corners
+    double ComputeLeftEdgeOverlap(int leftY, int leftX, int rightY, int rightX);
 
     // Synthesize a new texture sample by randomly choosing blocks satisfying overlap constraints
     ImgData OverlapConstraints();

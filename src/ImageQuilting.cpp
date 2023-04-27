@@ -2,7 +2,6 @@
 #include <cstdlib>
 #include <random>
 #include <algorithm>
-#include <iostream>
 
 ImgData ImageQuilting::Synthesis() {
     return OverlapConstraints();
@@ -70,6 +69,17 @@ ImgData ImageQuilting::RandomBlockPlacement()
         }
     }
     return mData;
+}
+
+// Compute the left edge overlap between two left and right blocks specified by their upper-left corners
+double ImageQuilting::ComputeLeftEdgeOverlap(int leftY, int leftX, int rightY, int rightX){
+    // Overlap edge width is 1/6 the size of the block
+    int overlapWidth = mData.block_w / 6;
+
+    // Compute the l2 norm of the overlap between the two blocks
+    double l2norm = 0;
+
+    return 0;
 }
 
 // Synthesize a new texture sample by randomly choosing blocks satisfying overlap constraints
