@@ -4,6 +4,8 @@
 #include <cstdint>
 #include <cstdlib>
 
+#define CHANNEL_NUM 4
+
 struct ImgData {
     // each char * stores one row of an image, for each pixel 4 value {rgba}
     unsigned char **data = NULL;

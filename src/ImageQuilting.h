@@ -13,6 +13,9 @@ public:
 
 private:
     ImgData mData;
+
+    // Synthesize a new texture sample by randomly choosing blocks
+    ImgData RandomBlockPlacement();
 };
 
 
