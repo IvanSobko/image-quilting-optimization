@@ -4,16 +4,15 @@
 #include "ImgData.h"
 
 class ImageQuilting {
-public:
+   public:
     ImageQuilting() = delete;
-    ImageQuilting(const ImgData &data) { mData = data; }
+    ImageQuilting(const ImgData& data) { mData = data; }
 
     ImgData synthesis();
     void transfer() {}
 
-private:
+   private:
     ImgData mData;
 };
 
-
-#endif //TEAM19_IMAGEQUILTING_H
+#endif  //TEAM19_IMAGEQUILTING_H

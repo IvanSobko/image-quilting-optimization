@@ -4,8 +4,8 @@
 struct ImgData;
 
 namespace file {
-    void read_png_file(char const *filename, ImgData &data);
-    void write_png_file(char const *filename, ImgData &data);
-}
+void read_png_file(char const* filename, ImgData& data);
+void write_png_file(char const* filename, ImgData& data);
+}  // namespace file
 
-#endif //TEAM19_PNGREADER_H
+#endif  //TEAM19_PNGREADER_H

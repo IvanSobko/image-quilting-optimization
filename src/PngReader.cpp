@@ -1,12 +1,12 @@
 #include "PngReader.h"
-#include "ImgData.h"
+#include <png.h>
 #include <cstdio>
 #include <cstdlib>
-#include <png.h>
+#include "ImgData.h"
 
 // modified code from: https://gist.github.com/niw/5963798
-void file::read_png_file(char const *filename, ImgData &data) {
-    FILE *fp = fopen(filename, "rb");
+void file::read_png_file(char const* filename, ImgData& data) {
+    FILE* fp = fopen(filename, "rb");
     if (!fp) {
         printf("ERROR: can't open the file %s\n", filename);
         return;
@@ -20,8 +20,7 @@ void file::read_png_file(char const *filename, ImgData &data) {
         free(data.data);
     }
 
-    png_structp png = png_create_read_struct(PNG_LIBPNG_VER_STRING,
-                                             NULL, NULL, NULL);
+    png_structp png = png_create_read_struct(PNG_LIBPNG_VER_STRING, NULL, NULL, NULL);
     if (!png) {
         printf("ERROR: failed the structure creation\n");
         return;
@@ -36,10 +35,10 @@ void file::read_png_file(char const *filename, ImgData &data) {
     png_init_io(png, fp);
     png_read_info(png, info);
 
-    data.width  = png_get_image_width(png, info);
+    data.width = png_get_image_width(png, info);
     data.height = png_get_image_height(png, info);
     png_byte color_type = png_get_color_type(png, info);
-    png_byte bit_depth  = png_get_bit_depth(png, info);
+    png_byte bit_depth = png_get_bit_depth(png, info);
 
     // Read any color_type into 8bit depth, RGBA format.
     // See http://www.libpng.org/pub/png/libpng-manual.txt
@@ -62,19 +61,19 @@ void file::read_png_file(char const *filename, ImgData &data) {
     }
 
     // These color_type don't have an alpha channel then fill it with 0xff.
-    if(color_type == PNG_COLOR_TYPE_RGB || color_type == PNG_COLOR_TYPE_GRAY ||
-       color_type == PNG_COLOR_TYPE_PALETTE) {
+    if (color_type == PNG_COLOR_TYPE_RGB || color_type == PNG_COLOR_TYPE_GRAY ||
+        color_type == PNG_COLOR_TYPE_PALETTE) {
         png_set_filler(png, 0xFF, PNG_FILLER_AFTER);
     }
 
-    if (color_type == PNG_COLOR_TYPE_GRAY ||  color_type == PNG_COLOR_TYPE_GRAY_ALPHA) {
+    if (color_type == PNG_COLOR_TYPE_GRAY || color_type == PNG_COLOR_TYPE_GRAY_ALPHA) {
         png_set_gray_to_rgb(png);
     }
 
     png_read_update_info(png, info);
     data.data = (png_bytep*)malloc(sizeof(png_bytep) * data.height);
-    for(int y = 0; y < data.height; y++) {
-        data.data[y] = (png_byte*)malloc(png_get_rowbytes(png,info));
+    for (int y = 0; y < data.height; y++) {
+        data.data[y] = (png_byte*)malloc(png_get_rowbytes(png, info));
     }
 
     png_read_image(png, data.data);
@@ -82,8 +81,8 @@ void file::read_png_file(char const *filename, ImgData &data) {
     png_destroy_read_struct(&png, &info, NULL);
 }
 
-void file::write_png_file(char const *filename, ImgData &data) {
-    FILE *fp = fopen(filename, "wb");
+void file::write_png_file(char const* filename, ImgData& data) {
+    FILE* fp = fopen(filename, "wb");
     if (!fp) {
         printf("ERROR: can't open the file %s\n", filename);
         return;
@@ -92,8 +91,7 @@ void file::write_png_file(char const *filename, ImgData &data) {
         printf("ERROR: nothing to save\n");
         return;
     }
-    png_structp png = png_create_write_struct(PNG_LIBPNG_VER_STRING,
-                                              NULL, NULL, NULL);
+    png_structp png = png_create_write_struct(PNG_LIBPNG_VER_STRING, NULL, NULL, NULL);
     if (!png) {
         printf("ERROR: failed the structure creation\n");
         return;
@@ -108,16 +106,8 @@ void file::write_png_file(char const *filename, ImgData &data) {
     png_init_io(png, fp);
 
     // Output is 8bit depth, RGBA format.
-    png_set_IHDR(
-            png,
-            info,
-            data.output_w, data.output_h,
-            8,
-            PNG_COLOR_TYPE_RGBA,
-            PNG_INTERLACE_NONE,
-            PNG_COMPRESSION_TYPE_DEFAULT,
-            PNG_FILTER_TYPE_DEFAULT
-    );
+    png_set_IHDR(png, info, data.output_w, data.output_h, 8, PNG_COLOR_TYPE_RGBA, PNG_INTERLACE_NONE,
+                 PNG_COMPRESSION_TYPE_DEFAULT, PNG_FILTER_TYPE_DEFAULT);
     png_write_info(png, info);
 
     // To remove the alpha channel for PNG_COLOR_TYPE_RGB format,
@@ -128,10 +118,10 @@ void file::write_png_file(char const *filename, ImgData &data) {
     png_write_end(png, NULL);
 
     // clear both data from input and output files
-    for(int y = 0; y < data.height; y++) {
+    for (int y = 0; y < data.height; y++) {
         free(data.data[y]);
     }
-    for(int y = 0; y < data.output_h; y++) {
+    for (int y = 0; y < data.output_h; y++) {
         free(data.output_d[y]);
     }
     free(data.data);

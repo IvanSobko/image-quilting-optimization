@@ -1,19 +1,19 @@
-#include "src/ImageQuilting.h"
-#include "src/PngReader.h"
 #include <cstdlib>
 #include <string>
+#include "src/ImageQuilting.h"
+#include "src/PngReader.h"
 
 // input parameters
 std::string input_file = "./gallery/input0.png";
 std::string output_file = "./gallery/output0.png";
 ImgData img_data;
 
-void parse_args(int argc, char *argv[]) {
+void parse_args(int argc, char* argv[]) {
     std::string delimiter = "=";
     for (int i = 1; i < argc; i++) {
         std::string arg = argv[i];
         std::string par = arg.substr(0, arg.find(delimiter));
-        std::string val = arg.substr(arg.find(delimiter)+1, std::string::npos);
+        std::string val = arg.substr(arg.find(delimiter) + 1, std::string::npos);
         if (par == "--input") {
             input_file = "./gallery/" + val;
         } else if (par == "--output") {
@@ -49,7 +49,7 @@ void set_default() {
     }
 }
 
-int main(int argc, char *argv[]) {
+int main(int argc, char* argv[]) {
     parse_args(argc, argv);
     file::read_png_file(input_file.c_str(), img_data);
     set_default();
