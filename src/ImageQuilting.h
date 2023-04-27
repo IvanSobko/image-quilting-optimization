@@ -4,19 +4,18 @@
 #include "ImgData.h"
 
 class ImageQuilting {
-public:
+   public:
     ImageQuilting() = delete;
-    ImageQuilting(const ImgData &data) { mData = data; }
+    ImageQuilting(const ImgData& data) { mData = data; }
 
     ImgData Synthesis();
     void Transfer() {}
 
-private:
+   private:
     ImgData mData;
 
     // Synthesize a new texture sample by randomly choosing blocks
     ImgData RandomBlockPlacement();
 };
 
-
-#endif //TEAM19_IMAGEQUILTING_H
+#endif  //TEAM19_IMAGEQUILTING_H
