@@ -16,7 +16,7 @@ void ImageQuilting::WriteBlock(const int dstY, const int dstX, const int srcY, c
         for (int j = 0; j < mData.block_w; j++){
             for (int k = 0; k < CHANNEL_NUM; k++){
                 // Write to the CHANNEL_NUM channels
-                mData.output_d[dstY+i][dstX+CHANNEL_NUM*j+k] = mData.data[srcY+i][CHANNEL_NUM*(srcX+j)+k];
+                mData.output_d[dstY+i][CHANNEL_NUM*(dstX+j)+k] = mData.data[srcY+i][CHANNEL_NUM*(srcX+j)+k];
             }
         }
     }
@@ -79,7 +79,7 @@ double ImageQuilting::ComputeVerticalEdgeOverlap(
 {
     // Overlap edge width is 1/6 the size of the block
     int overlapWidth = mData.block_w / 6;
-    int block0XOverlapStart = block0X + CHANNEL_NUM * (mData.block_w - overlapWidth);
+    int block0XOverlapStart = CHANNEL_NUM * (block0X + mData.block_w - overlapWidth);
 
     // Compute the l2 norm of the overlap between the two blocks
     double l2norm = 0;
@@ -101,15 +101,15 @@ double ImageQuilting::ComputeHorizontalEdgeOverlap(
     const int block0Y, const int block0X, const int block1Y, const int block1X)
 {
     // Overlap edge width is 1/6 the size of the block
-    int overlapWidth = mData.block_h / 6;
-    int block0YOverlapStart = block0Y + (mData.block_h - overlapWidth);
+    int overlapHeight = mData.block_h / 6;
+    int block0YOverlapStart = block0Y + (mData.block_h - overlapHeight);
 
     // Compute the l2 norm of the overlap between the two blocks
     double l2norm = 0;
-    for (int i = 0; i < overlapWidth; i++){
+    for (int i = 0; i < overlapHeight; i++){
         for (int j = 0; j < mData.block_w; j++){
             for (int k = 0; k < CHANNEL_NUM; k++){
-                double x0 = mData.output_d[block0YOverlapStart+i][block0X+CHANNEL_NUM*j+k];
+                double x0 = mData.output_d[block0YOverlapStart+i][CHANNEL_NUM*(j+block0X)+k];
                 double x1 = mData.data[block1Y+i][CHANNEL_NUM*(block1X+j)+k];
                 double norm = std::abs(x0 - x1);
                 l2norm += norm*norm;
@@ -214,7 +214,7 @@ ImgData ImageQuilting::OverlapConstraints(){
 
             // Top-left corner of the current block
             int dstY = mData.block_h * blockY;
-            int dstX = CHANNEL_NUM * mData.block_w * blockX;
+            int dstX = mData.block_w * blockX;
 
             // Randomly choose a block and place it
             if (blockY == 0 && blockX == 0){
@@ -227,7 +227,7 @@ ImgData ImageQuilting::OverlapConstraints(){
             }
             // Otherwise place a vertical edge overlap block
             else
-                PlaceVerticalEdgeOverlapBlock(dstY, dstX, maxBlockX, maxBlockY, 0.3);
+                PlaceVerticalEdgeOverlapBlock(dstY, dstX, maxBlockX, maxBlockY, 0.1);
         }
     }
 
