@@ -95,6 +95,29 @@ double ImageQuilting::ComputeVerticalEdgeOverlap(
     return std::sqrt(l2norm);
 }
 
+// Compute the horizontal edge overlap between block 0 of the output image and block 1 of the input image given their upper-left corners
+double ImageQuilting::ComputeHorizontalEdgeOverlap(
+    const int block0Y, const int block0X, const int block1Y, const int block1X)
+{
+    // Overlap edge width is 1/6 the size of the block
+    int overlapWidth = mData.block_h / 6;
+    int block0YOverlapStart = block0Y + (mData.block_h - overlapWidth);
+
+    // Compute the l2 norm of the overlap between the two blocks
+    double l2norm = 0;
+    for (int i = 0; i < overlapWidth; i++){
+        for (int j = 0; j < mData.block_w; j++){
+            for (int k = 0; k < CHANNEL_NUM; k++){
+                double x0 = mData.output_d[block0YOverlapStart+i][block0X+CHANNEL_NUM*j+k];
+                double x1 = mData.data[block1Y+i][CHANNEL_NUM*(block1X+j)+k];
+                double norm = std::abs(x0 - x1);
+                l2norm += norm*norm;
+            }
+        }
+    }
+    return std::sqrt(l2norm);
+}
+
 // BlockValue comparator
 int ImageQuilting::BlockValueComparator(const void* blockValue1, const void* blockValue2) {
     return ((BlockValue*)blockValue1)->value < ((BlockValue*)blockValue2)->value;

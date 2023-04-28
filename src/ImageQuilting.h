@@ -23,6 +23,9 @@ class ImageQuilting {
     // Compute the vertical edge overlap between block 0 of the output image and block 1 of the input image given their upper-left corners
     double ComputeVerticalEdgeOverlap(int block0Y, int block0X, int block1Y, int block1X);
 
+    // Compute the horizontal edge overlap between block 0 of the output image and block 1 of the input image given their upper-left corners
+    double ComputeHorizontalEdgeOverlap(int block0Y, int block0X, int block1Y, int block1X);
+
     // Struct to sort blocks by their l2 norm
     struct BlockValue{
         int y, x;
