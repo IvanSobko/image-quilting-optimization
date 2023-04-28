@@ -79,14 +79,14 @@ double ImageQuilting::ComputeVerticalEdgeOverlap(
 {
     // Overlap edge width is 1/6 the size of the block
     int overlapWidth = mData.block_w / 6;
-    int block0XOverlapStart = CHANNEL_NUM * (block0X + mData.block_w - overlapWidth);
+    int block0XOverlapStart = block0X + mData.block_w - overlapWidth;
 
     // Compute the l2 norm of the overlap between the two blocks
     double l2norm = 0;
     for (int i = 0; i < mData.block_h; i++){
         for (int j = 0; j < overlapWidth; j++){
             for (int k = 0; k < CHANNEL_NUM; k++){
-                double x0 = mData.output_d[block0Y+i][block0XOverlapStart+CHANNEL_NUM*j+k];
+                double x0 = mData.output_d[block0Y+i][CHANNEL_NUM*(block0XOverlapStart+j)+k];
                 double x1 = mData.data[block1Y+i][CHANNEL_NUM*(block1X+j)+k];
                 double norm = std::abs(x0 - x1);
                 l2norm += norm*norm;
@@ -102,11 +102,49 @@ double ImageQuilting::ComputeHorizontalEdgeOverlap(
 {
     // Overlap edge width is 1/6 the size of the block
     int overlapHeight = mData.block_h / 6;
-    int block0YOverlapStart = block0Y + (mData.block_h - overlapHeight);
+    int block0YOverlapStart = block0Y + mData.block_h - overlapHeight;
 
     // Compute the l2 norm of the overlap between the two blocks
     double l2norm = 0;
     for (int i = 0; i < overlapHeight; i++){
+        for (int j = 0; j < mData.block_w; j++){
+            for (int k = 0; k < CHANNEL_NUM; k++){
+                double x0 = mData.output_d[block0YOverlapStart+i][CHANNEL_NUM*(block0X+j)+k];
+                double x1 = mData.data[block1Y+i][CHANNEL_NUM*(block1X+j)+k];
+                double norm = std::abs(x0 - x1);
+                l2norm += norm*norm;
+            }
+        }
+    }
+    return std::sqrt(l2norm);
+}
+
+// Compute the corner edge overlap between block 0 of the output image and block 1 of the input image given their upper-left corners
+double ImageQuilting::ComputeCornerEdgeOverlap(
+    const int block0Y, const int block0X, const int block1Y, const int block1X)
+{
+    // Overlap edge width is 1/6 the size of the block
+    int overlapSize = mData.block_h / 6;
+
+    // Compute the l2 norm of the overlap between the two blocks
+    double l2norm = 0;
+
+    // Compute the vertical edge overlap
+    int block0XOverlapStart = block0X - overlapSize;
+    for (int i = 0; i < mData.block_h; i++){
+        for (int j = 0; j < overlapSize; j++){
+            for (int k = 0; k < CHANNEL_NUM; k++){
+                double x0 = mData.output_d[block0Y+i][CHANNEL_NUM*(block0XOverlapStart+j)+k];
+                double x1 = mData.data[block1Y+i][CHANNEL_NUM*(block1X+j)+k];
+                double norm = std::abs(x0 - x1);
+                l2norm += norm*norm;
+            }
+        }
+    }
+
+    // Compute the horizontal edge overlap
+    int block0YOverlapStart = block0Y - overlapSize;
+    for (int i = 0; i < overlapSize; i++){
         for (int j = 0; j < mData.block_w; j++){
             for (int k = 0; k < CHANNEL_NUM; k++){
                 double x0 = mData.output_d[block0YOverlapStart+i][CHANNEL_NUM*(j+block0X)+k];
@@ -116,6 +154,20 @@ double ImageQuilting::ComputeHorizontalEdgeOverlap(
             }
         }
     }
+
+    // Compute the corner edge overlap
+    for (int i = 0; i < overlapSize; i++){
+        for (int j = 0; j < overlapSize; j++){
+            for (int k = 0; k < CHANNEL_NUM; k++){
+                double x0 = mData.output_d[block0YOverlapStart+i][CHANNEL_NUM*(block0XOverlapStart+j)+k];
+                double x1 = mData.data[block1Y+i][CHANNEL_NUM*(block1X+j)+k];
+                double norm = std::abs(x0 - x1);
+                l2norm += norm*norm;
+            }
+        }
+    }
+
+    // Compute the horizontal edge overlap
     return std::sqrt(l2norm);
 }
 
