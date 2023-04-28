@@ -78,15 +78,14 @@ double ImageQuilting::ComputeVerticalEdgeOverlap(
 {
     // Overlap edge width is 1/6 the size of the block
     int overlapWidth = mData.block_w / 6;
-    int block0XOverlapMin = block0X + mData.block_w - overlapWidth;
-    int block1XOverlapMax = block1X + overlapWidth;
+    int block0XOverlapStart = block0X + CHANNEL_NUM * (mData.block_w - overlapWidth);
 
     // Compute the l2 norm of the overlap between the two blocks
     double l2norm = 0;
     for (int i = 0; i < mData.block_h; i++){
         for (int j = 0; j < overlapWidth; j++){
             for (int k = 0; k < CHANNEL_NUM; k++){
-                double x0 = mData.output_d[block0Y+i][block0X+CHANNEL_NUM*j+k];
+                double x0 = mData.output_d[block0Y+i][block0XOverlapStart+CHANNEL_NUM*j+k];
                 double x1 = mData.data[block1Y+i][CHANNEL_NUM*(block1X+j)+k];
                 double norm = std::abs(x0 - x1);
                 l2norm += norm*norm;
