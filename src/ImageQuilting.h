@@ -20,6 +20,9 @@ class ImageQuilting {
     // Synthesize a new texture sample by randomly choosing blocks
     ImgData RandomBlockPlacement();
 
+    // Choose what type of overlapping to estimate
+    double ComputeEdgeOverlap(int block0Y, int block0X, int block1Y, int block1X);
+
     // Compute the vertical edge overlap between block 0 of the output image and block 1 of the input image given their upper-left corners
     double ComputeVerticalEdgeOverlap(int block0Y, int block0X, int block1Y, int block1X);
 
@@ -43,9 +46,8 @@ class ImageQuilting {
         const void* array, size_t n, const void* upper_bound,
         size_t width, int (*comparator)(const void*, const void*));
 
-    // Place a vertical edge overlap block with respect to the given block of the output image
-    void PlaceVerticalEdgeOverlapBlock(
-        int blockY, int blockX, int maxBlockX, int maxBlockY, double errorTolerance);
+    // Place an edge overlap block with respect to the given block of the output image
+    void PlaceEdgeOverlapBlock(int blockY, int blockX, int maxBlockX, int maxBlockY, double errorTolerance);
 
     // Synthesize a new texture sample by randomly choosing blocks satisfying overlap constraints
     ImgData OverlapConstraints();

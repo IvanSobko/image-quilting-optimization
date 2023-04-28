@@ -64,7 +64,7 @@ void set_simple_test()
 int main(int argc, char *argv[]) {
     parse_args(argc, argv);
     file::read_png_file(input_file.c_str(), img_data);
-    //set_default();
+//    set_default();
     set_simple_test();
 
     // modifies img_data inside and creates output image
