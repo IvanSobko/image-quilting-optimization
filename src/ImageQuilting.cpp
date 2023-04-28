@@ -3,6 +3,7 @@
 #include <iostream>
 #include <algorithm>
 #include <random>
+#include <float.h>
 
 // Synthesize a new texture
 ImgData ImageQuilting::Synthesis(){
@@ -160,15 +161,29 @@ void ImageQuilting::PlaceVerticalEdgeOverlapBlock(
         }
     }
     // Sort the blocks by value
-    qsort(blocks, numBlocks, sizeof(BlockValue), BlockValueComparator);
-    BlockValue upperBound;
-    upperBound.value = errorTolerance * blocks[numBlocks-1].value;
-    size_t maxIndex = bs_upper_bound(blocks, numBlocks, &upperBound, sizeof(BlockValue), BlockValueComparator);
+    double minVal = DBL_MAX;
+    for (int i=0; i < numBlocks; i++) {
+        const auto &block = blocks[i];
+        if (block.value < minVal) {
+            minVal = block.value;
+        }
+    }
+    std::vector<BlockValue> suitBlocks;
+    for (int i=0; i < numBlocks; i++) {
+        const auto &block = blocks[i];
+        if (block.value < (1.0 + errorTolerance) * minVal) {
+            suitBlocks.push_back(block);
+        }
+    }
+//    qsort(blocks, numBlocks, sizeof(BlockValue), BlockValueComparator);
+//    BlockValue upperBound;
+//    upperBound.value = errorTolerance * blocks[numBlocks-1].value;
+//    size_t maxIndex = bs_upper_bound(blocks, numBlocks, &upperBound, sizeof(BlockValue), BlockValueComparator);
 
     // Sample and place a block
     std::random_device randomDevice;
     std::mt19937 randomNumberGenerator(randomDevice());
-    std::uniform_int_distribution<std::mt19937::result_type> randomBlock(0, maxIndex);
+    std::uniform_int_distribution<std::mt19937::result_type> randomBlock(0, suitBlocks.size());
     int blockIndex = randomBlock(randomNumberGenerator);
     WriteBlock(blockY, blockX, blocks[blockIndex].y, blocks[blockIndex].x);
 }
@@ -212,7 +227,7 @@ ImgData ImageQuilting::OverlapConstraints(){
             }
             // Otherwise place a vertical edge overlap block
             else
-                PlaceVerticalEdgeOverlapBlock(dstY, dstX, maxBlockX, maxBlockY, 0.1);
+                PlaceVerticalEdgeOverlapBlock(dstY, dstX, maxBlockX, maxBlockY, 0.3);
         }
     }
 
