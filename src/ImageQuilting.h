@@ -12,6 +12,7 @@ class ImageQuilting {
     void Transfer() {}
 
    private:
+
     ImgData mData;
 
     // Write a block from the source data to the output data given their upper-left corners
@@ -21,12 +22,12 @@ class ImageQuilting {
     void WriteBlockOverlap(int dstY, int dstX, int srcY, int srcX);
 
     // Same as the overlapping one, but applies the minimum cut
-    void WriteBlockOverlapWithMinCut(int overlapY, int overlapX, int dstY, int dstX, int srcY, int srcX);
+    void WriteBlockOverlapWithMinCut(int overlapType, int dstY, int dstX, int srcY, int srcX);
 
     // Compute the overlap between the current block - block 0 of the output image
     // and block 1 of the input image given their upper-left corners
     // and the position of the overlap
-    double ComputeOverlap(const int overlapYStart, const int overlapXStart,
+    double ComputeOverlap(const int overlapType,
                           const int block0Y, const int block0X,
                           const int block1Y, const int block1X);
 
@@ -34,6 +35,13 @@ class ImageQuilting {
     struct BlockValue{
         int y, x;
         double value;
+    };
+
+    // type of overlap between blocks
+    enum OverlapType {
+        vertical = 0,
+        horizontal = 1,
+        both = 2
     };
 
     // Place an edge overlap block with respect to the given block of the output image
