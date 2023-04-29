@@ -3,27 +3,45 @@
 #include <dirent.h>
 #include <cstdio>
 #include "tsc_x86.h"
+#include "PngReader.h"
+#include <string>
 
 #define CYCLES_REQUIRED 1e8
 #define RDTSC_LATENCY 26
-#define REP 50
+#define REP 1
 
 void timing::run_timing() {
     // TODO: run rdtsc() on images of different sizes. Then write results to file and create performance plot
     //  with python
 
-    char** files_list = NULL;
-    int n = read_files(&files_list, "./gallery", "input");
-
-    for (int i = 0; i < n; i++) {
-        printf("%s\n", files_list[i]);
+    std::string directory= "./gallery";
+    std::vector<std::string> files = read_files(directory, "input");
+    if (files.empty()) {
+        perror("Failed to collect files for timing");
+        return;
     }
 
+    ImgData img_data;
+    for (int i = 0; i < files.size(); i++) {
+        printf("Timing for %s\n", files[i].c_str());
+        file::read_png_file(files[i].c_str(), img_data);
+        //TODO: specify block size implicitly
+        img_data.output_w = img_data.width * 2;
+        img_data.output_h = img_data.height * 2;
+        img_data.block_w = img_data.width / 4;
+        img_data.block_h = img_data.height / 4;
 
-    for (int i = 0; i < n; i++) {
-        free(files_list[i]);
+        ImageQuilting quilting(img_data);
+        double cycles = rdtsc(&quilting);
+        printf("Done. Quilting for %s took %f cycles\n\n", files[i].c_str(), cycles);
+
+
+
+        free(img_data.data);
+        img_data.data = NULL;
+        free(img_data.output_d);
+        img_data.output_d = NULL;
     }
-    free(files_list);
 }
 
 double timing::rdtsc(ImageQuilting* quilting) {
@@ -35,6 +53,7 @@ double timing::rdtsc(ImageQuilting* quilting) {
     // Warm-up phase: we determine a number of executions that allows
     // the code to be executed for at least CYCLES_REQUIRED cycles.
     // This helps excluding timing overhead when measuring small runtimes.
+    printf("Doing warmup phase...");
     do {
         num_runs = num_runs * multiplier;
         start = start_tsc();
@@ -50,6 +69,7 @@ double timing::rdtsc(ImageQuilting* quilting) {
 
     // Actual performance measurements repeated REP times.
     // We simply store all results and compute medians during post-processing.
+    printf("actually measuring performance (%lli times).\n", num_runs);
     double total_cycles = 0;
     for (size_t j = 0; j < REP; j++) {
         start = start_tsc();
@@ -64,26 +84,22 @@ double timing::rdtsc(ImageQuilting* quilting) {
     total_cycles /= REP;
     return total_cycles;
 }
-int timing::read_files(char*** files, const char* directory, const char* filename_filter) {
-    DIR* folder = opendir(directory);
+
+std::vector<std::string> timing::read_files(const std::string &directory, const std::string &filename_filter) {
+    DIR* folder = opendir(directory.c_str());
     if (folder == NULL) {
         perror("Unable to read directory");
-        return NULL;
+        return {};
     }
 
-    if (filename_filter == NULL) {
-        filename_filter = "";  // is this even legal? p.s. modifying 'const char*'
-    }
-
+    std::vector<std::string> result;
     struct dirent* entry;
-    int n = 0;
     while ((entry = readdir(folder))) {
-        if (strstr(entry->d_name, filename_filter) != NULL) {
-            *files = (char**)realloc(*files, sizeof(**files) * (n + 1));
-            (*files)[n] = strdup(entry->d_name);
-            n++;
+        if (strstr(entry->d_name, filename_filter.c_str()) != NULL) {
+            std::string filepath = directory + '/' + entry->d_name;
+            result.push_back(filepath);
         }
     }
     closedir(folder);
-    return n;
+    return result;
 }
