@@ -1,7 +1,6 @@
 #include "timing.h"
 
 #include <dirent.h>
-#include <stdio.h>
 
 #include "PngReader.h"
 #include "tsc_x86.h"
@@ -38,11 +37,19 @@ void timing::run_timing() {
         printf("Done. Quilting for %s took %f cycles\n\n", files[i].c_str(), cycles);
 
         int64_t data_size = img_data.width * img_data.height;
-        fprintf(results_txt, "size=%ix%i, n=%lli, cycles=%f\n", img_data.width, img_data.height, data_size,
-                cycles);
+        //TODO: write performance=flops/cycles after implementation is finished and we can count flops
+        fprintf(results_txt, "size=%ix%i, n=%lli, performance=%f\n", img_data.width, img_data.height, data_size,
+                (double)data_size/cycles);
 
+        for (int j = 0; j < img_data.height; j++) {
+            free(img_data.data[j]);
+        }
         free(img_data.data);
         img_data.data = NULL;
+
+        for (int j = 0; j < img_data.output_h; j++) {
+            free(img_data.output_d[j]);
+        }
         free(img_data.output_d);
         img_data.output_d = NULL;
     }
