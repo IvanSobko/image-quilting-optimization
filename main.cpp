@@ -61,17 +61,18 @@ int main(int argc, char* argv[]) {
 
     // modifies img_data inside and creates output image
     ImageQuilting quilting(img_data);
+    timing::run_timing();
 
-    if (benchmark) {
-        clock_t start = clock();
-        double r = timing::rdtsc(&quilting);
-        clock_t end = clock();
-        double seconds = (double)(end - start) / CLOCKS_PER_SEC;
-        printf("RDTSC instruction:\n %lf cycles. Measurement took %.2f sec.\n", r, seconds);
-    } else {
-        img_data = quilting.synthesis();
-        file::write_png_file(output_file.c_str(), img_data);
-    }
+    // if (benchmark) {
+    //     clock_t start = clock();
+    //     double r = timing::rdtsc(&quilting);
+    //     clock_t end = clock();
+    //     double seconds = (double)(end - start) / CLOCKS_PER_SEC;
+    //     printf("RDTSC instruction:\n %lf cycles. Measurement took %.2f sec.\n", r, seconds);
+    // } else {
+    //     img_data = quilting.synthesis();
+    //     file::write_png_file(output_file.c_str(), img_data);
+    // }
 
     return 0;
 }
