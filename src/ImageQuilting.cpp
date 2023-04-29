@@ -42,13 +42,16 @@ void ImageQuilting::WriteBlockOverlap(int dstY, int dstX, int srcY, int srcX)
 // Same as the overlapping one, but applies the minimum cut
 void ImageQuilting::WriteBlockOverlapWithMinCut(int overlapType, int dstY, int dstX, int srcY, int srcX)
 {
-    // Vertical min cut
+    // Minimum cut paths
     int verticalPath[mData.block_h];
     int horizontalPath[mData.block_w];
 
-    int overlapXStart = dstX - overlapWidth;
-    int overlapYStart = dstY - overlapHeight;
-    if (overlapType != horizontal){
+    // Compute the correct
+    int overlapXStart = overlapType != horizontal ? dstX - overlapWidth : dstX;
+    int overlapYStart = overlapType != vertical ? dstY - overlapHeight : dstY;
+
+    if (overlapType == vertical || overlapType == both){
+
         // Compute the error surface
         double errorSurface[overlapWidth * mData.block_h];
         for (int i = 0; i < mData.block_h; i++){
@@ -56,7 +59,7 @@ void ImageQuilting::WriteBlockOverlapWithMinCut(int overlapType, int dstY, int d
                 // Compute the per pixel error
                 double error = 0;
                 for (int k = 0; k < CHANNEL_NUM; k++){
-                    double x0 = mData.output_d[dstY+i][CHANNEL_NUM*(overlapXStart+j)+k];
+                    double x0 = mData.output_d[overlapYStart+i][CHANNEL_NUM*(overlapXStart+j)+k];
                     double x1 = mData.data[srcY+i][CHANNEL_NUM*(srcX+j)+k];
                     double norm = x0 - x1;
                     error += norm * norm;
@@ -123,7 +126,7 @@ void ImageQuilting::WriteBlockOverlapWithMinCut(int overlapType, int dstY, int d
     }
 
     // horizontal min cut
-    if (overlapType != vertical){
+    if (overlapType == horizontal || overlapType == both){
         // Compute the error surface
         double errorSurface[overlapHeight * mData.block_w];
         for (int i = 0; i < overlapHeight; i++){
@@ -131,7 +134,7 @@ void ImageQuilting::WriteBlockOverlapWithMinCut(int overlapType, int dstY, int d
                 // Compute the per pixel error
                 double error = 0;
                 for (int k = 0; k < CHANNEL_NUM; k++){
-                    double x0 = mData.output_d[overlapYStart+i][CHANNEL_NUM*(dstX+j)+k];
+                    double x0 = mData.output_d[overlapYStart+i][CHANNEL_NUM*(overlapXStart+j)+k];
                     double x1 = mData.data[srcY+i][CHANNEL_NUM*(srcX+j)+k];
                     double norm = x0 - x1;
                     error += norm * norm;
@@ -201,9 +204,9 @@ void ImageQuilting::WriteBlockOverlapWithMinCut(int overlapType, int dstY, int d
     // Write the block according to the vertical cut
     for (int i = 0; i < mData.block_h; i++){
         for (int j = 0; j < mData.block_w; j++){
-            // >= - general region; another part of the statement - overlap region
-            // j > verticalPath[i] - the starting point for the source block
             if (overlapType != horizontal) {
+                // >= - general region; another part of the statement - overlap region
+                // j > verticalPath[i] - the starting point for the source block
                 if (j >= overlapWidth || (j < overlapWidth && j > verticalPath[i])) {
                     for (int k = 0; k < CHANNEL_NUM; k++) {
                         // Write to the CHANNEL_NUM channels
@@ -221,6 +224,7 @@ void ImageQuilting::WriteBlockOverlapWithMinCut(int overlapType, int dstY, int d
                     }
                 }
             }
+
         }
     }
 }
