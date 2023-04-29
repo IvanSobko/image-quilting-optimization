@@ -43,17 +43,14 @@ void ImageQuilting::WriteBlockOverlap(int dstY, int dstX, int srcY, int srcX)
 void ImageQuilting::WriteBlockOverlapWithMinCut(
     int overlapYStart, int overlapXStart, int dstY, int dstX, int srcY, int srcX)
 {
-    int overlapRegionHeight = dstY - overlapYStart;
-    int overlapRegionWidth = dstX - overlapXStart;
-
     // Vertical min cut
     int verticalPath[mData.block_h];
-    if (overlapRegionHeight == 0){
+    if (dstY - overlapYStart == 0){
 
         // Compute the error surface
         double errorSurface[overlapWidth * mData.block_h];
         for (int i = 0; i < mData.block_h; i++){
-            for (int j = 0; j < overlapRegionWidth; j++){
+            for (int j = 0; j < overlapWidth; j++){
                 // Compute the per pixel error
                 double error = 0;
                 for (int k = 0; k < CHANNEL_NUM; k++){
@@ -69,19 +66,19 @@ void ImageQuilting::WriteBlockOverlapWithMinCut(
         // Vertical minimum cut using dynamic programming
         double dpTable[overlapWidth * mData.block_h];
         // Fill up the first row with the error surface
-        for (int j = 0; j < overlapRegionWidth; j++){
+        for (int j = 0; j < overlapWidth; j++){
             dpTable[j] = errorSurface[j];
         }
         // DP going forward
         for (int i = 1; i < mData.block_h; i++){
-            for (int j = 0; j < overlapRegionWidth; j++){
+            for (int j = 0; j < overlapWidth; j++){
                 // Get the value directly above
                 double minError = dpTable[(i-1)*overlapWidth+j];
                 // Get the value to the left
                 if (j > 0) minError = std::min(minError, dpTable[(i-1)*overlapWidth+(j-1)]);
                 // Get the value to the right
-                if (j < overlapRegionWidth-1) minError = std::min(minError, dpTable[(i-1)*overlapWidth+(j+1)]);
-                dpTable[i*overlapWidth+j] = minError;
+                if (j < overlapWidth-1) minError = std::min(minError, dpTable[(i-1)*overlapWidth+(j+1)]);
+                dpTable[i*overlapWidth+j] = errorSurface[i*overlapWidth+j] + minError;
             }
         }
 
@@ -89,7 +86,7 @@ void ImageQuilting::WriteBlockOverlapWithMinCut(
         // Find the minimum of the last row
         double minError = dpTable[(mData.block_h-1)*overlapWidth];
         verticalPath[mData.block_h-1] = 0;
-        for (int j = 1; j < overlapRegionWidth; j++){
+        for (int j = 1; j < overlapWidth; j++){
             double error = dpTable[(mData.block_h-1)*overlapWidth+j];
             if (error < minError){
                 minError = error;
@@ -113,7 +110,7 @@ void ImageQuilting::WriteBlockOverlapWithMinCut(
                 }
             }
             // Get the value to the right
-            if (j < overlapRegionWidth-1){
+            if (j < overlapWidth-1){
                 double rightError = dpTable[i*overlapWidth+j+1];
                 if (rightError < localError){
                     localError = rightError;
@@ -122,14 +119,16 @@ void ImageQuilting::WriteBlockOverlapWithMinCut(
             }
         }
     }
+
+    // Write the block according to the vertical cut
     for (int i = 0; i < mData.block_h; i++){
         for (int j = 0; j < mData.block_w; j++){
-            if (i < overlapRegionHeight) {
+            if (i < overlapWidth) {
                 // horizontal overlap (TODO)
             }
             // >= - general region; another part of the statement - overlap region
             // j > verticalPath[i] - the starting point for the source block
-            if (j >= overlapRegionWidth || (j < overlapRegionWidth && j > verticalPath[i])) {
+            if (j >= overlapWidth || (j < overlapWidth && j > verticalPath[i])) {
                 for (int k = 0; k < CHANNEL_NUM; k++) {
                     // Write to the CHANNEL_NUM channels
 //                    mData.output_d[dstY + i][CHANNEL_NUM * (overlapXStart + j) + k] = mData.data[srcY + i][
