@@ -1,25 +1,27 @@
 #include "timing.h"
 
 #include <dirent.h>
-#include <cstdio>
-#include "tsc_x86.h"
-#include "PngReader.h"
-#include <string>
+#include <stdio.h>
 
+#include "PngReader.h"
+#include "tsc_x86.h"
+
+//TODO: should we modify cycles required? 1e8 is value from homeworks
 #define CYCLES_REQUIRED 1e8
 #define RDTSC_LATENCY 26
 #define REP 1
 
 void timing::run_timing() {
-    // TODO: run rdtsc() on images of different sizes. Then write results to file and create performance plot
-    //  with python
-
-    std::string directory= "./gallery";
-    std::vector<std::string> files = read_files(directory, "input");
+    std::string directory = "./gallery";
+    std::vector<std::string> files = read_files(directory, "input0_");
     if (files.empty()) {
         perror("Failed to collect files for timing");
         return;
     }
+
+    FILE* results_txt = NULL;
+    std::string results_path = directory + '/' + "results.txt";
+    results_txt = fopen(results_path.c_str(), "w");
 
     ImgData img_data;
     for (int i = 0; i < files.size(); i++) {
@@ -35,13 +37,16 @@ void timing::run_timing() {
         double cycles = rdtsc(&quilting);
         printf("Done. Quilting for %s took %f cycles\n\n", files[i].c_str(), cycles);
 
-
+        int64_t data_size = img_data.width * img_data.height;
+        fprintf(results_txt, "size=%ix%i, n=%lli, cycles=%f\n", img_data.width, img_data.height, data_size,
+                cycles);
 
         free(img_data.data);
         img_data.data = NULL;
         free(img_data.output_d);
         img_data.output_d = NULL;
     }
+    fclose(results_txt);
 }
 
 double timing::rdtsc(ImageQuilting* quilting) {
@@ -85,7 +90,8 @@ double timing::rdtsc(ImageQuilting* quilting) {
     return total_cycles;
 }
 
-std::vector<std::string> timing::read_files(const std::string &directory, const std::string &filename_filter) {
+std::vector<std::string> timing::read_files(const std::string& directory,
+                                            const std::string& filename_filter) {
     DIR* folder = opendir(directory.c_str());
     if (folder == NULL) {
         perror("Unable to read directory");
