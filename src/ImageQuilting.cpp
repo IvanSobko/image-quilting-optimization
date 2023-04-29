@@ -39,6 +39,91 @@ void ImageQuilting::WriteBlockOverlap(int dstY, int dstX, int srcY, int srcX)
     }
 }
 
+// Same as the overlapping one, but applies the minimum cut
+void ImageQuilting::WriteBlockOverlapWithMinCut(
+    int overlapYStart, int overlapXStart, int dstY, int dstX, int srcY, int srcX)
+{
+    int overlapRegionHeight = dstY - overlapYStart;
+    int overlapRegionWidth = dstX - overlapXStart;
+
+    // Vertical min cut
+    int verticalPath[mData.block_h];
+    if (overlapRegionHeight == 0){
+
+        // Compute the error surface
+        double errorSurface[overlapWidth * mData.block_h];
+        for (int i = 0; i < mData.block_h; i++){
+            for (int j = 0; j < overlapRegionWidth; j++){
+                // Compute the per pixel error
+                double error = 0;
+                for (int k = 0; k < CHANNEL_NUM; k++){
+                    double x0 = mData.output_d[dstY+i][CHANNEL_NUM*(overlapXStart+j)+k];
+                    double x1 = mData.data[srcY+i][CHANNEL_NUM*(srcX+j)+k];
+                    double norm = x0 - x1;
+                    error += norm * norm;
+                }
+                errorSurface[i*overlapWidth+j] = error;
+            }
+        }
+
+        // Vertical minimum cut using dynamic programming
+        double dpTable[overlapWidth * mData.block_h];
+        // Fill up the first row with the error surface
+        for (int j = 0; j < overlapRegionWidth; j++){
+            dpTable[j] = errorSurface[j];
+        }
+        // DP going forward
+        for (int i = 1; i < mData.block_h; i++){
+            for (int j = 0; j < overlapRegionWidth; j++){
+                // Get the value directly above
+                double minError = dpTable[(i-1)*overlapWidth+j];
+                // Get the value to the left
+                if (j > 0) minError = std::min(minError, dpTable[(i-1)*overlapWidth+(j-1)]);
+                // Get the value to the right
+                if (j < overlapRegionWidth-1) minError = std::min(minError, dpTable[(i-1)*overlapWidth+(j+1)]);
+                dpTable[i*overlapWidth+j] = minError;
+            }
+        }
+
+        // Find the minimum vertical path
+        // Find the minimum of the last row
+        double minError = dpTable[(mData.block_h-1)*overlapWidth];
+        verticalPath[mData.block_h-1] = 0;
+        for (int j = 1; j < overlapRegionWidth; j++){
+            double error = dpTable[(mData.block_h-1)*overlapWidth+j];
+            if (error < minError){
+                minError = error;
+                verticalPath[mData.block_h-1] = j;
+            }
+        }
+
+        // Traverse the dpTable upwards to construct the row
+        for (int i = mData.block_h - 2; i >= 0; i--){
+            // Get the path from the previous row
+            int j = verticalPath[i+1];
+            // Get the value directly above
+            double localError = dpTable[i*overlapWidth+j];
+            verticalPath[i] = j;
+            // Get the value to the left
+            if (j > 0){
+                double leftError = dpTable[i*overlapWidth+j-1];
+                if (leftError < localError){
+                    localError = leftError;
+                    verticalPath[i] = j-1;
+                }
+            }
+            // Get the value to the right
+            if (j < overlapRegionWidth-1){
+                double rightError = dpTable[i*overlapWidth+j+1];
+                if (rightError < localError){
+                    localError = rightError;
+                    verticalPath[i] = j+1;
+                }
+            }
+        }
+    }
+}
+
 // Compute the overlap between the current block - block 0 of the output image
 // and block 1 of the input image given their upper-left corners
 // and the position of the overlap
@@ -48,13 +133,13 @@ double ImageQuilting::ComputeOverlap(
         const int block1Y, const int block1X)
 {
     // will work for all cases: vertical, horizontal, both - will go to 0 if no overlap
-    int overlapHeight = block0Y - overlapYStart;
-    int overlapWidth = block0X - overlapXStart;
+    int overlapRegionHeight = block0Y - overlapYStart;
+    int overlapRegionWidth = block0X - overlapXStart;
 
     // Compute the l2 norm of the overlap between the two blocks
     // Compute the horizontal overlap
     double l2norm = 0;
-    for (int i = 0; i < overlapHeight; i++){
+    for (int i = 0; i < overlapRegionHeight; i++){
         for (int j = 0; j < mData.block_w; j++){
             for (int k = 0; k < CHANNEL_NUM; k++){
                 double x0 = mData.output_d[overlapYStart+i][CHANNEL_NUM*(block0X+j)+k];
@@ -67,7 +152,7 @@ double ImageQuilting::ComputeOverlap(
 
     // Compute the vertical overlap
     for (int i = 0; i < mData.block_h; i++){
-        for (int j = 0; j < overlapWidth; j++){
+        for (int j = 0; j < overlapRegionWidth; j++){
             for (int k = 0; k < CHANNEL_NUM; k++){
                 double x0 = mData.output_d[block0Y+i][CHANNEL_NUM*(overlapXStart+j)+k];
                 double x1 = mData.data[block1Y+i][CHANNEL_NUM*(block1X+j)+k];
@@ -78,8 +163,8 @@ double ImageQuilting::ComputeOverlap(
     }
 
     // Compute the corner edge overlap
-    for (int i = 0; i < overlapHeight; i++){
-        for (int j = 0; j < overlapWidth; j++){
+    for (int i = 0; i < overlapRegionHeight; i++){
+        for (int j = 0; j < overlapRegionWidth; j++){
             for (int k = 0; k < CHANNEL_NUM; k++){
                 double x0 = mData.output_d[overlapYStart+i][CHANNEL_NUM*(overlapXStart+j)+k];
                 double x1 = mData.data[block1Y+i][CHANNEL_NUM*(block1X+j)+k];
@@ -150,6 +235,66 @@ void ImageQuilting::PlaceEdgeOverlapBlock(
     int blockIndex = randomBlock(randomNumberGenerator);
     WriteBlockOverlap(overlapYStart + drawOffsetY, overlapXStart + drawOffsetX,
                       blocks[blockIndex].y + drawOffsetY, blocks[blockIndex].x + drawOffsetX);
+}
+
+// Place an edge overlap block with respect to the given block of the output image
+void ImageQuilting::PlaceEdgeOverlapBlockWithMinCut(
+    const int blockY, const int blockX, const int maxBlockX, const int maxBlockY, double errorTolerance)
+{
+    // calculate an overlap start position and the offset from where to write the block to the output
+    int overlapXStart, overlapYStart;
+    int drawOffsetX = 0, drawOffsetY = 0;
+    if (blockX == 0) {
+        // no vertical overline
+        overlapXStart = blockX;
+    } else {
+        overlapXStart = blockX - overlapWidth;
+        drawOffsetX = overlapWidth / 2.0;
+    }
+    if (blockY == 0) {
+        // no horizontal overline
+        overlapYStart = blockY;
+    } else {
+        overlapYStart = blockY - overlapHeight;
+        drawOffsetY = overlapHeight / 2.0;
+    }
+
+    // Compute the value of each block
+    int numBlocks = maxBlockY * maxBlockX;
+    BlockValue blocks[numBlocks];
+    for (int i = 0; i < maxBlockY; i++){
+        for (int j = 0; j < maxBlockX; j++){
+            int blockIndex = i * maxBlockX + j;
+            blocks[blockIndex].y = i;
+            blocks[blockIndex].x = j;
+            blocks[blockIndex].value = ComputeOverlap(overlapYStart, overlapXStart,
+                                                      blockY, blockX,
+                                                      i, j);
+        }
+    }
+    // Sort the blocks by value
+    double minVal = DBL_MAX;
+    for (int i=0; i < numBlocks; i++) {
+        const auto &block = blocks[i];
+        if (block.value < minVal) {
+            minVal = block.value;
+        }
+    }
+    std::vector<BlockValue> suitBlocks;
+    for (int i=0; i < numBlocks; i++) {
+        auto block = blocks[i];
+        if (block.value < (1.0 + errorTolerance) * minVal) {
+            suitBlocks.push_back(block);
+        }
+    }
+
+    // Sample and place a block
+    std::random_device randomDevice;
+    std::mt19937 randomNumberGenerator(randomDevice());
+    std::uniform_int_distribution<std::mt19937::result_type> randomBlock(0, suitBlocks.size());
+    int blockIndex = randomBlock(randomNumberGenerator);
+    WriteBlockOverlapWithMinCut(
+        overlapYStart, overlapXStart, blockY, blockX, blocks[blockIndex].y, blocks[blockIndex].x);
 }
 
 
