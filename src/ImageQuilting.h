@@ -45,6 +45,9 @@ class ImageQuilting {
     // Synthesize a new texture sample by randomly choosing blocks satisfying overlap constraints
     ImgData OverlapConstraints();
 
+    // Synthesize a new texture sample with minimum cut and overlap
+    ImgData OverlapConstraintsWithMinCut();
+
     // Synthesize a new texture sample by randomly choosing blocks
     ImgData RandomBlockPlacement();
 
