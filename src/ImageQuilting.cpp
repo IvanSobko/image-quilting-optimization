@@ -3,7 +3,7 @@
 #include <iostream>
 #include <algorithm>
 #include <random>
-#include <float.h>
+#include <cfloat>
 
 // Synthesize a new texture
 ImgData ImageQuilting::Synthesis(){
@@ -16,10 +16,194 @@ void ImageQuilting::WriteBlock(const int dstY, const int dstX, const int srcY, c
         for (int j = 0; j < mData.block_w; j++){
             for (int k = 0; k < CHANNEL_NUM; k++){
                 // Write to the CHANNEL_NUM channels
-                mData.output_d[dstY+i][CHANNEL_NUM*(dstX+j)+k] = mData.data[srcY+i][CHANNEL_NUM*(srcX+j)+k];
+                mData.output_d[dstY + i][CHANNEL_NUM * (dstX + j) + k] = mData.data[srcY + i][
+                        CHANNEL_NUM * (srcX + j) + k];
             }
         }
     }
+}
+
+// Same as the regular one, but leaves the half of the dst overlapping region untouched
+void ImageQuilting::WriteBlockOverlap(int dstY, int dstX, int srcY, int srcX)
+{
+    int height = mData.block_h - overlapHeight / 2.0;
+    int width = mData.block_w - overlapWidth / 2.0;
+    for (int i = 0; i < height; i++){
+        for (int j = 0; j < width; j++){
+            for (int k = 0; k < CHANNEL_NUM; k++){
+                // Write to the CHANNEL_NUM channels
+                mData.output_d[dstY + i][CHANNEL_NUM * (dstX + j) + k] = mData.data[srcY + i][
+                        CHANNEL_NUM * (srcX + j) + k];
+            }
+        }
+    }
+}
+
+// Compute the overlap between the current block - block 0 of the output image
+// and block 1 of the input image given their upper-left corners
+// and the position of the overlap
+double ImageQuilting::ComputeOverlap(
+        const int overlapYStart, const int overlapXStart,
+        const int block0Y, const int block0X,
+        const int block1Y, const int block1X)
+{
+    // will work for all cases: vertical, horizontal, both - will go to 0 if no overlap
+    int overlapHeight = block0Y - overlapYStart;
+    int overlapWidth = block0X - overlapXStart;
+
+    // Compute the l2 norm of the overlap between the two blocks
+    // Compute the horizontal overlap
+    double l2norm = 0;
+    for (int i = 0; i < overlapHeight; i++){
+        for (int j = 0; j < mData.block_w; j++){
+            for (int k = 0; k < CHANNEL_NUM; k++){
+                double x0 = mData.output_d[overlapYStart+i][CHANNEL_NUM*(block0X+j)+k];
+                double x1 = mData.data[block1Y+i][CHANNEL_NUM*(block1X+j)+k];
+                double norm = x0 - x1;
+                l2norm += norm*norm;
+            }
+        }
+    }
+
+    // Compute the vertical overlap
+    for (int i = 0; i < mData.block_h; i++){
+        for (int j = 0; j < overlapWidth; j++){
+            for (int k = 0; k < CHANNEL_NUM; k++){
+                double x0 = mData.output_d[block0Y+i][CHANNEL_NUM*(overlapXStart+j)+k];
+                double x1 = mData.data[block1Y+i][CHANNEL_NUM*(block1X+j)+k];
+                double norm = x0 - x1;
+                l2norm += norm*norm;
+            }
+        }
+    }
+
+    // Compute the corner edge overlap
+    for (int i = 0; i < overlapHeight; i++){
+        for (int j = 0; j < overlapWidth; j++){
+            for (int k = 0; k < CHANNEL_NUM; k++){
+                double x0 = mData.output_d[overlapYStart+i][CHANNEL_NUM*(overlapXStart+j)+k];
+                double x1 = mData.data[block1Y+i][CHANNEL_NUM*(block1X+j)+k];
+                double norm = x0 - x1;
+                l2norm += norm*norm;
+            }
+        }
+    }
+
+    return std::sqrt(l2norm);
+}
+
+// Place an edge overlap block with respect to the given block of the output image
+void ImageQuilting::PlaceEdgeOverlapBlock(
+    const int blockY, const int blockX, const int maxBlockX, const int maxBlockY, double errorTolerance)
+{
+    // calculate an overlap start position and the offset from where to write the block to the output
+    int overlapXStart, overlapYStart;
+    int drawOffsetX = 0, drawOffsetY = 0;
+    if (blockX == 0) {
+        // no vertical overline
+        overlapXStart = blockX;
+    } else {
+        overlapXStart = blockX - overlapWidth;
+        drawOffsetX = overlapWidth / 2.0;
+    }
+    if (blockY == 0) {
+        // no horizontal overline
+        overlapYStart = blockY;
+    } else {
+        overlapYStart = blockY - overlapHeight;
+        drawOffsetY = overlapHeight / 2.0;
+    }
+
+    // Compute the value of each block
+    int numBlocks = maxBlockY * maxBlockX;
+    BlockValue blocks[numBlocks];
+    for (int i = 0; i < maxBlockY; i++){
+        for (int j = 0; j < maxBlockX; j++){
+            int blockIndex = i * maxBlockX + j;
+            blocks[blockIndex].y = i;
+            blocks[blockIndex].x = j;
+            blocks[blockIndex].value = ComputeOverlap(overlapYStart, overlapXStart,
+                                                      blockY, blockX,
+                                                      i, j);
+        }
+    }
+    // Sort the blocks by value
+    double minVal = DBL_MAX;
+    for (int i=0; i < numBlocks; i++) {
+        const auto &block = blocks[i];
+        if (block.value < minVal) {
+            minVal = block.value;
+        }
+    }
+    std::vector<BlockValue> suitBlocks;
+    for (int i=0; i < numBlocks; i++) {
+        auto block = blocks[i];
+        if (block.value < (1.0 + errorTolerance) * minVal) {
+            suitBlocks.push_back(block);
+        }
+    }
+
+    // Sample and place a block
+    std::random_device randomDevice;
+    std::mt19937 randomNumberGenerator(randomDevice());
+    std::uniform_int_distribution<std::mt19937::result_type> randomBlock(0, suitBlocks.size());
+    int blockIndex = randomBlock(randomNumberGenerator);
+    WriteBlockOverlap(overlapYStart + drawOffsetY, overlapXStart + drawOffsetX,
+                      blocks[blockIndex].y + drawOffsetY, blocks[blockIndex].x + drawOffsetX);
+}
+
+
+// Synthesize a new texture sample by randomly choosing blocks satisfying overlap constraints
+ImgData ImageQuilting::OverlapConstraints(){
+    // Allocate memory for the synthesized texture
+    mData.output_d = (unsigned char **) malloc(sizeof(unsigned char *) * mData.output_h);
+    for(int y = 0; y < mData.output_h; y++) {
+        mData.output_d[y] = (unsigned char *) malloc(mData.output_w * CHANNEL_NUM);
+    }
+
+    overlapHeight = mData.block_h / 6;
+    overlapWidth = mData.block_w / 6;
+
+    int hStep = mData.block_h - overlapHeight;
+    int wStep = mData.block_w - overlapWidth;
+
+    // Compute block parameters
+    // Two blocks of a full size from each side, all others are blocks with size equal to the Step
+    int numBlocksY = (mData.output_h - 2*mData.block_h) / hStep + 2;
+    int numBlocksX = (mData.output_w - 2*mData.block_w) / wStep + 2;
+    int maxBlockY = mData.height - mData.block_h - 1;
+    int maxBlockX = mData.width - mData.block_w - 1;
+
+    // Randomly generate the upper-left corners of blocks
+    std::random_device randomDevice;
+    std::mt19937 randomNumberGenerator(randomDevice());
+    std::uniform_int_distribution<std::mt19937::result_type> randomY(0, maxBlockY);
+    std::uniform_int_distribution<std::mt19937::result_type> randomX(0, maxBlockX);
+
+    // Iterate over the block upper-left corners
+    for (int blockY = 0; blockY < numBlocksY; blockY++){
+        for (int blockX = 0; blockX < numBlocksX; blockX++){
+
+            // Top-left corner of the current block
+            int dstY = blockY == 0 ? 0 : mData.block_h + hStep * (blockY - 1);
+            int dstX = blockX == 0 ? 0 : mData.block_w + wStep * (blockX - 1);
+
+            // Randomly choose a block and place it
+            if (blockY == 0 && blockX == 0){
+                // Randomly choose the upper-left corner of a block
+                int srcY = randomY(randomNumberGenerator);
+                int srcX = randomX(randomNumberGenerator);
+
+                // Write the randomly chosen block to the output
+                WriteBlock(dstY, dstX, srcY, srcX);
+            } else {
+                PlaceEdgeOverlapBlock(dstY, dstX, maxBlockX, maxBlockY, 0.3);
+            }
+        }
+    }
+
+    // Return the output
+    return mData;
 }
 
 // Synthesize a new texture sample by randomly choosing blocks
@@ -70,226 +254,5 @@ ImgData ImageQuilting::RandomBlockPlacement(){
             }
         }
     }
-    return mData;
-}
-
-// Choose what type of overlapping to estimate
-double ImageQuilting::ComputeEdgeOverlap(int block0Y, int block0X, int block1Y, int block1X)
-{
-    if (block0Y == 0) {
-        return ComputeVerticalEdgeOverlap(block0Y, block0X, block1X, block1Y);
-    } else if (block0X == 0) {
-        return ComputeHorizontalEdgeOverlap(block0Y, block0X, block1X, block1Y);
-    }
-    return ComputeHorizontalEdgeOverlap(block0Y, block0X, block1X, block1Y);
-}
-
-// Compute the vertical edge overlap between block 0 of the output image and block 1 of the input image given their upper-left corners
-double ImageQuilting::ComputeVerticalEdgeOverlap(
-    const int block0Y, const int block0X, const int block1Y, const int block1X)
-{
-    // Overlap edge width is 1/6 the size of the block
-    int overlapWidth = mData.block_w / 6;
-    int block0XOverlapStart = block0X + mData.block_w - overlapWidth;
-
-    // Compute the l2 norm of the overlap between the two blocks
-    double l2norm = 0;
-    for (int i = 0; i < mData.block_h; i++){
-        for (int j = 0; j < overlapWidth; j++){
-            for (int k = 0; k < CHANNEL_NUM; k++){
-                double x0 = mData.output_d[block0Y+i][CHANNEL_NUM*(j+block0XOverlapStart)+k];
-                double x1 = mData.data[block1Y+i][CHANNEL_NUM*(block1X+j)+k];
-                double norm = std::abs(x0 - x1);
-                l2norm += norm*norm;
-            }
-        }
-    }
-    return std::sqrt(l2norm);
-}
-
-// Compute the horizontal edge overlap between block 0 of the output image and block 1 of the input image given their upper-left corners
-double ImageQuilting::ComputeHorizontalEdgeOverlap(
-    const int block0Y, const int block0X, const int block1Y, const int block1X)
-{
-    // Overlap edge width is 1/6 the size of the block
-    int overlapHeight = mData.block_h / 6;
-    int block0YOverlapStart = block0Y + (mData.block_h - overlapHeight);
-
-    // Compute the l2 norm of the overlap between the two blocks
-    double l2norm = 0;
-    for (int i = 0; i < overlapHeight; i++){
-        for (int j = 0; j < mData.block_w; j++){
-            for (int k = 0; k < CHANNEL_NUM; k++){
-                double x0 = mData.output_d[block0YOverlapStart+i][CHANNEL_NUM*(j+block0X)+k];
-                double x1 = mData.data[block1Y+i][CHANNEL_NUM*(block1X+j)+k];
-                double norm = std::abs(x0 - x1);
-                l2norm += norm*norm;
-            }
-        }
-    }
-    return std::sqrt(l2norm);
-}
-
-// Compute the corner edge overlap between block 0 of the output image and block 1 of the input image given their upper-left corners
-double ImageQuilting::ComputeCornerEdgeOverlap(
-        const int block0Y, const int block0X, const int block1Y, const int block1X)
-{
-    // Overlap edge width is 1/6 the size of the block
-    int overlapSize = mData.block_h / 6;
-
-    // Compute the l2 norm of the overlap between the two blocks
-    double l2norm = 0;
-
-    // Compute the vertical edge overlap
-    int block0XOverlapStart = block0X - overlapSize;
-    for (int i = 0; i < mData.block_h; i++){
-        for (int j = 0; j < overlapSize; j++){
-            for (int k = 0; k < CHANNEL_NUM; k++){
-                double x0 = mData.output_d[block0Y+i][CHANNEL_NUM*(block0XOverlapStart+j)+k];
-                double x1 = mData.data[block1Y+i][CHANNEL_NUM*(block1X+j)+k];
-                double norm = std::abs(x0 - x1);
-                l2norm += norm*norm;
-            }
-        }
-    }
-
-    // Compute the horizontal edge overlap
-    int block0YOverlapStart = block0Y - overlapSize;
-    for (int i = 0; i < overlapSize; i++){
-        for (int j = 0; j < mData.block_w; j++){
-            for (int k = 0; k < CHANNEL_NUM; k++){
-                double x0 = mData.output_d[block0YOverlapStart+i][CHANNEL_NUM*(j+block0X)+k];
-                double x1 = mData.data[block1Y+i][CHANNEL_NUM*(block1X+j)+k];
-                double norm = std::abs(x0 - x1);
-                l2norm += norm*norm;
-            }
-        }
-    }
-
-    // Compute the corner edge overlap
-    for (int i = 0; i < overlapSize; i++){
-        for (int j = 0; j < overlapSize; j++){
-            for (int k = 0; k < CHANNEL_NUM; k++){
-                double x0 = mData.output_d[block0YOverlapStart+i][CHANNEL_NUM*(block0XOverlapStart+j)+k];
-                double x1 = mData.data[block1Y+i][CHANNEL_NUM*(block1X+j)+k];
-                double norm = std::abs(x0 - x1);
-                l2norm += norm*norm;
-            }
-        }
-    }
-
-    // Compute the horizontal edge overlap
-    return std::sqrt(l2norm);
-}
-
-// BlockValue comparator
-int ImageQuilting::BlockValueComparator(const void* blockValue1, const void* blockValue2) {
-    return ((BlockValue*)blockValue1)->value < ((BlockValue*)blockValue2)->value;
-}
-
-// C style binary search with upper bound
-size_t ImageQuilting::bs_upper_bound(
-    const void* array, size_t n, const void* upper_bound,
-    size_t width, int (*comparator)(const void*, const void*))
-{
-    // https://stackoverflow.com/questions/6443569/implementation-of-c-lower-bound
-    // https://github.com/gcc-mirror/gcc/blob/master/libiberty/bsearch.c
-    const char *base = (const char *) array;
-    size_t l = 0;
-    size_t h = n;
-    while (l < h){
-        size_t mid = l + (h - l) / 2;
-        if (comparator(upper_bound, base + width * mid)) {
-            l = mid + 1;
-        } else {
-            h = mid;
-        }
-    }
-    return l;
-}
-
-// Place an edge overlap block with respect to the given block of the output image
-void ImageQuilting::PlaceEdgeOverlapBlock(
-    const int blockY, const int blockX, const int maxBlockX, const int maxBlockY, double errorTolerance)
-{
-    // Compute the value of each block
-    int numBlocks = maxBlockY * maxBlockX;
-    BlockValue blocks[numBlocks];
-    for (int i = 0; i < maxBlockY; i++){
-        for (int j = 0; j < maxBlockX; j++){
-            int blockIndex = i * maxBlockX + j;
-            blocks[blockIndex].y = i;
-            blocks[blockIndex].x = j;
-            blocks[blockIndex].value = ComputeEdgeOverlap(blockY, blockX, i, j);
-        }
-    }
-    // Sort the blocks by value
-    double minVal = DBL_MAX;
-    for (int i=0; i < numBlocks; i++) {
-        const auto &block = blocks[i];
-        if (block.value < minVal) {
-            minVal = block.value;
-        }
-    }
-    std::vector<BlockValue> suitBlocks;
-    for (int i=0; i < numBlocks; i++) {
-        const auto &block = blocks[i];
-        if (block.value < (1.0 + errorTolerance) * minVal) {
-            suitBlocks.push_back(block);
-        }
-    }
-
-    // Sample and place a block
-    std::random_device randomDevice;
-    std::mt19937 randomNumberGenerator(randomDevice());
-    std::uniform_int_distribution<std::mt19937::result_type> randomBlock(0, suitBlocks.size());
-    int blockIndex = randomBlock(randomNumberGenerator);
-    WriteBlock(blockY, blockX, blocks[blockIndex].y, blocks[blockIndex].x);
-}
-
-
-// Synthesize a new texture sample by randomly choosing blocks satisfying overlap constraints
-ImgData ImageQuilting::OverlapConstraints(){
-    // Allocate memory for the synthesized texture
-    mData.output_d = (unsigned char **) malloc(sizeof(unsigned char *) * mData.output_h);
-    for(int y = 0; y < mData.output_h; y++) {
-        mData.output_d[y] = (unsigned char *) malloc(mData.output_w * CHANNEL_NUM);
-    }
-
-    // Compute block parameters
-    int numBlocksY = mData.output_h / mData.block_h;
-    int numBlocksX = mData.output_w / mData.block_w;
-    int maxBlockY = mData.height - mData.block_h - 1;
-    int maxBlockX = mData.width - mData.block_w - 1;
-
-    // Randomly generate the upper-left corners of blocks
-    std::random_device randomDevice;
-    std::mt19937 randomNumberGenerator(randomDevice());
-    std::uniform_int_distribution<std::mt19937::result_type> randomY(0, maxBlockY);
-    std::uniform_int_distribution<std::mt19937::result_type> randomX(0, maxBlockX);
-
-    // Iterate over the block upper-left corners
-    for (int blockY = 0; blockY < numBlocksY; blockY++){
-        for (int blockX = 0; blockX < numBlocksX; blockX++){
-
-            // Top-left corner of the current block
-            int dstY = mData.block_h * blockY;
-            int dstX = mData.block_w * blockX;
-
-            // Randomly choose a block and place it
-            if (blockY == 0 && blockX == 0){
-                // Randomly choose the upper-left corner of a block
-                int srcY = randomY(randomNumberGenerator);
-                int srcX = randomX(randomNumberGenerator);
-
-                // Write the randomly chosen block to the output
-                WriteBlock(dstY, dstX, srcY, srcX);
-            } else if (blockY == 0 || blockX == 0) {
-                PlaceEdgeOverlapBlock(dstY, dstX, maxBlockX, maxBlockY, 0.1);
-            }
-        }
-    }
-
-    // Return the output
     return mData;
 }
