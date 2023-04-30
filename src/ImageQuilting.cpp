@@ -73,10 +73,12 @@ void ImageQuilting::WriteBlockOverlapWithMinCut(int overlapType, int dstY, int d
 
         // Vertical minimum cut using dynamic programming
         double dpTable[overlapWidth * mData->block_h];
+
         // Fill up the first row with the error surface
         for (int j = 0; j < overlapWidth; j++){
             dpTable[j] = errorSurface[j];
         }
+
         // DP going from the first row to the last row
         for (int i = 1; i < mData->block_h; i++){
             for (int j = 0; j < overlapWidth; j++){
@@ -148,10 +150,12 @@ void ImageQuilting::WriteBlockOverlapWithMinCut(int overlapType, int dstY, int d
 
         // Horizontal minimum cut using dynamic programming
         double dpTable[overlapHeight * mData->block_w];
+
         // Fill up the first column with the error surface
         for (int i = 0; i < overlapHeight; i++){
             dpTable[i*mData->block_w] = errorSurface[i*mData->block_w];
         }
+
         // DP going from the first column to the last column
         for (int j = 1; j < mData->block_w; j++){
             for (int i = 0; i < overlapHeight; i++){
@@ -177,7 +181,7 @@ void ImageQuilting::WriteBlockOverlapWithMinCut(int overlapType, int dstY, int d
         }
 
         // Traverse the dpTable from the last row to the first row to construct the horizontal path
-        for (int j = mData->block_w - 2; j >= 1; j--){
+        for (int j = mData->block_w - 2; j >= 0; j--){
             // Get the path from the right column
             int i = horizontalPath[j+1];
             // Get the value directly on the left
@@ -450,9 +454,9 @@ void ImageQuilting::OverlapConstraintsWithMinCut(){
     int wStep = mData->block_w - overlapWidth;
 
     // Compute block parameters
-    // Two blocks of a full size from each side, all others are blocks with size equal to the Step
-    int numBlocksY = (mData->output_h - 2*mData->block_h) / hStep + 2;
-    int numBlocksX = (mData->output_w - 2*mData->block_w) / wStep + 2;
+    // The first block is full size; the others are of size step due to overlapping
+    int numBlocksY = (mData->output_h - mData->block_h) / hStep + 1; // TODO 2
+    int numBlocksX = (mData->output_w - mData->block_w) / wStep + 1; // TODO 2
     int maxBlockY = mData->height - mData->block_h - 1;
     int maxBlockX = mData->width - mData->block_w - 1;
 
@@ -469,6 +473,9 @@ void ImageQuilting::OverlapConstraintsWithMinCut(){
             // Top-left corner of the current block
             int dstY = blockY == 0 ? 0 : mData->block_h + hStep * (blockY - 1);
             int dstX = blockX == 0 ? 0 : mData->block_w + wStep * (blockX - 1);
+
+            // Make sure we are inside of the output image
+           if (dstY > mData->output_h || dstX > mData->output_w) continue;
 
             // Randomly choose a block and place it
             if (blockY == 0 && blockX == 0){
