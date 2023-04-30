@@ -15,7 +15,6 @@ void ImageQuilting::WriteBlock(const int dstY, const int dstX, const int srcY, c
     for (int i = 0; i < mData.block_h; i++){
         for (int j = 0; j < mData.block_w; j++){
             for (int k = 0; k < CHANNEL_NUM; k++){
-                // Write to the CHANNEL_NUM channels
                 mData.output_d[dstY + i][CHANNEL_NUM * (dstX + j) + k] = mData.data[srcY + i][
                         CHANNEL_NUM * (srcX + j) + k];
             }
@@ -31,7 +30,6 @@ void ImageQuilting::WriteBlockOverlap(int dstY, int dstX, int srcY, int srcX)
     for (int i = 0; i < height; i++){
         for (int j = 0; j < width; j++){
             for (int k = 0; k < CHANNEL_NUM; k++){
-                // Write to the CHANNEL_NUM channels
                 mData.output_d[dstY + i][CHANNEL_NUM * (dstX + j) + k] = mData.data[srcY + i][
                         CHANNEL_NUM * (srcX + j) + k];
             }
@@ -301,10 +299,11 @@ double ImageQuilting::ComputeOverlap(
 void ImageQuilting::PlaceEdgeOverlapBlock(
         const int blockY, const int blockX, const int maxBlockX, const int maxBlockY, double errorTolerance)
 {
-    // calculate an overlap start position and the offset from where to write the block to the output
+    // Calculate the overlap start position and the offset from where to write the block to the output
     int overlapXStart, overlapYStart;
     int drawOffsetX = 0, drawOffsetY = 0;
-    // calculate an overlap type
+
+    // Calculate the overlap type
     int overlapType = vertical;
     if (blockY != 0) {
         overlapYStart = blockY - overlapHeight;
@@ -314,18 +313,18 @@ void ImageQuilting::PlaceEdgeOverlapBlock(
             overlapXStart = blockX - overlapWidth;
             drawOffsetX = overlapWidth / 2.0;
         } else {
-            // no vertical overline
+            // No vertical overline
             overlapType = horizontal;
             overlapXStart = blockX;
         }
     } else {
-        // no horizontal overline
+        // No horizontal overline
         overlapYStart = blockY;
     }
 
     // Compute the value of each block
     int numBlocks = maxBlockY * maxBlockX;
-    BlockValue blocks[numBlocks];
+    BlockValue* blocks = (BlockValue*) malloc(sizeof(BlockValue) * numBlocks);
     for (int i = 0; i < maxBlockY; i++){
         for (int j = 0; j < maxBlockX; j++){
             int blockIndex = i * maxBlockX + j;
@@ -335,29 +334,37 @@ void ImageQuilting::PlaceEdgeOverlapBlock(
                                                       i, j);
         }
     }
-    // Sort the blocks by value
+
+    // Find the minimum block value
     double minVal = DBL_MAX;
     for (int i=0; i < numBlocks; i++) {
-        const auto &block = blocks[i];
-        if (block.value < minVal) {
-            minVal = block.value;
+        if (blocks[i].value < minVal) {
+            minVal = blocks[i].value;
         }
     }
-    std::vector<BlockValue> suitBlocks;
-    for (int i=0; i < numBlocks; i++) {
-        auto block = blocks[i];
-        if (block.value < (1.0 + errorTolerance) * minVal) {
-            suitBlocks.push_back(block);
+
+    // Choose a random block within the tolerance
+    double upperBound = (1.0 + errorTolerance) * minVal;
+    BlockValue* suitableBlocks = (BlockValue*) malloc(sizeof(BlockValue) * numBlocks);
+    int numSuitableBlocks = 0;
+    for (int i = 0; i < numBlocks; i++) {
+        if (blocks[i].value < upperBound) {
+            suitableBlocks[numSuitableBlocks] = blocks[i];
+            numSuitableBlocks++;
         }
     }
 
     // Sample and place a block
     std::random_device randomDevice;
     std::mt19937 randomNumberGenerator(randomDevice());
-    std::uniform_int_distribution<std::mt19937::result_type> randomBlock(0, suitBlocks.size());
+    std::uniform_int_distribution<std::mt19937::result_type> randomBlock(0, numSuitableBlocks);
     int blockIndex = randomBlock(randomNumberGenerator);
     WriteBlockOverlap(overlapYStart + drawOffsetY, overlapXStart + drawOffsetX,
-                      blocks[blockIndex].y + drawOffsetY, blocks[blockIndex].x + drawOffsetX);
+                      suitableBlocks[blockIndex].y + drawOffsetY, suitableBlocks[blockIndex].x + drawOffsetX);
+
+    // Clean up
+    free(blocks);
+    free(suitableBlocks);
 }
 
 // Place an edge overlap block with respect to the given block of the output image
@@ -413,20 +420,8 @@ void ImageQuilting::PlaceEdgeOverlapBlockWithMinCut(
 
 // Synthesize a new texture by randomly choosing blocks satisfying constraints and applying minimum cuts
 ImgData ImageQuilting::OverlapConstraintsWithMinCut(){
-    // Allocate memory for the synthesized texture
-    mData.output_d = (unsigned char **) malloc(sizeof(unsigned char *) * mData.output_h);
-    for(int y = 0; y < mData.output_h; y++) {
-        mData.output_d[y] = (unsigned char *) malloc(mData.output_w * CHANNEL_NUM);
-    }
 
-    for (int i = 0; i < mData.output_h; i++){
-        for (int j = 0; j < mData.output_w; j++){
-            for (int k = 0; k < CHANNEL_NUM; k++){
-                // Write to the CHANNEL_NUM channels
-                mData.output_d[i][CHANNEL_NUM * (j) + k] = 0;
-            }
-        }
-    }
+    mData.AllocateOutput();
 
     overlapHeight = mData.block_h / 6;
     overlapWidth = mData.block_w / 6;
@@ -475,11 +470,8 @@ ImgData ImageQuilting::OverlapConstraintsWithMinCut(){
 
 // Synthesize a new texture sample by randomly choosing blocks satisfying overlap constraints
 ImgData ImageQuilting::OverlapConstraints(){
-    // Allocate memory for the synthesized texture
-    mData.output_d = (unsigned char **) malloc(sizeof(unsigned char *) * mData.output_h);
-    for(int y = 0; y < mData.output_h; y++) {
-        mData.output_d[y] = (unsigned char *) malloc(mData.output_w * CHANNEL_NUM);
-    }
+
+    mData.AllocateOutput();
 
     overlapHeight = mData.block_h / 6;
     overlapWidth = mData.block_w / 6;
@@ -528,11 +520,8 @@ ImgData ImageQuilting::OverlapConstraints(){
 
 // Synthesize a new texture sample by randomly choosing blocks
 ImgData ImageQuilting::RandomBlockPlacement(){
-    // Allocate memory for the synthesized texture
-    mData.output_d = (unsigned char **) malloc(sizeof(unsigned char *) * mData.output_h);
-    for(int y = 0; y < mData.output_h; y++) {
-        mData.output_d[y] = (unsigned char *) malloc(mData.output_w * CHANNEL_NUM);
-    }
+
+    mData.AllocateOutput();
 
     // Randomly generate the upper-left corners of blocks
     std::random_device randomDevice;
