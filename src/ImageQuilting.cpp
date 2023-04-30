@@ -348,7 +348,7 @@ void ImageQuilting::PlaceEdgeOverlapBlock(
 
     // Find the minimum block value
     double minVal = DBL_MAX;
-    for (int i=0; i < numBlocks; i++) {
+    for (int i = 0; i < numBlocks; i++) {
         if (blocks[i].value < minVal) {
             minVal = blocks[i].value;
         }
@@ -382,19 +382,18 @@ void ImageQuilting::PlaceEdgeOverlapBlock(
 void ImageQuilting::PlaceEdgeOverlapBlockWithMinCut(
         const int blockY, const int blockX, const int maxBlockX, const int maxBlockY, double errorTolerance)
 {
-    // calculate an overlap type
-    int overlapType = vertical;
-    if (blockY != 0) {
-        if (blockX != 0) {
-            overlapType = both;
-        } else {
-            overlapType = horizontal;
-        }
-    }
+    // Calculate the overlap type
+    int overlapType;
+    if (blockY == 0)
+        overlapType = vertical;
+    else if (blockX == 0)
+        overlapType = horizontal;
+    else
+        overlapType = both;
 
     // Compute the value of each block
     int numBlocks = maxBlockY * maxBlockX;
-    BlockValue blocks[numBlocks];
+    BlockValue* blocks = (BlockValue*) malloc(sizeof(BlockValue) * numBlocks);
     for (int i = 0; i < maxBlockY; i++){
         for (int j = 0; j < maxBlockX; j++){
             int blockIndex = i * maxBlockX + j;
@@ -404,29 +403,39 @@ void ImageQuilting::PlaceEdgeOverlapBlockWithMinCut(
                                                       i, j);
         }
     }
-    // Sort the blocks by value
+
+    // Find the minimum block value
     double minVal = DBL_MAX;
-    for (int i=0; i < numBlocks; i++) {
-        const auto &block = blocks[i];
-        if (block.value < minVal) {
-            minVal = block.value;
+    for (int i = 0; i < numBlocks; i++) {
+        if (blocks[i].value < minVal) {
+            minVal = blocks[i].value;
         }
     }
-    std::vector<BlockValue> suitBlocks;
-    for (int i=0; i < numBlocks; i++) {
-        auto block = blocks[i];
-        if (block.value < ((1.0 + errorTolerance) * minVal)) {
-            suitBlocks.push_back(block);
+
+    // Choose a random block within the tolerance
+    double upperBound = (1.0 + errorTolerance) * minVal;
+    BlockValue* suitableBlocks = (BlockValue*) malloc(sizeof(BlockValue) * numBlocks);
+    int numSuitableBlocks = 0;
+    for (int i = 0; i < numBlocks; i++) {
+        if (blocks[i].value < upperBound) {
+            suitableBlocks[numSuitableBlocks] = blocks[i];
+            numSuitableBlocks++;
         }
     }
 
     // Sample and place a block
     std::random_device randomDevice;
     std::mt19937 randomNumberGenerator(randomDevice());
-    std::uniform_int_distribution<std::mt19937::result_type> randomBlock(0, suitBlocks.size());
+    std::uniform_int_distribution<std::mt19937::result_type> randomBlock(0, numSuitableBlocks);
     int blockIndex = randomBlock(randomNumberGenerator);
     WriteBlockOverlapWithMinCut(
-            overlapType, blockY, blockX, blocks[blockIndex].y, blocks[blockIndex].x);
+        overlapType,
+        blockY, blockX,
+        suitableBlocks[blockIndex].y, suitableBlocks[blockIndex].x);
+
+    // Clean up
+    free(blocks);
+    free(suitableBlocks);
 }
 
 // Synthesize a new texture by randomly choosing blocks satisfying constraints and applying minimum cuts
