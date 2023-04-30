@@ -25,8 +25,12 @@ void ImageQuilting::WriteBlock(const int dstY, const int dstX, const int srcY, c
 // Same as WriteBlock but leaves the half of the dst overlapping region untouched
 void ImageQuilting::WriteBlockOverlap(int dstY, int dstX, int srcY, int srcX)
 {
+    // Compute the height and width of the block to write
     int height = mData->block_h - overlapHeight / 2.0;
     int width = mData->block_w - overlapWidth / 2.0;
+    // Clamp the height and width to the output image dimensions
+    height = std::min(height, std::min(dstY + height, (int)mData->output_h) - dstY);
+    width = std::min(width, std::min(dstX + width, (int)mData->output_w) - dstX);
     for (int i = 0; i < height; i++){
         for (int j = 0; j < width; j++){
             for (int k = 0; k < CHANNEL_NUM; k++){
@@ -245,15 +249,21 @@ double ImageQuilting::ComputeOverlap(
         const int block0Y, const int block0X,
         const int block1Y, const int block1X)
 {
-    int overlapXStart = block0X + mData->block_w - overlapWidth;
-    int overlapYStart = block0Y + mData->block_h - overlapHeight;
+    int overlapXStart = block0X - overlapWidth;
+    int overlapYStart = block0Y - overlapHeight;
+
+    // Clamp the overlapXEnd and overlapYEnd to the output image dimensions
+    int overlapYEnd = std::min(overlapHeight, std::min(overlapYStart + overlapHeight, (int)mData->output_h) - overlapYStart);
+    int overlapXEnd = std::min(overlapWidth, std::min(overlapXStart + overlapWidth, (int)mData->output_w) - overlapXStart);
+    int blockWidthEnd = std::min((int)mData->block_w, std::min(block0X + (int)mData->block_w, (int)mData->output_w) - block0X);
+    int blockHeightEnd = std::min((int)mData->block_h, std::min(block0Y + (int)mData->block_h, (int)mData->output_h) - block0Y);
 
     // Compute the l2 norm of the overlap between the two blocks
     // Compute the horizontal overlap
     double l2norm = 0;
     if (overlapType != vertical) {
-        for (int i = 0; i < overlapHeight; i++){
-            for (int j = 0; j < mData->block_w; j++){
+        for (int i = 0; i < overlapYEnd; i++){
+            for (int j = 0; j < blockWidthEnd; j++){
                 for (int k = 0; k < CHANNEL_NUM; k++){
                     double x0 = mData->output_d[overlapYStart+i][CHANNEL_NUM*(block0X+j)+k];
                     double x1 = mData->data[block1Y+i][CHANNEL_NUM*(block1X+j)+k];
@@ -266,8 +276,8 @@ double ImageQuilting::ComputeOverlap(
 
     // Compute the vertical overlap
     if (overlapType != horizontal) {
-        for (int i = 0; i < mData->block_h; i++){
-            for (int j = 0; j < overlapWidth; j++){
+        for (int i = 0; i < blockHeightEnd; i++){
+            for (int j = 0; j < overlapXEnd; j++){
                 for (int k = 0; k < CHANNEL_NUM; k++){
                     double x0 = mData->output_d[block0Y+i][CHANNEL_NUM*(overlapXStart+j)+k];
                     double x1 = mData->data[block1Y+i][CHANNEL_NUM*(block1X+j)+k];
@@ -280,8 +290,8 @@ double ImageQuilting::ComputeOverlap(
 
     // Compute the corner edge overlap
     if (overlapType == both) {
-        for (int i = 0; i < overlapHeight; i++) {
-            for (int j = 0; j < overlapWidth; j++) {
+        for (int i = 0; i < overlapYEnd; i++) {
+            for (int j = 0; j < overlapXEnd; j++) {
                 for (int k = 0; k < CHANNEL_NUM; k++) {
                     double x0 = mData->output_d[overlapYStart + i][CHANNEL_NUM * (overlapXStart + j) + k];
                     double x1 = mData->data[block1Y + i][CHANNEL_NUM * (block1X + j) + k];
@@ -300,26 +310,27 @@ void ImageQuilting::PlaceEdgeOverlapBlock(
         const int blockY, const int blockX, const int maxBlockX, const int maxBlockY, double errorTolerance)
 {
     // Calculate the overlap start position and the offset from where to write the block to the output
-    int overlapXStart, overlapYStart;
+    int overlapXStart = blockX,  overlapYStart = blockY;
     int drawOffsetX = 0, drawOffsetY = 0;
 
     // Calculate the overlap type
-    int overlapType = vertical;
-    if (blockY != 0) {
+    int overlapType;
+    if (blockY == 0){
+        overlapType = vertical;
+        overlapXStart = blockX - overlapWidth;
+        drawOffsetX = overlapWidth / 2;
+    }
+    else if (blockX == 0){
+        overlapType = horizontal;
         overlapYStart = blockY - overlapHeight;
-        drawOffsetY = overlapHeight / 2.0;
-        if (blockX != 0) {
-            overlapType = both;
-            overlapXStart = blockX - overlapWidth;
-            drawOffsetX = overlapWidth / 2.0;
-        } else {
-            // No vertical overline
-            overlapType = horizontal;
-            overlapXStart = blockX;
-        }
-    } else {
-        // No horizontal overline
-        overlapYStart = blockY;
+        drawOffsetY = overlapHeight / 2;
+    }
+    else{
+        overlapType = both;
+        overlapYStart = blockY - overlapHeight;
+        drawOffsetY = overlapHeight / 2;
+        overlapXStart = blockX - overlapWidth;
+        drawOffsetX = overlapWidth / 2;
     }
 
     // Compute the value of each block
@@ -477,9 +488,9 @@ void ImageQuilting::OverlapConstraints(){
     int wStep = mData->block_w - overlapWidth;
 
     // Compute block parameters
-    // Two blocks of a full size from each side, all others are blocks with size equal to the Step
-    int numBlocksY = (mData->output_h - 2*mData->block_h) / hStep + 2;
-    int numBlocksX = (mData->output_w - 2*mData->block_w) / wStep + 2;
+    // The first block is full size; the others are of size step due to overlapping
+    int numBlocksY = (mData->output_h - mData->block_h) / hStep + 2;
+    int numBlocksX = (mData->output_w - mData->block_w) / wStep + 2;
     int maxBlockY = mData->height - mData->block_h - 1;
     int maxBlockX = mData->width - mData->block_w - 1;
 
