@@ -24,12 +24,10 @@ class ImageQuilting {
     // Same as WriteBlockOverlap, but uses a minimum cut to write the new block
     void WriteBlockOverlapWithMinCut(int overlapType, int dstY, int dstX, int srcY, int srcX);
 
-    // Compute the overlap between the current block - block 0 of the output image
-    // and block 1 of the input image given their upper-left corners
+    // Compute the overlap between the current block, dst, of the output image
+    // and src, of the input image, given their upper-left corners
     // and the position of the overlap
-    double ComputeOverlap(const int overlapType,
-                          const int block0Y, const int block0X,
-                          const int block1Y, const int block1X);
+    double ComputeOverlap(int overlapType, int dstY, int dstX, int srcY, int srcX);
 
     // Struct to sort blocks by their l2 norm
     struct BlockValue{
