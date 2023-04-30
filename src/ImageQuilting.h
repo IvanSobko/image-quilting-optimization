@@ -18,10 +18,10 @@ class ImageQuilting {
     // Write a block from the source data to the output data given their upper-left corners
     void WriteBlock(int dstY, int dstX, int srcY, int srcX);
 
-    // Same as the regular one, but leaves the half of the dst overlapping region untouched
+    // Same as WriteBlock but leaves the half of the dst overlapping region untouched
     void WriteBlockOverlap(int dstY, int dstX, int srcY, int srcX);
 
-    // Same as the overlapping one, but applies the minimum cut
+    // Same as WriteBlockOverlap, but uses a minimum cut to write the new block
     void WriteBlockOverlapWithMinCut(int overlapType, int dstY, int dstX, int srcY, int srcX);
 
     // Compute the overlap between the current block - block 0 of the output image
@@ -37,7 +37,7 @@ class ImageQuilting {
         double value;
     };
 
-    // type of overlap between blocks
+    // Enum representing the type of overlap between blocks
     enum OverlapType {
         vertical = 0,
         horizontal = 1,
@@ -50,11 +50,11 @@ class ImageQuilting {
     // Place an edge overlap block with respect to the given block of the output image
     void PlaceEdgeOverlapBlockWithMinCut(int blockY, int blockX, int maxBlockX, int maxBlockY, double errorTolerance);
 
+    // Synthesize a new texture by randomly choosing blocks satisfying constraints and applying minimum cuts
+    ImgData OverlapConstraintsWithMinCut();
+
     // Synthesize a new texture sample by randomly choosing blocks satisfying overlap constraints
     ImgData OverlapConstraints();
-
-    // Synthesize a new texture sample with minimum cut and overlap
-    ImgData OverlapConstraintsWithMinCut();
 
     // Synthesize a new texture sample by randomly choosing blocks
     ImgData RandomBlockPlacement();

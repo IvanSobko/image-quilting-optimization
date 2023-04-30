@@ -23,7 +23,7 @@ void ImageQuilting::WriteBlock(const int dstY, const int dstX, const int srcY, c
     }
 }
 
-// Same as the regular one, but leaves the half of the dst overlapping region untouched
+// Same as WriteBlock but leaves the half of the dst overlapping region untouched
 void ImageQuilting::WriteBlockOverlap(int dstY, int dstX, int srcY, int srcX)
 {
     int height = mData.block_h - overlapHeight / 2.0;
@@ -39,17 +39,18 @@ void ImageQuilting::WriteBlockOverlap(int dstY, int dstX, int srcY, int srcX)
     }
 }
 
-// Same as the overlapping one, but applies the minimum cut
+// Same as WriteBlockOverlap, but uses a minimum cut to write the new block
 void ImageQuilting::WriteBlockOverlapWithMinCut(int overlapType, int dstY, int dstX, int srcY, int srcX)
 {
     // Minimum cut paths
     int verticalPath[mData.block_h];
     int horizontalPath[mData.block_w];
 
-    // Compute the correct
+    // Compute the correct overlap start pixel coordinates
     int overlapXStart = overlapType != horizontal ? dstX - overlapWidth : dstX;
     int overlapYStart = overlapType != vertical ? dstY - overlapHeight : dstY;
 
+    // Vertical minimum cut
     if (overlapType == vertical || overlapType == both){
 
         // Compute the error surface
@@ -74,7 +75,7 @@ void ImageQuilting::WriteBlockOverlapWithMinCut(int overlapType, int dstY, int d
         for (int j = 0; j < overlapWidth; j++){
             dpTable[j] = errorSurface[j];
         }
-        // DP going forward
+        // DP going from the first row to the last row
         for (int i = 1; i < mData.block_h; i++){
             for (int j = 0; j < overlapWidth; j++){
                 // Get the value directly above
@@ -87,7 +88,6 @@ void ImageQuilting::WriteBlockOverlapWithMinCut(int overlapType, int dstY, int d
             }
         }
 
-        // Find the minimum vertical path
         // Find the minimum of the last row
         double minError = dpTable[(mData.block_h-1)*overlapWidth];
         verticalPath[mData.block_h-1] = 0;
@@ -99,7 +99,7 @@ void ImageQuilting::WriteBlockOverlapWithMinCut(int overlapType, int dstY, int d
             }
         }
 
-        // Traverse the dpTable upwards to construct the row
+        // Traverse the dpTable from the last row to the first row to construct the vertical path
         for (int i = mData.block_h - 2; i >= 0; i--){
             // Get the path from the previous row
             int j = verticalPath[i+1];
@@ -125,8 +125,9 @@ void ImageQuilting::WriteBlockOverlapWithMinCut(int overlapType, int dstY, int d
         }
     }
 
-    // horizontal min cut
+    // Horizontal minimum cut
     if (overlapType == horizontal || overlapType == both){
+
         // Compute the error surface
         double errorSurface[overlapHeight * mData.block_w];
         for (int i = 0; i < overlapHeight; i++){
@@ -149,7 +150,7 @@ void ImageQuilting::WriteBlockOverlapWithMinCut(int overlapType, int dstY, int d
         for (int i = 0; i < overlapHeight; i++){
             dpTable[i*mData.block_w] = errorSurface[i*mData.block_w];
         }
-        // DP going from the left to the right
+        // DP going from the first column to the last column
         for (int j = 1; j < mData.block_w; j++){
             for (int i = 0; i < overlapHeight; i++){
                 // Get the value directly to the left
@@ -162,7 +163,6 @@ void ImageQuilting::WriteBlockOverlapWithMinCut(int overlapType, int dstY, int d
             }
         }
 
-        // Find the minimum horizontal path
         // Find the minimum of the last column
         double minError = dpTable[mData.block_w-1];
         horizontalPath[mData.block_w-1] = 0;
@@ -174,23 +174,22 @@ void ImageQuilting::WriteBlockOverlapWithMinCut(int overlapType, int dstY, int d
             }
         }
 
-        // Traverse the dpTable from right to left to construct the column
+        // Traverse the dpTable from the last row to the first row to construct the horizontal path
         for (int j = mData.block_w - 2; j >= 1; j--){
             // Get the path from the right column
             int i = horizontalPath[j+1];
             // Get the value directly on the left
             double localError = dpTable[i*mData.block_w+j];
             horizontalPath[j] = i;
-            // Get the value to the left
+            // Get the value to the left and above
             if (i > 0){
-                // Get the value directly on the left
                 double leftError = dpTable[(i-1)*mData.block_w+j];
                 if (leftError < localError){
                     localError = leftError;
                     horizontalPath[j] = i-1;
                 }
             }
-            // Get the value to the right
+            // Get the value to the left and below
             if (i < overlapHeight-1){
                 double rightError = dpTable[(i+1)*mData.block_w+j];
                 if (rightError < localError){
@@ -201,39 +200,41 @@ void ImageQuilting::WriteBlockOverlapWithMinCut(int overlapType, int dstY, int d
         }
     }
 
-    // Write the block according to the vertical cut
+    // Write the block according to the overlap type, vertical cut, and horizontal cut
     for (int i = 0; i < mData.block_h; i++){
         for (int j = 0; j < mData.block_w; j++){
+
+            // Vertical overlap
             if (overlapType == vertical) {
-                // >= - general region; another part of the statement - overlap region
-                // j > verticalPath[i] - the starting point for the source block
+                // Write the source block only if we are to the right of it
                 if (j > verticalPath[i]) {
                     for (int k = 0; k < CHANNEL_NUM; k++) {
-                        // Write to the CHANNEL_NUM channels
                         mData.output_d[dstY + i][CHANNEL_NUM * (overlapXStart + j) + k] =
                                 mData.data[srcY + i][CHANNEL_NUM * (srcX + j) + k];
                     }
                 }
             }
+
+            // Horizontal overlap
             if (overlapType == horizontal) {
+                // If the column is to the left of the horizontal path, write the source block
                 if (i > horizontalPath[j]) {
                     for (int k = 0; k < CHANNEL_NUM; k++) {
-                        // Write to the CHANNEL_NUM channels
                         mData.output_d[overlapYStart + i][CHANNEL_NUM * (dstX + j) + k] =
                                 mData.data[srcY + i][CHANNEL_NUM * (srcX + j) + k];
                     }
                 }
             }
+
+            // Both overlap
             if (overlapType == both) {
                 if (j > verticalPath[i] && i > horizontalPath[j]) {
                     for (int k = 0; k < CHANNEL_NUM; k++) {
-                        // Write to the CHANNEL_NUM channels
                         mData.output_d[overlapYStart + i][CHANNEL_NUM * (overlapXStart + j) + k] =
                                 mData.data[srcY + i][CHANNEL_NUM * (srcX + j) + k];
                     }
                 }
             }
-
         }
     }
 }
@@ -410,62 +411,7 @@ void ImageQuilting::PlaceEdgeOverlapBlockWithMinCut(
             overlapType, blockY, blockX, blocks[blockIndex].y, blocks[blockIndex].x);
 }
 
-
-// Synthesize a new texture sample by randomly choosing blocks satisfying overlap constraints
-ImgData ImageQuilting::OverlapConstraints(){
-    // Allocate memory for the synthesized texture
-    mData.output_d = (unsigned char **) malloc(sizeof(unsigned char *) * mData.output_h);
-    for(int y = 0; y < mData.output_h; y++) {
-        mData.output_d[y] = (unsigned char *) malloc(mData.output_w * CHANNEL_NUM);
-    }
-
-    overlapHeight = mData.block_h / 6;
-    overlapWidth = mData.block_w / 6;
-
-    int hStep = mData.block_h - overlapHeight;
-    int wStep = mData.block_w - overlapWidth;
-
-    // Compute block parameters
-    // Two blocks of a full size from each side, all others are blocks with size equal to the Step
-    int numBlocksY = (mData.output_h - 2*mData.block_h) / hStep + 2;
-    int numBlocksX = (mData.output_w - 2*mData.block_w) / wStep + 2;
-    int maxBlockY = mData.height - mData.block_h - 1;
-    int maxBlockX = mData.width - mData.block_w - 1;
-
-    // Randomly generate the upper-left corners of blocks
-    std::random_device randomDevice;
-    std::mt19937 randomNumberGenerator(randomDevice());
-    std::uniform_int_distribution<std::mt19937::result_type> randomY(0, maxBlockY);
-    std::uniform_int_distribution<std::mt19937::result_type> randomX(0, maxBlockX);
-
-    // Iterate over the block upper-left corners
-    for (int blockY = 0; blockY < numBlocksY; blockY++){
-        for (int blockX = 0; blockX < numBlocksX; blockX++){
-
-            // Top-left corner of the current block
-            int dstY = blockY == 0 ? 0 : mData.block_h + hStep * (blockY - 1);
-            int dstX = blockX == 0 ? 0 : mData.block_w + wStep * (blockX - 1);
-
-            // Randomly choose a block and place it
-            if (blockY == 0 && blockX == 0){
-                // Randomly choose the upper-left corner of a block
-                int srcY = randomY(randomNumberGenerator);
-                int srcX = randomX(randomNumberGenerator);
-
-                // Write the randomly chosen block to the output
-                WriteBlock(dstY, dstX, srcY, srcX);
-            } else {
-                PlaceEdgeOverlapBlock(dstY, dstX, maxBlockX, maxBlockY, 0.3);
-            }
-        }
-    }
-
-    // Return the output
-    return mData;
-}
-
-
-// Synthesize a new texture sample with minimum cut and overlap
+// Synthesize a new texture by randomly choosing blocks satisfying constraints and applying minimum cuts
 ImgData ImageQuilting::OverlapConstraintsWithMinCut(){
     // Allocate memory for the synthesized texture
     mData.output_d = (unsigned char **) malloc(sizeof(unsigned char *) * mData.output_h);
@@ -519,6 +465,59 @@ ImgData ImageQuilting::OverlapConstraintsWithMinCut(){
                 WriteBlock(dstY, dstX, srcY, srcX);
             } else {
                 PlaceEdgeOverlapBlockWithMinCut(dstY, dstX, maxBlockX, maxBlockY, 0.5);
+            }
+        }
+    }
+
+    // Return the output
+    return mData;
+}
+
+// Synthesize a new texture sample by randomly choosing blocks satisfying overlap constraints
+ImgData ImageQuilting::OverlapConstraints(){
+    // Allocate memory for the synthesized texture
+    mData.output_d = (unsigned char **) malloc(sizeof(unsigned char *) * mData.output_h);
+    for(int y = 0; y < mData.output_h; y++) {
+        mData.output_d[y] = (unsigned char *) malloc(mData.output_w * CHANNEL_NUM);
+    }
+
+    overlapHeight = mData.block_h / 6;
+    overlapWidth = mData.block_w / 6;
+
+    int hStep = mData.block_h - overlapHeight;
+    int wStep = mData.block_w - overlapWidth;
+
+    // Compute block parameters
+    // Two blocks of a full size from each side, all others are blocks with size equal to the Step
+    int numBlocksY = (mData.output_h - 2*mData.block_h) / hStep + 2;
+    int numBlocksX = (mData.output_w - 2*mData.block_w) / wStep + 2;
+    int maxBlockY = mData.height - mData.block_h - 1;
+    int maxBlockX = mData.width - mData.block_w - 1;
+
+    // Randomly generate the upper-left corners of blocks
+    std::random_device randomDevice;
+    std::mt19937 randomNumberGenerator(randomDevice());
+    std::uniform_int_distribution<std::mt19937::result_type> randomY(0, maxBlockY);
+    std::uniform_int_distribution<std::mt19937::result_type> randomX(0, maxBlockX);
+
+    // Iterate over the block upper-left corners
+    for (int blockY = 0; blockY < numBlocksY; blockY++){
+        for (int blockX = 0; blockX < numBlocksX; blockX++){
+
+            // Top-left corner of the current block
+            int dstY = blockY == 0 ? 0 : mData.block_h + hStep * (blockY - 1);
+            int dstX = blockX == 0 ? 0 : mData.block_w + wStep * (blockX - 1);
+
+            // Randomly choose a block and place it
+            if (blockY == 0 && blockX == 0){
+                // Randomly choose the upper-left corner of a block
+                int srcY = randomY(randomNumberGenerator);
+                int srcX = randomX(randomNumberGenerator);
+
+                // Write the randomly chosen block to the output
+                WriteBlock(dstY, dstX, srcY, srcX);
+            } else {
+                PlaceEdgeOverlapBlock(dstY, dstX, maxBlockX, maxBlockY, 0.3);
             }
         }
     }
