@@ -68,7 +68,7 @@ int main(int argc, char *argv[]) {
     file::read_png_file(input_file.c_str(), img_data);
 
     // Run the image quilting algorithm
-    set_simple_test();
+    set_default();
     ImageQuilting imageQuilting(&img_data);
     imageQuilting.Synthesis();
 
