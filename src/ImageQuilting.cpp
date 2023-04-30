@@ -508,6 +508,9 @@ void ImageQuilting::OverlapConstraints(){
             int dstY = blockY == 0 ? 0 : mData->block_h + hStep * (blockY - 1);
             int dstX = blockX == 0 ? 0 : mData->block_w + wStep * (blockX - 1);
 
+            // Make sure we are inside of the output image
+            if (dstY > mData->block_h || dstX > mData->block_w) continue;
+
             // Randomly choose a block and place it
             if (blockY == 0 && blockX == 0){
                 // Randomly choose the upper-left corner of a block
@@ -516,7 +519,9 @@ void ImageQuilting::OverlapConstraints(){
 
                 // Write the randomly chosen block to the output
                 WriteBlock(dstY, dstX, srcY, srcX);
-            } else {
+            }
+            // Otherwise place a block according to the overlap constraints
+            else {
                 PlaceEdgeOverlapBlock(dstY, dstX, maxBlockX, maxBlockY, 0.3);
             }
         }
