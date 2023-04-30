@@ -245,8 +245,8 @@ double ImageQuilting::ComputeOverlap(
         const int block0Y, const int block0X,
         const int block1Y, const int block1X)
 {
-    int overlapXStart = block0X - overlapWidth;
-    int overlapYStart = block0Y - overlapHeight;
+    int overlapXStart = block0X + mData->block_w - overlapWidth;
+    int overlapYStart = block0Y + mData->block_h - overlapHeight;
 
     // Compute the l2 norm of the overlap between the two blocks
     // Compute the horizontal overlap
