@@ -518,7 +518,7 @@ void ImageQuilting::OverlapConstraints(){
             int dstX = blockX == 0 ? 0 : mData->block_w + wStep * (blockX - 1);
 
             // Make sure we are inside of the output image
-            if (dstY > mData->block_h || dstX > mData->block_w) continue;
+            if (dstY > mData->output_h || dstX > mData->output_w) continue;
 
             // Randomly choose a block and place it
             if (blockY == 0 && blockX == 0){
