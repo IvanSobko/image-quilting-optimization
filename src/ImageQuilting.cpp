@@ -53,7 +53,7 @@ void ImageQuilting::WriteBlockOverlapWithMinCut(int overlapType, int dstY, int d
     int overlapYStart = overlapType != vertical ? dstY - overlapHeight : dstY;
 
     // Vertical minimum cut
-    if (overlapType == vertical || overlapType == both){
+    if (overlapType == vertical /* TODO || overlapType == both */){
 
         // Compute the error surface
         double errorSurface[overlapWidth * mData->block_h];
@@ -130,7 +130,7 @@ void ImageQuilting::WriteBlockOverlapWithMinCut(int overlapType, int dstY, int d
     }
 
     // Horizontal minimum cut
-    if (overlapType == horizontal || overlapType == both){
+    if (overlapType == horizontal /* TODO || overlapType == both */){
 
         // Compute the error surface
         double errorSurface[overlapHeight * mData->block_w];
@@ -206,43 +206,57 @@ void ImageQuilting::WriteBlockOverlapWithMinCut(int overlapType, int dstY, int d
         }
     }
 
-    // Write the block according to the overlap type, vertical cut, and horizontal cut
-    for (int i = 0; i < mData->block_h; i++){
-        for (int j = 0; j < mData->block_w; j++){
+    // Clamp the height and width to the output image dimensions
+    int blockMaxHeight = std::min((int)mData->block_h, std::min(dstY + (int)mData->block_h, (int)mData->output_h) - dstY);
+    int blockMaxWidth = std::min((int)mData->block_w, std::min(dstX + (int)mData->block_w, (int)mData->output_w) - dstX);
+    int blockMaxOverlapHeight = std::min((int)mData->block_h, std::min(overlapYStart + (int)mData->block_h, (int)mData->output_h) - overlapYStart);
+    int blockMaxOverlapWidth = std::min((int)mData->block_w, std::min(overlapXStart + (int)mData->block_w, (int)mData->output_w) - overlapXStart);
 
-            // Vertical overlap
-            if (overlapType == vertical) {
+    // Vertical overlap
+    if (overlapType == vertical) {
+        for (int i = 0; i < blockMaxHeight; i++) {
+            for (int j = 0; j < blockMaxOverlapWidth; j++) {
                 // Write the source block only if we are to the right of it
                 if (j > verticalPath[i]) {
                     for (int k = 0; k < CHANNEL_NUM; k++) {
                         mData->output_d[dstY + i][CHANNEL_NUM * (overlapXStart + j) + k] =
-                                mData->data[srcY + i][CHANNEL_NUM * (srcX + j) + k];
-                    }
-                }
-            }
-
-            // Horizontal overlap
-            if (overlapType == horizontal) {
-                // If the column is to the left of the horizontal path, write the source block
-                if (i > horizontalPath[j]) {
-                    for (int k = 0; k < CHANNEL_NUM; k++) {
-                        mData->output_d[overlapYStart + i][CHANNEL_NUM * (dstX + j) + k] =
-                                mData->data[srcY + i][CHANNEL_NUM * (srcX + j) + k];
-                    }
-                }
-            }
-
-            // Both overlap
-            if (overlapType == both) {
-                if (j > verticalPath[i] && i > horizontalPath[j]) {
-                    for (int k = 0; k < CHANNEL_NUM; k++) {
-                        mData->output_d[overlapYStart + i][CHANNEL_NUM * (overlapXStart + j) + k] =
-                                mData->data[srcY + i][CHANNEL_NUM * (srcX + j) + k];
+                            mData->data[srcY + i][CHANNEL_NUM * (srcX + j) + k];
                     }
                 }
             }
         }
     }
+
+    // Horizontal overlap
+    if (overlapType == horizontal) {
+        for (int i = 0; i < blockMaxOverlapHeight; i++){
+            for (int j = 0; j < blockMaxWidth; j++){
+                // If the column is to the left of the horizontal path, write the source block
+                if (i > horizontalPath[j]) {
+                    for (int k = 0; k < CHANNEL_NUM; k++) {
+                        mData->output_d[overlapYStart + i][CHANNEL_NUM * (dstX + j) + k] =
+                            mData->data[srcY + i][CHANNEL_NUM * (srcX + j) + k];
+                    }
+                }
+            }
+        }
+    }
+
+    // TODO Corner overlap
+    /*
+    if (overlapType == both){
+        for (int i = 0; i < blockMaxOverlapHeight; i++){
+            for (int j = 0; j < blockMaxOverlapWidth; j++){
+                if (j > verticalPath[i] && i > horizontalPath[j]) {
+                    for (int k = 0; k < CHANNEL_NUM; k++) {
+                        mData->output_d[overlapYStart + i][CHANNEL_NUM * (overlapXStart + j) + k] =
+                            mData->data[srcY + i][CHANNEL_NUM * (srcX + j) + k];
+                    }
+                }
+            }
+        }
+    }
+    */
 }
 
 // Compute the overlap between the current block - block 0 of the output image
@@ -455,8 +469,8 @@ void ImageQuilting::OverlapConstraintsWithMinCut(){
 
     // Compute block parameters
     // The first block is full size; the others are of size step due to overlapping
-    int numBlocksY = (mData->output_h - mData->block_h) / hStep + 1; // TODO 2
-    int numBlocksX = (mData->output_w - mData->block_w) / wStep + 1; // TODO 2
+    int numBlocksY = (mData->output_h - mData->block_h) / hStep + 2;
+    int numBlocksX = (mData->output_w - mData->block_w) / wStep + 2;
     int maxBlockY = mData->height - mData->block_h - 1;
     int maxBlockX = mData->width - mData->block_w - 1;
 
