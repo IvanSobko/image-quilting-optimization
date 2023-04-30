@@ -63,21 +63,17 @@ void set_simple_test()
 
 int main(int argc, char *argv[]) {
     parse_args(argc, argv);
+
+    // Read the input data
     file::read_png_file(input_file.c_str(), img_data);
 
     // Run the image quilting algorithm
-    //set_default();
     set_simple_test();
-    ImageQuilting imageQuilting(img_data);
-    // TODO is thus struct assignment safe?
-    img_data = imageQuilting.Synthesis();
+    ImageQuilting imageQuilting(&img_data);
+    imageQuilting.Synthesis();
 
-    // Write the output file
+    // Write the output file and free the members of img_data
     file::write_png_file(output_file.c_str(), img_data);
-
-    // TODO cleanup; why doesn't this work? Is this because of the struct assignment?
-    //img_data.FreeInput();
-    //img_data.FreeOutput();
 
     return EXIT_SUCCESS;
 }

@@ -5,15 +5,15 @@
 class ImageQuilting {
    public:
     ImageQuilting() = delete;
-    ImageQuilting(const ImgData& data) { mData = data; }
+    ImageQuilting(ImgData* data) { mData = data; }
 
     // Synthesize a new texture
-    ImgData Synthesis();
-    void Transfer() {}
+    void Synthesis();
 
    private:
 
-    ImgData mData;
+    // Keep a pointer to the input image data
+    ImgData* mData;
 
     // Write a block from the source data to the output data given their upper-left corners
     void WriteBlock(int dstY, int dstX, int srcY, int srcX);
@@ -51,13 +51,13 @@ class ImageQuilting {
     void PlaceEdgeOverlapBlockWithMinCut(int blockY, int blockX, int maxBlockX, int maxBlockY, double errorTolerance);
 
     // Synthesize a new texture by randomly choosing blocks satisfying constraints and applying minimum cuts
-    ImgData OverlapConstraintsWithMinCut();
+    void OverlapConstraintsWithMinCut();
 
     // Synthesize a new texture sample by randomly choosing blocks satisfying overlap constraints
-    ImgData OverlapConstraints();
+    void OverlapConstraints();
 
     // Synthesize a new texture sample by randomly choosing blocks
-    ImgData RandomBlockPlacement();
+    void RandomBlockPlacement();
 
     int overlapWidth = 0;
     int overlapHeight = 0;

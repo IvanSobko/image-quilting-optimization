@@ -4,6 +4,7 @@
 #include <cstdlib>
 #include "ImgData.h"
 
+// Read a png file into data.data
 // modified code from: https://gist.github.com/niw/5963798
 void file::read_png_file(char const* filename, ImgData& data) {
     FILE* fp = fopen(filename, "rb");
@@ -81,6 +82,7 @@ void file::read_png_file(char const* filename, ImgData& data) {
     png_destroy_read_struct(&png, &info, NULL);
 }
 
+// Write the png file and frees both the data.data and data.output_d
 void file::write_png_file(char const* filename, ImgData& data) {
     FILE* fp = fopen(filename, "wb");
     if (!fp) {
