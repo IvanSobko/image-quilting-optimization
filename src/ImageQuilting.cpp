@@ -211,44 +211,27 @@ void ImageQuilting::WriteBlockOverlapWithMinCut(int overlapType, int dstY, int d
         }
     }
 
-    // Vertical overlap
-    if (overlapType == vertical) {
-        for (int i = 0; i < overlapHeightLocal; i++) {
-            for (int j = 0; j < overlapWidthLocal; j++) {
-                // Write the source block only if we are to the right of it
-                if (j > verticalPath[i]) {
-                    for (int k = 0; k < CHANNEL_NUM; k++) {
-                        mData->output_d[overlapYStart + i][CHANNEL_NUM * (overlapXStart + j) + k] =
-                            mData->data[srcY + i][CHANNEL_NUM * (srcX + j) + k];
-                    }
-                }
-            }
-        }
-    }
+    // Write the source block
+    for (int i = 0; i < overlapHeightLocal; i++) {
+        for (int j = 0; j < overlapWidthLocal; j++) {
+            // Use the vertical and horizontal path to determine if we write the given source pixel
+            bool write = false;
 
-    // Horizontal overlap
-    if (overlapType == horizontal) {
-        for (int i = 0; i < overlapHeightLocal; i++){
-            for (int j = 0; j < overlapWidthLocal; j++){
-                // If the column is to the left of the horizontal path, write the source block
-                if (i > horizontalPath[j]) {
-                    for (int k = 0; k < CHANNEL_NUM; k++) {
-                        mData->output_d[overlapYStart + i][CHANNEL_NUM * (overlapXStart + j) + k] =
-                            mData->data[srcY + i][CHANNEL_NUM * (srcX + j) + k];
-                    }
-                }
-            }
-        }
-    }
+            // Vertical overlap: write the source block if we are to the right of the path
+            if (overlapType == vertical)
+                write = j > verticalPath[i];
+            // Horizontal overlap: write the source block if we are above the path
+            else if (overlapType == horizontal)
+                write = i > horizontalPath[j];
+            // Corner overlap: write the source block if we are to the right and above the two paths
+            else if (overlapType == both)
+                write = j > verticalPath[i] && i > horizontalPath[j];
 
-    if (overlapType == both){
-        for (int i = 0; i < overlapHeightLocal; i++){
-            for (int j = 0; j < overlapWidthLocal; j++){
-                if (j > verticalPath[i] && i > horizontalPath[j]) {
-                    for (int k = 0; k < CHANNEL_NUM; k++) {
-                        mData->output_d[overlapYStart + i][CHANNEL_NUM * (overlapXStart + j) + k] =
-                            mData->data[srcY + i][CHANNEL_NUM * (srcX + j) + k];
-                    }
+            // Write the given source pixel
+            if (write){
+                for (int k = 0; k < CHANNEL_NUM; k++) {
+                    mData->output_d[overlapYStart + i][CHANNEL_NUM * (overlapXStart + j) + k] =
+                        mData->data[srcY + i][CHANNEL_NUM * (srcX + j) + k];
                 }
             }
         }
