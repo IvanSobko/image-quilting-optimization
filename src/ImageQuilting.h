@@ -19,7 +19,7 @@ class ImageQuilting {
     void WriteBlock(int dstY, int dstX, int srcY, int srcX);
 
     // Same as WriteBlock but leaves the half of the dst overlapping region untouched
-    void WriteBlockOverlap(int dstY, int dstX, int srcY, int srcX);
+    void WriteBlockOverlap(int overlapType, int dstY, int dstX, int srcY, int srcX);
 
     // Same as WriteBlockOverlap, but uses a minimum cut to write the new block
     void WriteBlockOverlapWithMinCut(int overlapType, int dstY, int dstX, int srcY, int srcX);

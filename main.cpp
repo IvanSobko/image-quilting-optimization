@@ -43,12 +43,19 @@ void set_default() {
         img_data.output_h = img_data.height * 2;
     }
     // TODO: I'm not sure if these are the exact maximum values, but it seems logical that we should bound the block size
-    uint32_t max_block_w = img_data.width / 3;
-    uint32_t max_block_h = img_data.height / 3;
-    if (img_data.block_w == 0 || img_data.block_w > max_block_w) {
+//    uint32_t max_block_w = img_data.width / 3;
+//    uint32_t max_block_h = img_data.height / 3;
+//    if (img_data.block_w == 0 || img_data.block_w > max_block_w) {
+//        img_data.block_w = img_data.width / 4;
+//    }
+//    if (img_data.block_h == 0 || img_data.block_h > max_block_h) {
+//        img_data.block_h = img_data.height / 4;
+//    }
+
+    if (img_data.block_w == 0) {
         img_data.block_w = img_data.width / 4;
     }
-    if (img_data.block_h == 0 || img_data.block_h > max_block_h) {
+    if (img_data.block_h == 0) {
         img_data.block_h = img_data.height / 4;
     }
 }
