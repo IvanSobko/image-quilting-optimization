@@ -7,7 +7,7 @@
 
 // Synthesize a new texture
 void ImageQuilting::Synthesis(){
-    RandomBlockPlacement();
+    OverlapConstraintsWithMinCut();
 }
 
 // Write a block from the source data to the output data given their upper-left corners
@@ -253,21 +253,21 @@ double ImageQuilting::ComputeOverlap(const int overlapType, const int dstY, cons
     // Compute the overlap region that we are working with
     int overlapXStart = dstX - overlapWidth;
     int overlapYStart = dstY - overlapHeight;
-    int verticalOverlapYEnd = std::min(overlapYStart + (int)mData->block_h, (int)mData->output_h);
-    int horizontalOverlapXEnd = std::min(overlapXStart + (int)mData->block_w, (int)mData->output_w);
-    int verticalOverlapHeightLocal = verticalOverlapYEnd - overlapYStart;
-    int horizontalOverlapWidthLocal = horizontalOverlapXEnd - overlapXStart;
+    int verticalBlockYEnd = std::min(overlapYStart + (int)mData->block_h, (int)mData->output_h);
+    int horizontalBlockXEnd = std::min(overlapXStart + (int)mData->block_w, (int)mData->output_w);
+    int verticalBlockHeightLocal = verticalBlockYEnd - dstY;
+    int horizontalBlockWidthLocal = horizontalBlockXEnd - dstX;
 
     // Compute the l2 norm of the overlap between the two blocks
     double l2norm = 0;
 
     // Compute the horizontal overlap
-    if (overlapType != vertical) {
-        for (int i = 0; i < verticalOverlapHeightLocal; i++){
+    if (overlapType == horizontal || overlapType == both) {
+        for (int i = 0; i < verticalBlockHeightLocal; i++){
             for (int j = 0; j < overlapWidth; j++){
                 for (int k = 0; k < CHANNEL_NUM; k++){
                     double x0 = mData->output_d[overlapYStart+i][CHANNEL_NUM*(dstX +j)+k];
-                    double x1 = mData->data[srcY +i][CHANNEL_NUM*(srcX +j)+k];
+                    double x1 = mData->data[srcY + i][CHANNEL_NUM*(srcX +j)+k];
                     double norm = x0 - x1;
                     l2norm += norm*norm;
                 }
@@ -276,9 +276,9 @@ double ImageQuilting::ComputeOverlap(const int overlapType, const int dstY, cons
     }
 
     // Compute the vertical overlap
-    if (overlapType != horizontal) {
+    if (overlapType == vertical  || overlapType == both) {
         for (int i = 0; i < overlapHeight; i++){
-            for (int j = 0; j < horizontalOverlapWidthLocal; j++){
+            for (int j = 0; j < horizontalBlockWidthLocal; j++){
                 for (int k = 0; k < CHANNEL_NUM; k++){
                     double x0 = mData->output_d[dstY +i][CHANNEL_NUM*(overlapXStart+j)+k];
                     double x1 = mData->data[srcY +i][CHANNEL_NUM*(srcX +j)+k];
@@ -483,7 +483,7 @@ void ImageQuilting::OverlapConstraintsWithMinCut(){
                 // Write the randomly chosen block to the output
                 WriteBlock(dstY, dstX, srcY, srcX);
             } else {
-                PlaceEdgeOverlapBlockWithMinCut(dstY, dstX, maxBlockX, maxBlockY, 0.5);
+                PlaceEdgeOverlapBlockWithMinCut(dstY, dstX, maxBlockX, maxBlockY, 0.1);
             }
         }
     }
@@ -535,7 +535,7 @@ void ImageQuilting::OverlapConstraints(){
             }
             // Otherwise place a block according to the overlap constraints
             else {
-                PlaceEdgeOverlapBlock(dstY, dstX, maxBlockX, maxBlockY, 0.3);
+                PlaceEdgeOverlapBlock(dstY, dstX, maxBlockX, maxBlockY, 0.1);
             }
         }
     }
