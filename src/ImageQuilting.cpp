@@ -284,11 +284,12 @@ double ImageQuilting::ComputeOverlap(const int overlapType, const int dstY, cons
 
     // Compute the vertical overlap
     if (overlapType == vertical || overlapType == both) {
+        int srcYOffset = overlapType == both ? overlapHeight : 0;
         for (int i = 0; i < verticalBlockHeightLocal; i++){
             for (int j = 0; j < overlapWidth; j++){
                 for (int k = 0; k < CHANNEL_NUM; k++){
                     double x0 = mData->output_d[dstY+i][CHANNEL_NUM*(overlapXStart +j)+k];
-                    double x1 = mData->data[srcY + i][CHANNEL_NUM*(srcX + j)+k];
+                    double x1 = mData->data[srcY+srcYOffset+i][CHANNEL_NUM*(srcX + j)+k];
                     double norm = x0 - x1;
                     l2norm += norm*norm;
                 }
@@ -298,11 +299,12 @@ double ImageQuilting::ComputeOverlap(const int overlapType, const int dstY, cons
 
     // Compute the horizontal overlap
     if (overlapType == horizontal  || overlapType == both) {
+        int srcXOffset = overlapType == both ? overlapWidth : 0;
         for (int i = 0; i < overlapHeight; i++){
             for (int j = 0; j < horizontalBlockWidthLocal; j++){
                 for (int k = 0; k < CHANNEL_NUM; k++){
                     double x0 = mData->output_d[overlapYStart +i][CHANNEL_NUM*(dstX+j)+k];
-                    double x1 = mData->data[srcY +i][CHANNEL_NUM*(srcX +j)+k];
+                    double x1 = mData->data[srcY + i][CHANNEL_NUM*(srcX+srcXOffset+j)+k];
                     double norm = x0 - x1;
                     l2norm += norm*norm;
                 }
@@ -439,6 +441,10 @@ void ImageQuilting::PlaceEdgeOverlapBlockWithMinCut(
             numSuitableBlocks++;
         }
     }
+
+    std::cout << "dstY, dstX: " << blockY << ", " << blockX << std::endl;
+    std::cout << "numSuitableBlocks: " << numSuitableBlocks << std::endl;
+    std::cout << suitableBlocks[0].y << ", " << suitableBlocks[0].x << ": " << suitableBlocks[0].value << std::endl;
 
     // Sample and place a block
     std::random_device randomDevice;
