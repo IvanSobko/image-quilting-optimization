@@ -1,6 +1,6 @@
 #ifndef TEAM19_TIMING_H
 #define TEAM19_TIMING_H
-#include "ImageQuilting.h"
+#include "../ImageQuilting.h"
 
 namespace timing {
 

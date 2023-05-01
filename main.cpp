@@ -1,10 +1,10 @@
 #include <cstdlib>
 #include <string>
 #include <time.h>
-#include "ImageQuilting.h"
-#include "PngReader.h"
+#include "src/ImageQuilting.h"
+#include "src/PngReader.h"
 
-#include "benchmarking/timing.h"
+#include "src/benchmarking/timing.h"
 
 // input parameters
 std::string input_file = "./gallery/input0.png";
