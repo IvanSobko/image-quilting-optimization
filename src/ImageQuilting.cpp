@@ -7,13 +7,19 @@
 
 // Synthesize a new texture
 void ImageQuilting::Synthesis(){
-    OverlapConstraintsWithMinCut();
+    RandomBlockPlacement();
 }
 
 // Write a block from the source data to the output data given their upper-left corners
 void ImageQuilting::WriteBlock(const int dstY, const int dstX, const int srcY, const int srcX){
-    for (int i = 0; i < mData->block_h; i++){
-        for (int j = 0; j < mData->block_w; j++){
+    // Compute the height and width of the block to write
+    int height = mData->block_h;
+    int width = mData->block_w;
+    // Clamp the height and width to the output image dimensions
+    height = std::min(height, std::min(dstY + height, (int)mData->output_h) - dstY);
+    width = std::min(width, std::min(dstX + width, (int)mData->output_w) - dstX);
+    for (int i = 0; i < height; i++){
+        for (int j = 0; j < width; j++){
             for (int k = 0; k < CHANNEL_NUM; k++){
                 mData->output_d[dstY + i][CHANNEL_NUM * (dstX + j) + k] = mData->data[srcY + i][
                         CHANNEL_NUM * (srcX + j) + k];
@@ -354,7 +360,7 @@ void ImageQuilting::PlaceEdgeOverlapBlock(
     BlockValue* suitableBlocks = (BlockValue*) malloc(sizeof(BlockValue) * numBlocks);
     int numSuitableBlocks = 0;
     for (int i = 0; i < numBlocks; i++) {
-        if (blocks[i].value < upperBound) {
+        if (blocks[i].value <= upperBound) {
             suitableBlocks[numSuitableBlocks] = blocks[i];
             numSuitableBlocks++;
         }
@@ -412,7 +418,7 @@ void ImageQuilting::PlaceEdgeOverlapBlockWithMinCut(
     BlockValue* suitableBlocks = (BlockValue*) malloc(sizeof(BlockValue) * numBlocks);
     int numSuitableBlocks = 0;
     for (int i = 0; i < numBlocks; i++) {
-        if (blocks[i].value < upperBound) {
+        if (blocks[i].value <= upperBound) {
             suitableBlocks[numSuitableBlocks] = blocks[i];
             numSuitableBlocks++;
         }
@@ -547,8 +553,8 @@ void ImageQuilting::RandomBlockPlacement(){
     std::uniform_int_distribution<std::mt19937::result_type> randomX(0,mData->width-mData->block_w-1);
 
     // Compute block parameters
-    int numBlocksY = mData->output_h / mData->block_h;
-    int numBlocksX = mData->output_w / mData->block_w;
+    int numBlocksY = mData->output_h / mData->block_h + 1;
+    int numBlocksX = mData->output_w / mData->block_w + 1;
 
     // Iterate over the block upper-left corners
     for (int blockY = 0; blockY < numBlocksY; blockY++){
@@ -556,7 +562,7 @@ void ImageQuilting::RandomBlockPlacement(){
 
             // Top-left corner of the current block
             int y = mData->block_h * blockY;
-            int x = CHANNEL_NUM * mData->block_w * blockX;
+            int x = mData->block_w * blockX;
 
             // Randomly choose the upper-left corner of a block
             int offsetY = randomY(randomNumberGenerator);
@@ -568,7 +574,7 @@ void ImageQuilting::RandomBlockPlacement(){
 
                     // Top-left corner of the current block
                     int dstY = mData->block_h * blockY;
-                    int dstX = CHANNEL_NUM * mData->block_w * blockX;
+                    int dstX = mData->block_w * blockX;
 
                     // Randomly choose the upper-left corner of a block
                     int srcY = randomY(randomNumberGenerator);
