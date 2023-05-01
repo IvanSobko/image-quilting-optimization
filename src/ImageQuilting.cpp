@@ -7,7 +7,7 @@
 
 // Synthesize a new texture
 void ImageQuilting::Synthesis(){
-    OverlapConstraints();
+    OverlapConstraintsWithMinCut();
 }
 
 // Write a block from the source data to the output data given their upper-left corners
@@ -61,10 +61,6 @@ void ImageQuilting::WriteBlockOverlap(const int overlapType, const int dstY, con
     for (int i = 0; i < height; i++){
         for (int j = 0; j < width; j++){
             for (int k = 0; k < CHANNEL_NUM; k++){
-                if (i < 2 && j < 2) {
-                    mData->output_d[overlapYStart + i][CHANNEL_NUM * (overlapXStart + j) + k] =
-                            (k == 0 || k == 3) ? 255 : 0;
-                } else
                 mData->output_d[overlapYStart + i][CHANNEL_NUM * (overlapXStart + j) + k] =
                         mData->data[srcOverlapYStart + i][CHANNEL_NUM * (srcOverlapXStart + j) + k];
             }
@@ -293,9 +289,6 @@ double ImageQuilting::ComputeOverlap(const int overlapType, const int dstY, cons
                 for (int k = 0; k < CHANNEL_NUM; k++){
                     double x0 = mData->output_d[dstY+i][CHANNEL_NUM*(overlapXStart +j)+k];
                     double x1 = mData->data[srcY + i][CHANNEL_NUM*(srcX + j)+k];
-//                    if (dstX == 30 && srcX == 0 && srcY == 0) {
-//                        std::cout << "Diff pixels: " << x0 << " " << x1 << std::endl;
-//                    }
                     double norm = x0 - x1;
                     l2norm += norm*norm;
                 }
@@ -331,13 +324,6 @@ double ImageQuilting::ComputeOverlap(const int overlapType, const int dstY, cons
         }
     }
 
-
-    if (dstX == 30 && srcX == 0 && srcY == 0) {
-        std::cout << "Norm: " << l2norm << " " << std::sqrt(l2norm) << std::endl;
-    }
-    if (dstX == 30 && srcX == 25 && srcY == 0) {
-        std::cout << "Norm: " << l2norm << " " << std::sqrt(l2norm) << std::endl;
-    }
     return std::sqrt(l2norm);
 }
 
@@ -366,7 +352,6 @@ void ImageQuilting::PlaceEdgeOverlapBlock(
 
     // Compute the value of each block
     int numBlocks = maxBlockY * maxBlockX;
-//    std::cout << "Num blocks: " << numBlocks << std::endl;
     BlockValue* blocks = (BlockValue*) malloc(sizeof(BlockValue) * numBlocks);
     for (int i = 0; i < maxBlockY; i++){
         for (int j = 0; j < maxBlockX; j++){
@@ -375,12 +360,6 @@ void ImageQuilting::PlaceEdgeOverlapBlock(
             blocks[blockIndex].x = j;
             blocks[blockIndex].value = ComputeOverlap(overlapType, blockY, blockX,
                                                       i, j);
-            if (blockX == 30 && i == 0 && j == 0) {
-                std::cout << "Norm j==0: " << blocks[blockIndex].value << std::endl;
-            }
-            if (blockX == 30 && i == 0 && j == 25) {
-                std::cout << "Norm j==25: " << blocks[blockIndex].value << std::endl;
-            }
         }
     }
 
@@ -391,30 +370,23 @@ void ImageQuilting::PlaceEdgeOverlapBlock(
             minVal = blocks[i].value;
         }
     }
-    std::cout << minVal << std::endl;
 
     // Choose a random block within the tolerance
     double upperBound = (1.0 + errorTolerance) * minVal;
     BlockValue* suitableBlocks = (BlockValue*) malloc(sizeof(BlockValue) * numBlocks);
     int numSuitableBlocks = 0;
     for (int i = 0; i < numBlocks; i++) {
-        if (blocks[i].value == 0) {
-            std::cout << "Indices: " << blocks[i].y << " " << blocks[i].x << std::endl;
-        }
         if (blocks[i].value <= upperBound) {
             suitableBlocks[numSuitableBlocks] = blocks[i];
             numSuitableBlocks++;
         }
     }
-    std::cout << numSuitableBlocks << std::endl;
 
     // Sample and place a block
     std::random_device randomDevice;
     std::mt19937 randomNumberGenerator(randomDevice());
-    std::uniform_int_distribution<std::mt19937::result_type> randomBlock(0, numSuitableBlocks);
+    std::uniform_int_distribution<std::mt19937::result_type> randomBlock(0, numSuitableBlocks-1);
     int blockIndex = randomBlock(randomNumberGenerator);
-    std::cout << "Position of the source " << suitableBlocks[blockIndex].y << " " <<
-        suitableBlocks[blockIndex].x << std::endl;
     WriteBlockOverlap(overlapType, blockY, blockX,
                       suitableBlocks[blockIndex].y, suitableBlocks[blockIndex].x);
 
@@ -471,7 +443,7 @@ void ImageQuilting::PlaceEdgeOverlapBlockWithMinCut(
     // Sample and place a block
     std::random_device randomDevice;
     std::mt19937 randomNumberGenerator(randomDevice());
-    std::uniform_int_distribution<std::mt19937::result_type> randomBlock(0, numSuitableBlocks);
+    std::uniform_int_distribution<std::mt19937::result_type> randomBlock(0, numSuitableBlocks-1);
     int blockIndex = randomBlock(randomNumberGenerator);
     WriteBlockOverlapWithMinCut(
         overlapType,
@@ -498,14 +470,14 @@ void ImageQuilting::OverlapConstraintsWithMinCut(){
     // The first block is full size; the others are of size step due to overlapping
     int numBlocksY = (mData->output_h - mData->block_h) / hStep + 2;
     int numBlocksX = (mData->output_w - mData->block_w) / wStep + 2;
-    int maxBlockY = mData->height - mData->block_h - 1;
-    int maxBlockX = mData->width - mData->block_w - 1;
+    int maxBlockY = mData->height - mData->block_h;
+    int maxBlockX = mData->width - mData->block_w;
 
     // Randomly generate the upper-left corners of blocks
     std::random_device randomDevice;
     std::mt19937 randomNumberGenerator(randomDevice());
-    std::uniform_int_distribution<std::mt19937::result_type> randomY(0, maxBlockY);
-    std::uniform_int_distribution<std::mt19937::result_type> randomX(0, maxBlockX);
+    std::uniform_int_distribution<std::mt19937::result_type> randomY(0, maxBlockY-1);
+    std::uniform_int_distribution<std::mt19937::result_type> randomX(0, maxBlockX-1);
 
     // Iterate over the block upper-left corners
     for (int blockY = 0; blockY < numBlocksY; blockY++){
@@ -551,17 +523,15 @@ void ImageQuilting::OverlapConstraints(){
     int maxBlockY = mData->height - mData->block_h;
     int maxBlockX = mData->width - mData->block_w;
 
-    std::cout << "Max block size: " << maxBlockY << " " << maxBlockX << std::endl;
-
     // Randomly generate the upper-left corners of blocks
     std::random_device randomDevice;
     std::mt19937 randomNumberGenerator(randomDevice());
-    std::uniform_int_distribution<std::mt19937::result_type> randomY(0, maxBlockY);
-    std::uniform_int_distribution<std::mt19937::result_type> randomX(0, maxBlockX);
+    std::uniform_int_distribution<std::mt19937::result_type> randomY(0, maxBlockY-1);
+    std::uniform_int_distribution<std::mt19937::result_type> randomX(0, maxBlockX-1);
 
     // Iterate over the block upper-left corners
-    for (int blockY = 0; blockY < 1; blockY++){
-        for (int blockX = 0; blockX < 3; blockX++){
+    for (int blockY = 0; blockY < numBlocksY; blockY++){
+        for (int blockX = 0; blockX < numBlocksX; blockX++){
 
             // Top-left corner of the current block
             int dstY = blockY == 0 ? 0 : mData->block_h + hStep * (blockY - 1);
@@ -573,17 +543,15 @@ void ImageQuilting::OverlapConstraints(){
             // Randomly choose a block and place it
             if (blockY == 0 && blockX == 0){
                 // Randomly choose the upper-left corner of a block
-//                int srcY = randomY(randomNumberGenerator);
-//                int srcX = randomX(randomNumberGenerator);
-                int srcY = 0;
-                int srcX = 0;
+                int srcY = randomY(randomNumberGenerator);
+                int srcX = randomX(randomNumberGenerator);
 
                 // Write the randomly chosen block to the output
                 WriteBlock(dstY, dstX, srcY, srcX);
             }
             // Otherwise place a block according to the overlap constraints
             else {
-                PlaceEdgeOverlapBlock(dstY, dstX, maxBlockX, maxBlockY, 0);
+                PlaceEdgeOverlapBlock(dstY, dstX, maxBlockX, maxBlockY, 0.1);
             }
         }
     }
