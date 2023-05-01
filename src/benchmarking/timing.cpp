@@ -22,9 +22,9 @@ void timing::run_timing() {
     std::string results_path = directory + '/' + "results.txt";
     results_txt = fopen(results_path.c_str(), "w");
 
-    ImgData img_data;
     for (int i = 0; i < files.size(); i++) {
         printf("Timing for %s\n", files[i].c_str());
+        ImgData img_data;
         file::read_png_file(files[i].c_str(), img_data);
         //TODO: specify block size implicitly
         img_data.output_w = img_data.width * 2;
@@ -32,7 +32,7 @@ void timing::run_timing() {
         img_data.block_w = img_data.width / 4;
         img_data.block_h = img_data.height / 4;
 
-        ImageQuilting quilting(img_data);
+        ImageQuilting quilting(&img_data);
         double cycles = rdtsc(&quilting);
         printf("Done. Quilting for %s took %f cycles\n\n", files[i].c_str(), cycles);
 
@@ -40,18 +40,8 @@ void timing::run_timing() {
         //TODO: write performance=flops/cycles after implementation is finished and we can count flops
         fprintf(results_txt, "size=%ix%i, n=%lli, performance=%f\n", img_data.width, img_data.height, data_size,
                 (double)data_size/cycles);
-
-        for (int j = 0; j < img_data.height; j++) {
-            free(img_data.data[j]);
-        }
-        free(img_data.data);
-        img_data.data = NULL;
-
-        for (int j = 0; j < img_data.output_h; j++) {
-            free(img_data.output_d[j]);
-        }
-        free(img_data.output_d);
-        img_data.output_d = NULL;
+        img_data.FreeInput();
+        img_data.FreeOutput();
     }
     fclose(results_txt);
 }
@@ -70,7 +60,7 @@ double timing::rdtsc(ImageQuilting* quilting) {
         num_runs = num_runs * multiplier;
         start = start_tsc();
         for (size_t i = 0; i < num_runs; i++) {
-            quilting->synthesis();
+            quilting->Synthesis();
         }
         end = stop_tsc(start);
 
@@ -86,7 +76,7 @@ double timing::rdtsc(ImageQuilting* quilting) {
     for (size_t j = 0; j < REP; j++) {
         start = start_tsc();
         for (size_t i = 0; i < num_runs; ++i) {
-            quilting->synthesis();
+            quilting->Synthesis();
         }
         end = stop_tsc(start) - RDTSC_LATENCY;
 
