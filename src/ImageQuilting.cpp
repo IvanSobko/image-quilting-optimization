@@ -66,6 +66,13 @@ void ImageQuilting::WriteBlockOverlap(const int overlapType, const int dstY, con
             }
         }
     }
+
+    /*
+    std::cout << "Last pixel written: " << std::endl;
+    std::cout << overlapYStart + height-1 << ", " << overlapXStart + width - 1 << std::endl;
+    std::cout << srcOverlapYStart + height - 1 << ", " << overlapXStart + width - 1 << std::endl;
+     */
+
 }
 
 // Same as WriteBlockOverlap, but uses a minimum cut to write the new block
@@ -326,6 +333,12 @@ double ImageQuilting::ComputeOverlap(const int overlapType, const int dstY, cons
         }
     }
 
+    /*
+    if (l2norm == 0){
+        std::cout << "srcY, srcX: " << srcY << ", " << srcX << std::endl;
+        std::cout << "overlapYStart, overlapXStart: " << overlapYStart << ", " << overlapXStart << std::endl;
+    }
+     */
     return std::sqrt(l2norm);
 }
 
@@ -383,6 +396,12 @@ void ImageQuilting::PlaceEdgeOverlapBlock(
             numSuitableBlocks++;
         }
     }
+
+    /*
+    std::cout << "dstY, dstX: " << blockY << ", " << blockX << std::endl;
+    std::cout << "numSuitableBlocks: " << numSuitableBlocks << std::endl;
+    std::cout << suitableBlocks[0].y << ", " << suitableBlocks[0].x << ": " << suitableBlocks[0].value << std::endl;
+    */
 
     // Sample and place a block
     std::random_device randomDevice;
@@ -557,7 +576,7 @@ void ImageQuilting::OverlapConstraints(){
             }
             // Otherwise place a block according to the overlap constraints
             else {
-                PlaceEdgeOverlapBlock(dstY, dstX, maxBlockX, maxBlockY, 0.1);
+                PlaceEdgeOverlapBlock(dstY, dstX, maxBlockX, maxBlockY, 0);
             }
         }
     }
