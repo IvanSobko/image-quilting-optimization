@@ -1,5 +1,3 @@
-import numpy as np
-import re
 import matplotlib.pyplot as plt
 from matplotlib.ticker import FormatStrFormatter
 

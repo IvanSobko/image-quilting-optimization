@@ -474,8 +474,8 @@ void ImageQuilting::PlaceEdgeOverlapBlockWithMinCut(
         if (overlapType == vertical || overlapType == horizontal) {
             flopCount += maxBlockY * maxBlockX * (3 * CHANNEL_NUM * overlap * mData->block_h + 1);
         } else {
-            flopCount += maxBlockY * maxBlockX * 2 * (3 * CHANNEL_NUM * overlap * mData->block_h) +
-                                  (3 * CHANNEL_NUM * overlap * overlap) + 1;
+            flopCount += maxBlockY * maxBlockX * ((6 * CHANNEL_NUM * overlap * mData->block_h) +
+                                  (3 * CHANNEL_NUM * overlap * overlap) + 1);
         }
         // flops for intermediate flops
         flopCount += 2 * maxBlockY * maxBlockX + 2;
@@ -484,8 +484,7 @@ void ImageQuilting::PlaceEdgeOverlapBlockWithMinCut(
         if (overlapType == vertical || overlapType == horizontal) {
             flopCount += 3 * CHANNEL_NUM * overlap * overlap +  3 * overlap * (overlap - 1) + (overlap - 1);
         } else {
-            flopCount += 2 * 3 * CHANNEL_NUM * overlap * overlap +  3 * overlap * (overlap - 1) + (overlap -
-                                                                                                  1);
+            flopCount += 6 * CHANNEL_NUM * overlap * overlap +  3 * overlap * (overlap - 1) + (overlap - 1);
         }
     }
 }
