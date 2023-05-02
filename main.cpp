@@ -53,10 +53,10 @@ void set_default() {
 //    }
 
     if (img_data.block_w == 0) {
-        img_data.block_w = img_data.width / 4;
+        img_data.block_w = img_data.width / 2;
     }
     if (img_data.block_h == 0) {
-        img_data.block_h = img_data.height / 4;
+        img_data.block_h = img_data.height / 2;
     }
 }
 
@@ -84,11 +84,15 @@ int main(int argc, char *argv[]) {
 
         // Run the image quilting algorithm
         set_default();
+
+        img_data.AllocateOutput();
         ImageQuilting imageQuilting(&img_data);
         imageQuilting.Synthesis();
 
         // Write the output file and free the members of img_data
         file::write_png_file(output_file.c_str(), img_data);
+        img_data.FreeOutput();
+        img_data.FreeInput();
     }
     return 0;
 }

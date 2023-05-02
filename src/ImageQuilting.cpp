@@ -1,9 +1,9 @@
 #include "ImageQuilting.h"
+#include <algorithm>
+#include <cfloat>
 #include <cstdlib>
 #include <iostream>
-#include <algorithm>
 #include <random>
-#include <cfloat>
 
 // Synthesize a new texture
 void ImageQuilting::Synthesis(){
@@ -85,13 +85,14 @@ void ImageQuilting::WriteBlockOverlapWithMinCut(
     int verticalPath[overlapHeightLocal];
     int horizontalPath[overlapWidthLocal];
 
-    // Vertical minimum cut
-    if (overlapType == vertical || overlapType == both){
+    double* errorSurface = (double*)malloc(sizeof(double) * numOverlapPixels);
+    double* dpTable = (double*)malloc(sizeof(double) * numOverlapPixels);
 
+    // Vertical minimum cut
+    if (overlapType == vertical || overlapType == both) {
         // Compute the error surface
-        double errorSurface[numOverlapPixels];
-        for (int i = 0; i < overlapHeightLocal; i++){
-            for (int j = 0; j < overlapWidthLocal; j++){
+        for (int i = 0; i < overlapHeightLocal; i++) {
+            for (int j = 0; j < overlapWidthLocal; j++) {
                 // Compute the per pixel error
                 double error = 0;
                 for (int k = 0; k < CHANNEL_NUM; k++){
@@ -105,8 +106,6 @@ void ImageQuilting::WriteBlockOverlapWithMinCut(
         }
 
         // Vertical minimum cut using dynamic programming
-        double dpTable[numOverlapPixels];
-
         // Fill up the first row with the error surface
         for (int j = 0; j < overlapWidthLocal; j++){
             dpTable[j] = errorSurface[j];
@@ -166,7 +165,6 @@ void ImageQuilting::WriteBlockOverlapWithMinCut(
     if (overlapType == horizontal || overlapType == both){
 
         // Compute the error surface
-        double errorSurface[numOverlapPixels];
         for (int i = 0; i < overlapHeightLocal; i++){
             for (int j = 0; j < overlapWidthLocal; j++){
                 // Compute the per pixel error
@@ -182,8 +180,6 @@ void ImageQuilting::WriteBlockOverlapWithMinCut(
         }
 
         // Horizontal minimum cut using dynamic programming
-        double dpTable[numOverlapPixels];
-
         // Fill up the first column with the error surface
         for (int i = 0; i < overlapHeightLocal; i++){
             dpTable[i*overlapWidthLocal] = errorSurface[i*overlapWidthLocal];
@@ -238,6 +234,9 @@ void ImageQuilting::WriteBlockOverlapWithMinCut(
             }
         }
     }
+
+    free(errorSurface);
+    free(dpTable);
 
     // Write the source block
     for (int i = 0; i < overlapHeightLocal; i++) {
@@ -459,9 +458,6 @@ void ImageQuilting::PlaceEdgeOverlapBlockWithMinCut(
 
 // Synthesize a new texture by randomly choosing blocks satisfying constraints and applying minimum cuts
 void ImageQuilting::OverlapConstraintsWithMinCut(){
-
-    mData->AllocateOutput();
-
     overlapHeight = mData->block_h / 6;
     overlapWidth = mData->block_w / 6;
 
@@ -509,9 +505,6 @@ void ImageQuilting::OverlapConstraintsWithMinCut(){
 
 // Synthesize a new texture sample by randomly choosing blocks satisfying overlap constraints
 void ImageQuilting::OverlapConstraints(){
-
-    mData->AllocateOutput();
-
     overlapHeight = mData->block_h / 6;
     overlapWidth = mData->block_w / 6;
 
@@ -561,9 +554,6 @@ void ImageQuilting::OverlapConstraints(){
 
 // Synthesize a new texture sample by randomly choosing blocks
 void ImageQuilting::RandomBlockPlacement(){
-
-    mData->AllocateOutput();
-
     // Randomly generate the upper-left corners of blocks
     std::random_device randomDevice;
     std::mt19937 randomNumberGenerator(randomDevice());

@@ -15,9 +15,11 @@ struct ImgData {
 
     // Free memory for the input texture
     void FreeInput(){
-        for (int y = 0; y < height; y++)
+        for (int y = 0; y < height; y++) {
             free(data[y]);
+        }
         free(data);
+        data = NULL;
     }
 
     // Allocate memory for the output texture and initialize it to black
@@ -40,8 +42,10 @@ struct ImgData {
 
     // Free memory for the output texture
     void FreeOutput(){
-        for (int y = 0; y < output_h; y++)
+        for (int y = 0; y < output_h; y++) {
             free(output_d[y]);
+        }
         free(output_d);
+        output_d = NULL;
     }
 };

@@ -29,8 +29,9 @@ void timing::run_timing() {
         //TODO: specify block size implicitly
         img_data.output_w = img_data.width * 2;
         img_data.output_h = img_data.height * 2;
-        img_data.block_w = img_data.width / 4;
-        img_data.block_h = img_data.height / 4;
+        img_data.block_w = img_data.width / 2;
+        img_data.block_h = img_data.height / 2;
+        img_data.AllocateOutput();
 
         ImageQuilting quilting(&img_data);
         double cycles = rdtsc(&quilting);
@@ -40,15 +41,15 @@ void timing::run_timing() {
         //TODO: write performance=flops/cycles after implementation is finished and we can count flops
         fprintf(results_txt, "size=%ix%i, n=%lli, performance=%f\n", img_data.width, img_data.height, data_size,
                 (double)data_size/cycles);
-        img_data.FreeInput();
         img_data.FreeOutput();
+        img_data.FreeInput();
     }
     fclose(results_txt);
 }
 
 double timing::rdtsc(ImageQuilting* quilting) {
     double cycles = 0;
-    int64_t num_runs = 100;
+    int64_t num_runs = 10;
     double multiplier = 1;
     myInt64 start, end;
 
