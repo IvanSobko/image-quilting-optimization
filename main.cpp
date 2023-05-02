@@ -3,6 +3,7 @@
 #include "src/ImageQuilting.h"
 #include "src/PngReader.h"
 
+#include "Testing.h"
 #include "src/benchmarking/timing.h"
 
 // input parameters
@@ -11,6 +12,8 @@ std::string output_file = "./gallery/output0.png";
 ImgData img_data;
 
 bool benchmark = false;
+bool generate = false;
+bool test = false;
 
 void parse_args(int argc, char* argv[]) {
     std::string delimiter = "=";
@@ -30,6 +33,10 @@ void parse_args(int argc, char* argv[]) {
             img_data.block_w = std::stoi(val);
         } else if (par == "--blockH") {
             img_data.block_h = std::stoi(val);
+        } else if (par == "--generate") {
+            generate = true;
+        } else if (par == "--test") {
+            test = true;
         }
     }
 }
@@ -60,20 +67,29 @@ int main(int argc, char* argv[]) {
     // modifies img_data inside and creates output image
     ImageQuilting imageQuilting(&img_data);
 
+    // Benchmarking
     if (benchmark) {
         clock_t start = clock();
         double r = timing::rdtsc(&imageQuilting);
         clock_t end = clock();
         double seconds = (double)(end - start) / CLOCKS_PER_SEC;
         printf("RDTSC instruction:\n %lf cycles. Measurement took %.2f sec.\n", r, seconds);
-    } else {
+    }
+    // Testing
+    else if (generate) {
+        Testing testing = Testing(0);
+        testing.GenerateOutputFiles();
+    }
+    else if (test) {
+        Testing testing = Testing(0);
+        testing.RegisterTestFunction(Testing::ImageQuiltingFunction, "default");
+        testing.TestRegisteredTestFunctions();
+    }
+    // Main
+    else {
         imageQuilting.Synthesis();
         file::write_png_file(output_file.c_str(), img_data);
     }
-
-    return 0;
-    // Write the output file and free the members of img_data
-    file::write_png_file(output_file.c_str(), img_data);
 
     return EXIT_SUCCESS;
 }

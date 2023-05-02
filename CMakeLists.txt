@@ -2,7 +2,7 @@ cmake_minimum_required(VERSION 3.18)
 project(team19)
 
 set(CMAKE_FIND_FRAMEWORK LAST)
-set(CMAKE_CXX_STANDARD 14)
+set(CMAKE_CXX_STANDARD 17)
 
 include_directories(src)
 add_executable(team19
@@ -12,7 +12,8 @@ add_executable(team19
         src/ImageQuilting.cpp
         src/ImageQuilting.h
         src/ImgData.h
-
+        src/Testing.cpp
+        src/Testing.h
         src/benchmarking/tsc_x86.h
         src/benchmarking/timing.h
         src/benchmarking/timing.cpp)
