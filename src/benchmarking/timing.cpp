@@ -26,7 +26,6 @@ void timing::run_timing() {
         printf("Timing for %s\n", files[i].c_str());
         ImgData img_data;
         file::read_png_file(files[i].c_str(), img_data);
-        //TODO: specify block size implicitly
         img_data.output_w = img_data.width * 2;
         img_data.output_h = img_data.height * 2;
         img_data.block_w = img_data.width / 2;
@@ -38,9 +37,9 @@ void timing::run_timing() {
         printf("Done. Quilting for %s took %f cycles\n\n", files[i].c_str(), cycles);
 
         int64_t data_size = img_data.width * img_data.height;
-        //TODO: write performance=flops/cycles after implementation is finished and we can count flops
+        double flopC = ((double)quilting.getFlopCount()) / cycles;
         fprintf(results_txt, "size=%ix%i, n=%lli, performance=%f\n", img_data.width, img_data.height, data_size,
-                (double)data_size/cycles);
+                flopC);
         img_data.FreeOutput();
         img_data.FreeInput();
     }
@@ -49,7 +48,7 @@ void timing::run_timing() {
 
 double timing::rdtsc(ImageQuilting* quilting) {
     double cycles = 0;
-    int64_t num_runs = 10;
+    int num_runs = 1;
     double multiplier = 1;
     myInt64 start, end;
 
@@ -72,7 +71,7 @@ double timing::rdtsc(ImageQuilting* quilting) {
 
     // Actual performance measurements repeated REP times.
     // We simply store all results and compute medians during post-processing.
-    printf("actually measuring performance (%lli times).\n", num_runs);
+    printf("actually measuring performance (%i times).\n", num_runs);
     double total_cycles = 0;
     for (size_t j = 0; j < REP; j++) {
         start = start_tsc();
