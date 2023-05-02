@@ -24,7 +24,7 @@ double timing::rdtsc(ImageQuilting* quilting) {
         num_runs = num_runs * multiplier;
         start = start_tsc();
         for (size_t i = 0; i < num_runs; i++) {
-            quilting->synthesis();
+            quilting->Synthesis();
         }
         end = stop_tsc(start);
 
@@ -39,7 +39,7 @@ double timing::rdtsc(ImageQuilting* quilting) {
     for (size_t j = 0; j < REP; j++) {
         start = start_tsc();
         for (size_t i = 0; i < num_runs; ++i) {
-            quilting->synthesis();
+            quilting->Synthesis();
         }
         end = stop_tsc(start) - RDTSC_LATENCY;
 

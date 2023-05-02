@@ -1,6 +1,5 @@
 #include <cstdlib>
 #include <string>
-#include <time.h>
 #include "src/ImageQuilting.h"
 #include "src/PngReader.h"
 
@@ -43,7 +42,6 @@ void set_default() {
     if (img_data.output_h == 0) {
         img_data.output_h = img_data.height * 2;
     }
-    // TODO: I'm not sure if these are the exact maximum values, but it seems logical that we should bound the block size
     uint32_t max_block_w = img_data.width / 3;
     uint32_t max_block_h = img_data.height / 3;
     if (img_data.block_w == 0 || img_data.block_w > max_block_w) {
@@ -60,18 +58,22 @@ int main(int argc, char* argv[]) {
     set_default();
 
     // modifies img_data inside and creates output image
-    ImageQuilting quilting(img_data);
+    ImageQuilting imageQuilting(&img_data);
 
     if (benchmark) {
         clock_t start = clock();
-        double r = timing::rdtsc(&quilting);
+        double r = timing::rdtsc(&imageQuilting);
         clock_t end = clock();
         double seconds = (double)(end - start) / CLOCKS_PER_SEC;
         printf("RDTSC instruction:\n %lf cycles. Measurement took %.2f sec.\n", r, seconds);
     } else {
-        img_data = quilting.synthesis();
+        imageQuilting.Synthesis();
         file::write_png_file(output_file.c_str(), img_data);
     }
 
     return 0;
+    // Write the output file and free the members of img_data
+    file::write_png_file(output_file.c_str(), img_data);
+
+    return EXIT_SUCCESS;
 }
