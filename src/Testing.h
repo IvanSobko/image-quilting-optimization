@@ -38,6 +38,8 @@ class Testing {
 
     // Get the output file path
     std::string GetOutputfile(const std::filesystem::path & input);
+    // Set the image quilting algorithm parameters
+    static void SetImageQuiltingParameters(ImgData* imgData);
     // Compute the l2 error between two images
     static double ComputeError(unsigned char ** image0, unsigned char ** image1, int height, int width);
 };

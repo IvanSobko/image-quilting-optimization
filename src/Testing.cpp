@@ -25,6 +25,14 @@ std::string Testing::GetOutputfile(const std::filesystem::path & input) {
     return outputDirectory + input.stem().string() + input.extension().string();
 }
 
+// Set the image quilting algorithm parameters
+void Testing::SetImageQuiltingParameters(ImgData* imgData) {
+    imgData->output_h = 2 * imgData->height;
+    imgData->output_w = 2 * imgData->width;
+    imgData->block_h = imgData->height / 4;
+    imgData->block_w = imgData->width / 4;
+}
+
 // Run the image quilting algorithm on all the input files to generate the output files
 void Testing::GenerateOutputFiles() {
 
@@ -37,13 +45,8 @@ void Testing::GenerateOutputFiles() {
         ImgData imgData;
         file::read_png_file(input.c_str(), imgData);
 
-        // Image quilting parameters
-        imgData.output_h = 2 * imgData.height;
-        imgData.output_w = 2 * imgData.width;
-        imgData.block_h = imgData.height / 2;
-        imgData.block_w = imgData.width / 2;
-
         // Image quilting algorithm
+        SetImageQuiltingParameters(&imgData);
         ImageQuiltingFunction(&imgData, seed);
 
         // Write the output
