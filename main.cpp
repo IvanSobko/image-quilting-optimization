@@ -1,7 +1,7 @@
 #include <cstdlib>
 #include <string>
-#include "src/ImageQuilting.h"
-#include "src/PngReader.h"
+#include "ImageQuilting.h"
+#include "PngReader.h"
 
 #include "src/benchmarking/timing.h"
 
@@ -10,7 +10,7 @@ std::string input_file = "./gallery/input0.png";
 std::string output_file = "./gallery/output0.png";
 ImgData img_data;
 
-bool benchmark = false;
+bool runTiming = true;
 
 void parse_args(int argc, char* argv[]) {
     std::string delimiter = "=";
@@ -53,27 +53,24 @@ void set_default() {
 }
 
 int main(int argc, char* argv[]) {
-    parse_args(argc, argv);
-    file::read_png_file(input_file.c_str(), img_data);
-    set_default();
 
-    // modifies img_data inside and creates output image
-    ImageQuilting imageQuilting(&img_data);
-
-    if (benchmark) {
-        clock_t start = clock();
-        double r = timing::rdtsc(&imageQuilting);
-        clock_t end = clock();
-        double seconds = (double)(end - start) / CLOCKS_PER_SEC;
-        printf("RDTSC instruction:\n %lf cycles. Measurement took %.2f sec.\n", r, seconds);
+    if (runTiming) {
+        timing::run_timing();
     } else {
+        parse_args(argc, argv);
+
+        // Read the input data
+        file::read_png_file(input_file.c_str(), img_data);
+        set_default();
+
+        img_data.AllocateOutput();
+        ImageQuilting imageQuilting(&img_data);
         imageQuilting.Synthesis();
+
+        // Write the output file and free the members of img_data
         file::write_png_file(output_file.c_str(), img_data);
+        img_data.FreeOutput();
+        img_data.FreeInput();
     }
-
-    return 0;
-    // Write the output file and free the members of img_data
-    file::write_png_file(output_file.c_str(), img_data);
-
     return EXIT_SUCCESS;
 }

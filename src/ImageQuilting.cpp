@@ -1,12 +1,13 @@
 #include "ImageQuilting.h"
+#include <algorithm>
+#include <cfloat>
 #include <cstdlib>
 #include <iostream>
-#include <algorithm>
 #include <random>
-#include <cfloat>
 
 // Synthesize a new texture
 void ImageQuilting::Synthesis(){
+    flopCount = 0;
     OverlapConstraintsWithMinCut();
 }
 
@@ -85,13 +86,14 @@ void ImageQuilting::WriteBlockOverlapWithMinCut(
     int verticalPath[overlapHeightLocal];
     int horizontalPath[overlapWidthLocal];
 
-    // Vertical minimum cut
-    if (overlapType == vertical || overlapType == both){
+    double* errorSurface = (double*)malloc(sizeof(double) * numOverlapPixels);
+    double* dpTable = (double*)malloc(sizeof(double) * numOverlapPixels);
 
+    // Vertical minimum cut
+    if (overlapType == vertical || overlapType == both) {
         // Compute the error surface
-        double errorSurface[numOverlapPixels];
-        for (int i = 0; i < overlapHeightLocal; i++){
-            for (int j = 0; j < overlapWidthLocal; j++){
+        for (int i = 0; i < overlapHeightLocal; i++) {
+            for (int j = 0; j < overlapWidthLocal; j++) {
                 // Compute the per pixel error
                 double error = 0;
                 for (int k = 0; k < CHANNEL_NUM; k++){
@@ -105,8 +107,6 @@ void ImageQuilting::WriteBlockOverlapWithMinCut(
         }
 
         // Vertical minimum cut using dynamic programming
-        double dpTable[numOverlapPixels];
-
         // Fill up the first row with the error surface
         for (int j = 0; j < overlapWidthLocal; j++){
             dpTable[j] = errorSurface[j];
@@ -118,9 +118,13 @@ void ImageQuilting::WriteBlockOverlapWithMinCut(
                 // Get the value directly above
                 double minError = dpTable[(i-1)*overlapWidthLocal+j];
                 // Get the value to the left
-                if (j > 0) minError = std::min(minError, dpTable[(i-1)*overlapWidthLocal+(j-1)]);
+                if (j > 0) {
+                    minError = std::min(minError, dpTable[(i - 1) * overlapWidthLocal + (j - 1)]);
+                }
                 // Get the value to the right
-                if (j < overlapWidthLocal-1) minError = std::min(minError, dpTable[(i-1)*overlapWidthLocal+(j+1)]);
+                if (j < overlapWidthLocal - 1) {
+                    minError = std::min(minError, dpTable[(i - 1) * overlapWidthLocal + (j + 1)]);
+                }
                 dpTable[i*overlapWidthLocal+j] = errorSurface[i*overlapWidthLocal+j] + minError;
             }
         }
@@ -146,6 +150,7 @@ void ImageQuilting::WriteBlockOverlapWithMinCut(
             // Get the value to the left
             if (j > 0){
                 double leftError = dpTable[i*overlapWidthLocal+j-1];
+                flopCount++;
                 if (leftError < localError){
                     localError = leftError;
                     verticalPath[i] = j-1;
@@ -154,6 +159,7 @@ void ImageQuilting::WriteBlockOverlapWithMinCut(
             // Get the value to the right
             if (j < overlapWidthLocal-1){
                 double rightError = dpTable[i*overlapWidthLocal+j+1];
+                flopCount++;
                 if (rightError < localError){
                     localError = rightError;
                     verticalPath[i] = j+1;
@@ -166,7 +172,6 @@ void ImageQuilting::WriteBlockOverlapWithMinCut(
     if (overlapType == horizontal || overlapType == both){
 
         // Compute the error surface
-        double errorSurface[numOverlapPixels];
         for (int i = 0; i < overlapHeightLocal; i++){
             for (int j = 0; j < overlapWidthLocal; j++){
                 // Compute the per pixel error
@@ -182,8 +187,6 @@ void ImageQuilting::WriteBlockOverlapWithMinCut(
         }
 
         // Horizontal minimum cut using dynamic programming
-        double dpTable[numOverlapPixels];
-
         // Fill up the first column with the error surface
         for (int i = 0; i < overlapHeightLocal; i++){
             dpTable[i*overlapWidthLocal] = errorSurface[i*overlapWidthLocal];
@@ -195,9 +198,13 @@ void ImageQuilting::WriteBlockOverlapWithMinCut(
                 // Get the value directly to the left
                 double minError = dpTable[i*overlapWidthLocal+j-1];
                 // Get the value to the left and up
-                if (i > 0) minError = std::min(minError, dpTable[(i-1)*overlapWidthLocal+(j-1)]);
+                if (i > 0) {
+                    minError = std::min(minError, dpTable[(i - 1) * overlapWidthLocal + (j - 1)]);
+                }
                 // Get the value to the left and below
-                if (i < overlapHeightLocal-1) minError = std::min(minError, dpTable[(i+1)*overlapWidthLocal+(j-1)]);
+                if (i < overlapHeightLocal - 1) {
+                    minError = std::min(minError, dpTable[(i + 1) * overlapWidthLocal + (j - 1)]);
+                }
                 dpTable[i*overlapWidthLocal+j] = errorSurface[i*overlapWidthLocal+j] + minError;
             }
         }
@@ -223,6 +230,7 @@ void ImageQuilting::WriteBlockOverlapWithMinCut(
             // Get the value to the left and above
             if (i > 0){
                 double leftError = dpTable[(i-1)*overlapWidthLocal+j];
+                flopCount++;
                 if (leftError < localError){
                     localError = leftError;
                     horizontalPath[j] = i-1;
@@ -230,6 +238,7 @@ void ImageQuilting::WriteBlockOverlapWithMinCut(
             }
             // Get the value to the left and below
             if (i < overlapHeightLocal-1){
+                flopCount++;
                 double rightError = dpTable[(i+1)*overlapWidthLocal+j];
                 if (rightError < localError){
                     localError = rightError;
@@ -238,6 +247,9 @@ void ImageQuilting::WriteBlockOverlapWithMinCut(
             }
         }
     }
+
+    free(errorSurface);
+    free(dpTable);
 
     // Write the source block
     for (int i = 0; i < overlapHeightLocal; i++) {
@@ -455,13 +467,39 @@ void ImageQuilting::PlaceEdgeOverlapBlockWithMinCut(
     // Clean up
     free(blocks);
     free(suitableBlocks);
+
+
+    // flops for ComputeOverlap loop
+    // Note: approximating verticalBlockHeightLocal and verticalBlockWidthLocal as block_h and block_w
+    if (overlapType == vertical) {
+        flopCount += numBlocks * (3 * CHANNEL_NUM * overlapWidth * mData->block_h + 1);
+    } else if (overlapType == horizontal) {
+        flopCount += numBlocks * (3 * CHANNEL_NUM * overlapHeight * mData->block_w + 1);
+    } else {
+        flopCount += numBlocks * ((3 * CHANNEL_NUM * overlapWidth * mData->block_h)
+                                              + (3 * CHANNEL_NUM * overlapHeight * mData->block_w)
+                                              + (3 * CHANNEL_NUM * overlapHeight * overlapWidth) + 1);
+    }
+    // flops for intermediate calculations
+    flopCount += 2 * numBlocks + 2;
+
+    // flops for WriteBlockOverlapWithMinCut + some flops are computed in code
+    // Note: approximating overlapHeightLocal and overlapWidthLocal as overlapHeight and overlapWidth
+    if (overlapType == vertical) {
+        flopCount += 3 * CHANNEL_NUM * overlapWidth * overlapHeight +  3 * overlapWidth * (overlapHeight - 1) +
+                     (overlapWidth - 1);
+    } else if (overlapType == horizontal) {
+        flopCount += 3 * CHANNEL_NUM * overlapWidth * overlapHeight +  3 * overlapHeight * (overlapWidth - 1) +
+                     (overlapHeight - 1);
+    } else {
+        flopCount += (3 * CHANNEL_NUM * overlapWidth * overlapHeight +  3 * overlapWidth * (overlapHeight - 1) +
+                     (overlapWidth - 1)) + (3 * CHANNEL_NUM * overlapWidth * overlapHeight +  3 *
+                                               overlapHeight * (overlapWidth - 1) + (overlapHeight - 1));
+    }
 }
 
 // Synthesize a new texture by randomly choosing blocks satisfying constraints and applying minimum cuts
 void ImageQuilting::OverlapConstraintsWithMinCut(){
-
-    mData->AllocateOutput();
-
     overlapHeight = mData->block_h / 6;
     overlapWidth = mData->block_w / 6;
 
@@ -509,9 +547,6 @@ void ImageQuilting::OverlapConstraintsWithMinCut(){
 
 // Synthesize a new texture sample by randomly choosing blocks satisfying overlap constraints
 void ImageQuilting::OverlapConstraints(){
-
-    mData->AllocateOutput();
-
     overlapHeight = mData->block_h / 6;
     overlapWidth = mData->block_w / 6;
 
@@ -561,9 +596,6 @@ void ImageQuilting::OverlapConstraints(){
 
 // Synthesize a new texture sample by randomly choosing blocks
 void ImageQuilting::RandomBlockPlacement(){
-
-    mData->AllocateOutput();
-
     // Randomly generate the upper-left corners of blocks
     std::random_device randomDevice;
     std::mt19937 randomNumberGenerator(randomDevice());
@@ -604,4 +636,7 @@ void ImageQuilting::RandomBlockPlacement(){
             }
         }
     }
+}
+int64_t ImageQuilting::getFlopCount() const {
+    return flopCount;
 }

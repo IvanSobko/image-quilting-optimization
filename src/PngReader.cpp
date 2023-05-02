@@ -119,16 +119,6 @@ void file::write_png_file(char const* filename, ImgData& data) {
     png_write_image(png, data.output_d);
     png_write_end(png, NULL);
 
-    // clear both data from input and output files
-    for (int y = 0; y < data.height; y++) {
-        free(data.data[y]);
-    }
-    for (int y = 0; y < data.output_h; y++) {
-        free(data.output_d[y]);
-    }
-    free(data.data);
-    free(data.output_d);
-
     fclose(fp);
     png_destroy_write_struct(&png, &info);
 }

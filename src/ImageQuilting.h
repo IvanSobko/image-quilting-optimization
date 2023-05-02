@@ -10,6 +10,9 @@ class ImageQuilting {
     // Synthesize a new texture
     void Synthesis();
 
+
+    int64_t getFlopCount() const;
+
    private:
 
     // Keep a pointer to the input image data
@@ -59,4 +62,6 @@ class ImageQuilting {
 
     int overlapWidth = 0;
     int overlapHeight = 0;
+
+    int64_t flopCount = 0;
 };
