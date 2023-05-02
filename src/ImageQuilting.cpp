@@ -150,7 +150,7 @@ void ImageQuilting::WriteBlockOverlapWithMinCut(
             // Get the value to the left
             if (j > 0){
                 double leftError = dpTable[i*overlapWidthLocal+j-1];
-                flopCount += 1;
+                flopCount++;
                 if (leftError < localError){
                     localError = leftError;
                     verticalPath[i] = j-1;
@@ -159,7 +159,7 @@ void ImageQuilting::WriteBlockOverlapWithMinCut(
             // Get the value to the right
             if (j < overlapWidthLocal-1){
                 double rightError = dpTable[i*overlapWidthLocal+j+1];
-                flopCount += 1;
+                flopCount++;
                 if (rightError < localError){
                     localError = rightError;
                     verticalPath[i] = j+1;
@@ -468,24 +468,31 @@ void ImageQuilting::PlaceEdgeOverlapBlockWithMinCut(
     free(blocks);
     free(suitableBlocks);
 
-    {
-        int overlap = mData->block_h / 6;
-        // flops for ComputeOverlap loop
-        if (overlapType == vertical || overlapType == horizontal) {
-            flopCount += maxBlockY * maxBlockX * (3 * CHANNEL_NUM * overlap * mData->block_h + 1);
-        } else {
-            flopCount += maxBlockY * maxBlockX * ((6 * CHANNEL_NUM * overlap * mData->block_h) +
-                                  (3 * CHANNEL_NUM * overlap * overlap) + 1);
-        }
-        // flops for intermediate flops
-        flopCount += 2 * maxBlockY * maxBlockX + 2;
 
-        // flops for WriteBlockOverlapWithMinCut
-        if (overlapType == vertical || overlapType == horizontal) {
-            flopCount += 3 * CHANNEL_NUM * overlap * overlap +  3 * overlap * (overlap - 1) + (overlap - 1);
-        } else {
-            flopCount += 6 * CHANNEL_NUM * overlap * overlap +  3 * overlap * (overlap - 1) + (overlap - 1);
-        }
+    // // flops for ComputeOverlap loop
+    if (overlapType == vertical) {
+        flopCount += maxBlockY * maxBlockX * (3 * CHANNEL_NUM * overlapWidth * mData->block_h + 1);
+    } else if (overlapType == horizontal) {
+        flopCount += maxBlockY * maxBlockX * (3 * CHANNEL_NUM * overlapHeight * mData->block_w + 1);
+    } else {
+        flopCount += maxBlockY * maxBlockX * ((3 * CHANNEL_NUM * overlapWidth * mData->block_h)
+                                              + (3 * CHANNEL_NUM * overlapHeight * mData->block_w)
+                                              + 3 * CHANNEL_NUM * overlapHeight * overlapWidth);
+    }
+    // flops for intermediate flops
+    flopCount += 2 * maxBlockY * maxBlockX + 2;
+
+    // flops for WriteBlockOverlapWithMinCut + some flops are computed in code
+    if (overlapType == vertical) {
+        flopCount += 3 * CHANNEL_NUM * overlapWidth * overlapHeight +  3 * overlapWidth * (overlapHeight - 1) +
+                     (overlapWidth - 1);
+    } else if (overlapType == horizontal) {
+        flopCount += 3 * CHANNEL_NUM * overlapWidth * overlapHeight +  3 * overlapHeight * (overlapWidth - 1) +
+                     (overlapHeight - 1);
+    } else {
+        flopCount += (3 * CHANNEL_NUM * overlapWidth * overlapHeight +  3 * overlapWidth * (overlapHeight - 1) +
+                     (overlapWidth - 1)) + (3 * CHANNEL_NUM * overlapWidth * overlapHeight +  3 *
+                                               overlapHeight * (overlapWidth - 1) + (overlapHeight - 1));
     }
 }
 

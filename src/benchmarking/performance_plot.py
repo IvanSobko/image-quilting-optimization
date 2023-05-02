@@ -30,7 +30,7 @@ def performance_plot():
     # ax.yaxis.set_major_formatter(FormatStrFormatter('%g'))
     # plt.minorticks_off()
 
-    plt.plot(x, y, '-o', label='random blocks')
+    plt.plot(x, y, '-o', label='mincut')
     plt.legend()
     plt.savefig("./gallery/performance_plot.png")
     plt.show()
