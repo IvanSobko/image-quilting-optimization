@@ -19,7 +19,7 @@ void timing::run_timing() {
     }
 
     FILE* results_txt = NULL;
-    std::string results_path = directory + '/' + "results.txt";
+    std::string results_path = directory + '/' + "timing_results.txt";
     results_txt = fopen(results_path.c_str(), "w");
 
     for (int i = 0; i < files.size(); i++) {
@@ -38,9 +38,11 @@ void timing::run_timing() {
                quilting.getFlopCount(), cycles);
 
         int64_t data_size = img_data.width * img_data.height;
-        double flopC = ((double)quilting.getFlopCount()) / cycles;
-        fprintf(results_txt, "size=%ix%i, n=%lli, performance=%f\n", img_data.width, img_data.height,
-                data_size, flopC);
+        int64_t flops = quilting.getFlopCount();
+        double flopC = ((double)flops) / cycles;
+        fprintf(results_txt, "size=%ix%i, n=%lli, performance=%f, flops=%lli, cycles=%f\n", img_data.width,
+                img_data.height,
+                data_size, flopC, flops, cycles);
         img_data.FreeOutput();
         img_data.FreeInput();
     }

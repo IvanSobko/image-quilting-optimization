@@ -4,4 +4,3 @@
 .idea
 /cmake-build*
 output*.png
-/gallery/results.txt
