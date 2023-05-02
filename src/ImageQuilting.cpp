@@ -469,20 +469,22 @@ void ImageQuilting::PlaceEdgeOverlapBlockWithMinCut(
     free(suitableBlocks);
 
 
-    // // flops for ComputeOverlap loop
+    // flops for ComputeOverlap loop
+    // Note: approximating verticalBlockHeightLocal and verticalBlockWidthLocal as block_h and block_w
     if (overlapType == vertical) {
-        flopCount += maxBlockY * maxBlockX * (3 * CHANNEL_NUM * overlapWidth * mData->block_h + 1);
+        flopCount += numBlocks * (3 * CHANNEL_NUM * overlapWidth * mData->block_h + 1);
     } else if (overlapType == horizontal) {
-        flopCount += maxBlockY * maxBlockX * (3 * CHANNEL_NUM * overlapHeight * mData->block_w + 1);
+        flopCount += numBlocks * (3 * CHANNEL_NUM * overlapHeight * mData->block_w + 1);
     } else {
-        flopCount += maxBlockY * maxBlockX * ((3 * CHANNEL_NUM * overlapWidth * mData->block_h)
+        flopCount += numBlocks * ((3 * CHANNEL_NUM * overlapWidth * mData->block_h)
                                               + (3 * CHANNEL_NUM * overlapHeight * mData->block_w)
-                                              + 3 * CHANNEL_NUM * overlapHeight * overlapWidth);
+                                              + (3 * CHANNEL_NUM * overlapHeight * overlapWidth) + 1);
     }
-    // flops for intermediate flops
-    flopCount += 2 * maxBlockY * maxBlockX + 2;
+    // flops for intermediate calculations
+    flopCount += 2 * numBlocks + 2;
 
     // flops for WriteBlockOverlapWithMinCut + some flops are computed in code
+    // Note: approximating overlapHeightLocal and overlapWidthLocal as overlapHeight and overlapWidth
     if (overlapType == vertical) {
         flopCount += 3 * CHANNEL_NUM * overlapWidth * overlapHeight +  3 * overlapWidth * (overlapHeight - 1) +
                      (overlapWidth - 1);

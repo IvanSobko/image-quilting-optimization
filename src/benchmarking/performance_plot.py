@@ -1,3 +1,4 @@
+import numpy as np
 import matplotlib.pyplot as plt
 from matplotlib.ticker import FormatStrFormatter
 
@@ -15,22 +16,24 @@ def performance_plot():
     title_compiler = "Compiler: GCC 12.2.0"
     plt.title(title_cpu + ', ' + title_compiler, loc='left', pad=15)
 
-    x = []
-    y = []
+
+    data = []
     file = open("./gallery/results.txt", "r")
     for line in file:
-        x.append(float(line.split('n=')[1].split(',')[0]))
-        y.append(float(line.split('performance=')[1]))
+        x_value = int(line.split('n=')[1].split(',')[0])
+        y_value = float(line.split('performance=')[1])
+        data.append((x_value, y_value))
 
-    x.sort()
-    y.sort()
+    data.sort(key=lambda x:x[0])
+    print(data)
 
     plt.xscale('log', base=2)
+    plt.xticks([2 ** np.floor((np.log2(i[0]))) for i in data])
     # ax.xaxis.set_major_formatter(FormatStrFormatter('%g'))
     # ax.yaxis.set_major_formatter(FormatStrFormatter('%g'))
     # plt.minorticks_off()
 
-    plt.plot(x, y, '-o', label='mincut')
+    plt.plot(*zip(*data), '-o', label='mincut')
     plt.legend()
     plt.savefig("./gallery/performance_plot.png")
     plt.show()

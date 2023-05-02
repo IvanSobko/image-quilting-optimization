@@ -8,7 +8,7 @@
 //TODO: should we modify cycles required? 1e8 is value from homeworks
 #define CYCLES_REQUIRED 1e8
 #define RDTSC_LATENCY 26
-#define REP 1
+#define REP 3
 
 void timing::run_timing() {
     std::string directory = "./gallery";
@@ -34,12 +34,13 @@ void timing::run_timing() {
 
         ImageQuilting quilting(&img_data);
         double cycles = rdtsc(&quilting);
-        printf("Done. Quilting for %s took %f cycles\n\n", files[i].c_str(), cycles);
+        printf("Done. Quilting for %s took %lli flops and %f cycles\n\n", files[i].c_str(),
+               quilting.getFlopCount(), cycles);
 
         int64_t data_size = img_data.width * img_data.height;
         double flopC = ((double)quilting.getFlopCount()) / cycles;
-        fprintf(results_txt, "size=%ix%i, n=%lli, performance=%f\n", img_data.width, img_data.height, data_size,
-                flopC);
+        fprintf(results_txt, "size=%ix%i, n=%lli, performance=%f\n", img_data.width, img_data.height,
+                data_size, flopC);
         img_data.FreeOutput();
         img_data.FreeInput();
     }
@@ -71,7 +72,7 @@ double timing::rdtsc(ImageQuilting* quilting) {
 
     // Actual performance measurements repeated REP times.
     // We simply store all results and compute medians during post-processing.
-    printf("actually measuring performance (%i times).\n", num_runs);
+    printf("actually measuring performance (%i times).\n", num_runs * REP);
     double total_cycles = 0;
     for (size_t j = 0; j < REP; j++) {
         start = start_tsc();
