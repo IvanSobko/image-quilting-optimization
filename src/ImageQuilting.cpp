@@ -588,7 +588,7 @@ void ImageQuilting::OverlapConstraints(){
             }
             // Otherwise place a block according to the overlap constraints
             else {
-                PlaceEdgeOverlapBlock(dstY, dstX, maxBlockX, maxBlockY, 0);
+                PlaceEdgeOverlapBlock(dstY, dstX, maxBlockX, maxBlockY, 0.1);
             }
         }
     }
