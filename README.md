@@ -68,6 +68,14 @@ TODO: insert performance plots here
 ## Benchmark alternatives
 
 ## Bottlenecks
+The major bottleneck in our code is the ComputeOverlap function that estimates the L2 loss function for all possible 
+blocks in all possible positions. 
 
 ## Optimization plan
+1. Divide functions into 2 types, with and without bound checks
+2. Vectorization of L2 loss function calculation
 
+## Questions
+1. We have a lot of integer computations that can be vectorized nicely. For now, we change pixels values to double to 
+calculate the performance using flops, but maybe we will need to choose another metric (calculating int ops too?) for the 
+performance calculation in the future?
