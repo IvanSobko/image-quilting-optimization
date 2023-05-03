@@ -1,14 +1,39 @@
 #include "ImageQuilting.h"
-#include <algorithm>
-#include <cfloat>
 #include <cstdlib>
 #include <iostream>
+#include <algorithm>
 #include <random>
+#include <cfloat>
 
 // Synthesize a new texture
-void ImageQuilting::Synthesis(){
+void ImageQuilting::Synthesis() {
     flopCount = 0;
+    SeedRandomNumberGenerator();
     OverlapConstraintsWithMinCut();
+}
+
+// Synthesize a new texture with the given seed
+void ImageQuilting::Synthesis(int seed) {
+    flopCount = 0;
+    SeedRandomNumberGenerator(seed);
+    OverlapConstraintsWithMinCut();
+}
+
+// Seed the random number generator with the system time
+void ImageQuilting::SeedRandomNumberGenerator() {
+    // https://stackoverflow.com/questions/1190870/i-need-to-generate-random-numbers-in-c
+    srand(time(0));
+}
+
+// Seed the random number generator with a specified seed
+void ImageQuilting::SeedRandomNumberGenerator(int seed) {
+    srand(seed);
+}
+
+// Generate a random number in the range [min, max]
+int ImageQuilting::GetRandomInt(int min, int max) {
+    // https://stackoverflow.com/questions/1190870/i-need-to-generate-random-numbers-in-c
+    return rand() % (max - min + 1) + min;
 }
 
 // Write a block from the source data to the output data given their upper-left corners
@@ -86,6 +111,7 @@ void ImageQuilting::WriteBlockOverlapWithMinCut(
     int verticalPath[overlapHeightLocal];
     int horizontalPath[overlapWidthLocal];
 
+    // Declare our error surface and dynamic programming table
     double* errorSurface = (double*)malloc(sizeof(double) * numOverlapPixels);
     double* dpTable = (double*)malloc(sizeof(double) * numOverlapPixels);
 
@@ -107,6 +133,7 @@ void ImageQuilting::WriteBlockOverlapWithMinCut(
         }
 
         // Vertical minimum cut using dynamic programming
+
         // Fill up the first row with the error surface
         for (int j = 0; j < overlapWidthLocal; j++){
             dpTable[j] = errorSurface[j];
@@ -187,6 +214,7 @@ void ImageQuilting::WriteBlockOverlapWithMinCut(
         }
 
         // Horizontal minimum cut using dynamic programming
+
         // Fill up the first column with the error surface
         for (int i = 0; i < overlapHeightLocal; i++){
             dpTable[i*overlapWidthLocal] = errorSurface[i*overlapWidthLocal];
@@ -248,6 +276,7 @@ void ImageQuilting::WriteBlockOverlapWithMinCut(
         }
     }
 
+    // Clean up
     free(errorSurface);
     free(dpTable);
 
@@ -397,10 +426,7 @@ void ImageQuilting::PlaceEdgeOverlapBlock(
     }
 
     // Sample and place a block
-    std::random_device randomDevice;
-    std::mt19937 randomNumberGenerator(randomDevice());
-    std::uniform_int_distribution<std::mt19937::result_type> randomBlock(0, numSuitableBlocks-1);
-    int blockIndex = randomBlock(randomNumberGenerator);
+    int blockIndex = GetRandomInt(0, numSuitableBlocks-1);
     WriteBlockOverlap(overlapType, blockY, blockX,
                       suitableBlocks[blockIndex].y, suitableBlocks[blockIndex].x);
 
@@ -455,10 +481,7 @@ void ImageQuilting::PlaceEdgeOverlapBlockWithMinCut(
     }
 
     // Sample and place a block
-    std::random_device randomDevice;
-    std::mt19937 randomNumberGenerator(randomDevice());
-    std::uniform_int_distribution<std::mt19937::result_type> randomBlock(0, numSuitableBlocks-1);
-    int blockIndex = randomBlock(randomNumberGenerator);
+    int blockIndex = GetRandomInt(0, numSuitableBlocks-1);
     WriteBlockOverlapWithMinCut(
         overlapType,
         blockY, blockX,
@@ -467,7 +490,6 @@ void ImageQuilting::PlaceEdgeOverlapBlockWithMinCut(
     // Clean up
     free(blocks);
     free(suitableBlocks);
-
 
     // flops for ComputeOverlap loop
     // Note: approximating verticalBlockHeightLocal and verticalBlockWidthLocal as block_h and block_w
@@ -500,24 +522,18 @@ void ImageQuilting::PlaceEdgeOverlapBlockWithMinCut(
 
 // Synthesize a new texture by randomly choosing blocks satisfying constraints and applying minimum cuts
 void ImageQuilting::OverlapConstraintsWithMinCut(){
+
+    // Compute block parameters
     overlapHeight = mData->block_h / 6;
     overlapWidth = mData->block_w / 6;
-
     int hStep = mData->block_h - overlapHeight;
     int wStep = mData->block_w - overlapWidth;
 
-    // Compute block parameters
     // The first block is full size; the others are of size step due to overlapping
     int numBlocksY = (mData->output_h - mData->block_h) / hStep + 2;
     int numBlocksX = (mData->output_w - mData->block_w) / wStep + 2;
     int maxBlockY = mData->height - mData->block_h;
     int maxBlockX = mData->width - mData->block_w;
-
-    // Randomly generate the upper-left corners of blocks
-    std::random_device randomDevice;
-    std::mt19937 randomNumberGenerator(randomDevice());
-    std::uniform_int_distribution<std::mt19937::result_type> randomY(0, maxBlockY-1);
-    std::uniform_int_distribution<std::mt19937::result_type> randomX(0, maxBlockX-1);
 
     // Iterate over the block upper-left corners
     for (int blockY = 0; blockY < numBlocksY; blockY++){
@@ -533,8 +549,8 @@ void ImageQuilting::OverlapConstraintsWithMinCut(){
             // Randomly choose a block and place it
             if (blockY == 0 && blockX == 0){
                 // Randomly choose the upper-left corner of a block
-                int srcY = randomY(randomNumberGenerator);
-                int srcX = randomX(randomNumberGenerator);
+                int srcY = GetRandomInt(0, maxBlockY-1);
+                int srcX = GetRandomInt(0, maxBlockX-1);
 
                 // Write the randomly chosen block to the output
                 WriteBlock(dstY, dstX, srcY, srcX);
@@ -547,24 +563,18 @@ void ImageQuilting::OverlapConstraintsWithMinCut(){
 
 // Synthesize a new texture sample by randomly choosing blocks satisfying overlap constraints
 void ImageQuilting::OverlapConstraints(){
+
+    // Compute block parameters
     overlapHeight = mData->block_h / 6;
     overlapWidth = mData->block_w / 6;
-
     int hStep = mData->block_h - overlapHeight;
     int wStep = mData->block_w - overlapWidth;
 
-    // Compute block parameters
     // The first block is full size; the others are of size step due to overlapping
     int numBlocksY = (mData->output_h - mData->block_h) / hStep + 2;
     int numBlocksX = (mData->output_w - mData->block_w) / wStep + 2;
     int maxBlockY = mData->height - mData->block_h;
     int maxBlockX = mData->width - mData->block_w;
-
-    // Randomly generate the upper-left corners of blocks
-    std::random_device randomDevice;
-    std::mt19937 randomNumberGenerator(randomDevice());
-    std::uniform_int_distribution<std::mt19937::result_type> randomY(0, maxBlockY-1);
-    std::uniform_int_distribution<std::mt19937::result_type> randomX(0, maxBlockX-1);
 
     // Iterate over the block upper-left corners
     for (int blockY = 0; blockY < numBlocksY; blockY++){
@@ -580,8 +590,8 @@ void ImageQuilting::OverlapConstraints(){
             // Randomly choose a block and place it
             if (blockY == 0 && blockX == 0){
                 // Randomly choose the upper-left corner of a block
-                int srcY = randomY(randomNumberGenerator);
-                int srcX = randomX(randomNumberGenerator);
+                int srcY = GetRandomInt(0, maxBlockY-1);
+                int srcX = GetRandomInt(0, maxBlockX-1);
 
                 // Write the randomly chosen block to the output
                 WriteBlock(dstY, dstX, srcY, srcX);
@@ -596,15 +606,12 @@ void ImageQuilting::OverlapConstraints(){
 
 // Synthesize a new texture sample by randomly choosing blocks
 void ImageQuilting::RandomBlockPlacement(){
-    // Randomly generate the upper-left corners of blocks
-    std::random_device randomDevice;
-    std::mt19937 randomNumberGenerator(randomDevice());
-    std::uniform_int_distribution<std::mt19937::result_type> randomY(0,mData->height-mData->block_h-1);
-    std::uniform_int_distribution<std::mt19937::result_type> randomX(0,mData->width-mData->block_w-1);
 
     // Compute block parameters
     int numBlocksY = mData->output_h / mData->block_h + 1;
     int numBlocksX = mData->output_w / mData->block_w + 1;
+    int maxBlockY = mData->height - mData->block_h;
+    int maxBlockX = mData->width - mData->block_w;
 
     // Iterate over the block upper-left corners
     for (int blockY = 0; blockY < numBlocksY; blockY++){
@@ -613,10 +620,6 @@ void ImageQuilting::RandomBlockPlacement(){
             // Top-left corner of the current block
             int y = mData->block_h * blockY;
             int x = mData->block_w * blockX;
-
-            // Randomly choose the upper-left corner of a block
-            int offsetY = randomY(randomNumberGenerator);
-            int offsetX = randomX(randomNumberGenerator);
 
             // Iterate over the block upper-left corners
             for (int blockY = 0; blockY < numBlocksY; blockY++){
@@ -627,8 +630,8 @@ void ImageQuilting::RandomBlockPlacement(){
                     int dstX = mData->block_w * blockX;
 
                     // Randomly choose the upper-left corner of a block
-                    int srcY = randomY(randomNumberGenerator);
-                    int srcX = randomX(randomNumberGenerator);
+                    int srcY = GetRandomInt(0, maxBlockY-1);
+                    int srcX = GetRandomInt(0, maxBlockX-1);
 
                     // Write the randomly chosen block to the output
                     WriteBlock(dstY, dstX, srcY, srcX);
@@ -637,6 +640,7 @@ void ImageQuilting::RandomBlockPlacement(){
         }
     }
 }
+
 int64_t ImageQuilting::getFlopCount() const {
     return flopCount;
 }

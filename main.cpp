@@ -3,6 +3,7 @@
 #include "ImageQuilting.h"
 #include "PngReader.h"
 
+#include "Testing.h"
 #include "src/benchmarking/timing.h"
 
 // input parameters
@@ -11,6 +12,8 @@ std::string output_file = "./gallery/output0.png";
 ImgData img_data;
 
 bool runTiming = false;
+bool generate = false;
+bool test = false;
 
 void parse_args(int argc, char* argv[]) {
     std::string delimiter = "=";
@@ -30,6 +33,10 @@ void parse_args(int argc, char* argv[]) {
             img_data.block_w = std::stoi(val);
         } else if (par == "--blockH") {
             img_data.block_h = std::stoi(val);
+        } else if (par == "--generate") {
+            generate = true;
+        } else if (par == "--test") {
+            test = true;
         }
     }
 }
@@ -54,15 +61,30 @@ void set_default() {
 
 int main(int argc, char* argv[]) {
 
+    // Parse the command line arguments
+    parse_args(argc, argv);
+
+    // Benchmarking
     if (runTiming) {
         timing::run_timing();
-    } else {
-        parse_args(argc, argv);
-
+    }
+    // Testing
+    else if (generate) {
+        Testing testing = Testing(0);
+        testing.GenerateOutputFiles();
+    }
+    else if (test) {
+        Testing testing = Testing(0);
+        testing.RegisterTestFunction(Testing::ImageQuiltingFunction, "default");
+        testing.TestRegisteredTestFunctions();
+    }
+    // Main
+    else {
         // Read the input data
         file::read_png_file(input_file.c_str(), img_data);
         set_default();
 
+        // Allocate the output data and run the image quilting algorithm
         img_data.AllocateOutput();
         ImageQuilting imageQuilting(&img_data);
         imageQuilting.Synthesis();

@@ -9,6 +9,15 @@ class ImageQuilting {
 
     // Synthesize a new texture
     void Synthesis();
+    // Synthesize a new texture with the given seed
+    void Synthesis(int seed);
+
+    // Seed the random number generator with the system time
+    static void SeedRandomNumberGenerator();
+    // Seed the random number generator with a specified seed
+    static void SeedRandomNumberGenerator(int seed);
+    // Generate a random number in the range [min, max]
+    static int GetRandomInt(int min, int max);
 
 
     int64_t getFlopCount() const;
