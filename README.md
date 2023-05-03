@@ -68,13 +68,20 @@ TODO: insert performance plots here
 ## Benchmark alternatives
 
 ## Bottlenecks
-The major bottleneck in our code is the ComputeOverlap function that estimates the L2 loss function for all possible 
-blocks in all possible positions. 
+The major bottleneck in our code is the ComputeOverlap function that estimates the L2 loss function for all possible blocks in all possible positions. 
 
 ## Optimization plan
-1. Divide functions into 2 types, with and without bound checks
-2. Vectorization of L2 loss function calculation
-3. In the second stage of the algorithm, we compute the error between one block of the output texture and every block of the input texture. We have spatial locality because we access the matrices row-by-row, but more importantly, we re-use the entire block of the output texture to compute the error multiple times. This suggests that we should create a blocked version of the function so that we can keep some region of the output texture entirely in cache and reduce the number of cache misses.
+
+### Simple
+1. Pre-calculation of indices and bounds.
+2. Everything is a c-style array except for the one structure holding all of the algorithm's relevant information; we can get rid of all the indirection with the struct references.
+3. Basic block optimization: loop unrolling with scalar replacement and optimization of dependencies / ILP for computing the overlap error and in computing the minimum cuts.
+
+### Advanced
+1. Divide functions into 2 types, with and without bound checks.
+2. In the second stage of the algorithm, we compute the error between one block of the output texture and every block of the input texture. We have spatial locality because we access the matrices row-by-row, but more importantly, we re-use the entire block of the output texture to compute the error multiple times. This suggests that we should create a blocked version of the function so that we can keep some region of the output texture entirely in cache and reduce the number of cache misses. Auto-tuning infrastructure for block sizes.
+3. In order to compute the horizontal minimum cut, our dynamic programming traverses the overlap region column by column, which means that we don't have spatial locality.
+4. Vectorization of L2 loss function calculation.
 
 ## Questions
 1. We have a lot of integer computations that can be vectorized nicely. For now, we change pixels values to double to 
