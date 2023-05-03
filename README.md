@@ -74,8 +74,10 @@ blocks in all possible positions.
 ## Optimization plan
 1. Divide functions into 2 types, with and without bound checks
 2. Vectorization of L2 loss function calculation
+3. In the second stage of the algorithm, we compute the error between one block of the output texture and every block of the input texture. We have spatial locality because we access the matrices row-by-row, but more importantly, we re-use the entire block of the output texture to compute the error multiple times. This suggests that we should create a blocked version of the function so that we can keep some region of the output texture entirely in cache and reduce the number of cache misses.
 
 ## Questions
 1. We have a lot of integer computations that can be vectorized nicely. For now, we change pixels values to double to 
 calculate the performance using flops, but maybe we will need to choose another metric (calculating int ops too?) for the 
 performance calculation in the future?
+2. For blocking the error computation, what should the parameters for the block size be here? Should we use a generator?
