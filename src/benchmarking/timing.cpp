@@ -1,6 +1,7 @@
 #include "timing.h"
 
 #include <dirent.h>
+#include <algorithm>
 
 #include "PngReader.h"
 #include "tsc_x86.h"
@@ -8,7 +9,7 @@
 //TODO: should we modify cycles required? 1e8 is value from homeworks
 #define CYCLES_REQUIRED 1e8
 #define RDTSC_LATENCY 26
-#define REP 3
+#define REP 2
 
 void timing::run_timing() {
     std::string directory = "./gallery";
@@ -19,7 +20,11 @@ void timing::run_timing() {
     }
 
     FILE* results_txt = NULL;
-    std::string results_path = directory + '/' + "timing_results.txt";
+    std::string filename = "timing_results_default_flags.txt";
+#ifdef _CompileFlags // get variable _CompileFlags from CmakeLists.txt
+    filename = std::string("timing_results_") + _CompileFlags + ".txt";
+#endif
+    std::string results_path = directory + '/' + filename;
     results_txt = fopen(results_path.c_str(), "w");
 
     for (int i = 0; i < files.size(); i++) {

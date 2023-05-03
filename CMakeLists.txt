@@ -17,6 +17,18 @@ add_executable(team19
         src/benchmarking/timing.h
         src/benchmarking/timing.cpp)
 
+# We can use different compiler flags
+set(CompileFlags "-O3" "-ffast-math" "-march=native")
+add_definitions(-D_CompileFlags="-O3-ffast-math-march=native") # pass variable _CompileFlags to c++ code
+
+#set(CompileFlags "-O3" "-fno-tree-vectorize")
+#add_definitions(-D_CompileFlags="-O3-fno-tree-vectorize")
+
+#set(CompileFlags "-O1")
+#add_definitions(-D_CompileFlags="-O1")
+
+target_compile_options(team19 PRIVATE ${CompileFlags})
+
 find_package(PNG 1.6 REQUIRED)
 include_directories(${PNG_INCLUDE_DIR})
 target_link_libraries(team19 ${PNG_LIBRARY})
