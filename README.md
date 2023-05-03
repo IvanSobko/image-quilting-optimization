@@ -48,8 +48,22 @@ stitching method. In this case, instead of just connecting blocks in the middle 
 
 
 ## Validation
+To validate the results during the optimization phase, we created the wrapper around our implementation. There we can register new functions with our optimizations.
+This testing framework then will generate output images for all test input files using our base implementation. We set seed to some specific value, to remove all randomization that
+our algorithm has, so it is going to give us the same result every time. After that, the program will run the same test dataset with our new registered function and will estimate the
+error between results with base and optimized implementation. Right now, our testing tool returns zero error when comparing results that both were generated with base implementation, as expected.
 
 ## Performance
+To measure performance we chose the cost metric of flops/cycle. To count flops we derived general formula for each block, as we iterate through blocks variable will update the total count of flops.
+The cycles are measured using TSC counter. Performance measurement involves 2 steps:
+
+1. Warm-up phase: used to warm-up the cache and determine the correct amount of runs to avoid inconsistent results.
+
+2. Actual measurement: run algorithm several times and count flops and cycles.
+
+We ran performance measurements for different compiler flags: -O3 -ffast-math -march=native; -O3 -fno-tree-vectorize; -O1.
+
+TODO: insert performance plots here
 
 ## Benchmark alternatives
 
