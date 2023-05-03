@@ -102,15 +102,17 @@ default is incorrect
 ```
 ## Performance
 To measure performance we chose the cost metric of flops/cycle. To count flops we derived general formula for each block, as we iterate through blocks variable will update the total count of flops.
-The cycles are measured using TSC counter. Performance measurement involves 2 steps:
+The cycles are measured using TSC counter, which is available on all x86 machines. Performance measurement involves 2 steps:
 
 1. Warm-up phase: used to warm-up the cache and determine the correct amount of runs to avoid inconsistent results.
 
 2. Actual measurement: run algorithm several times and count flops and cycles.
 
-We ran performance measurements for different compiler flags: -O3 -ffast-math -march=native; -O3 -fno-tree-vectorize; -O1.
+We ran performance measurements for different compiler flags: -O3 -ffast-math -march=native; -O3 -fno-tree-vectorize; -O1 and included the results:
 
-TODO: insert performance plots here
+| Performance Plot [Flops/Cycle]                                        | Runtime Plot [Cycles]                                             |
+|-----------------------------------------------------------------------|-------------------------------------------------------------------|
+| <img align="center" src="./results/performance_plot.png" width="480"> | <img align="center" src="./results/runtime_plot.png" width="480"> |
 
 ## Benchmark alternatives
 
