@@ -48,11 +48,58 @@ stitching method. In this case, instead of just connecting blocks in the middle 
 
 
 ## Validation
-To validate the results during the optimization phase, we created the wrapper around our implementation. There we can register new functions with our optimizations.
-This testing framework then will generate output images for all test input files using our base implementation. We set seed to some specific value, to remove all randomization that
-our algorithm has, so it is going to give us the same result every time. After that, the program will run the same test dataset with our new registered function and will estimate the
-error between results with base and optimized implementation. Right now, our testing tool returns zero error when comparing results that both were generated with base implementation, as expected.
+To validate the results during the optimization phase, we created the wrapper around our implementation. There we can register new functions with our optimizations. This testing framework then will generate output images for all test input files using our base implementation. We set seed to some specific value, to remove all randomization that our algorithm has, so it is going to give us the same result every time. After that, the program will run the same test dataset with our new registered function and will estimate the error between results with base and optimized implementation. Right now, our testing tool returns zero error when comparing results that both were generated with base implementation, as expected.
 
+To illustrate how it works, here is the terminal output after running our algorithm with a seed of 0 on our set of 6 input files.
+```
+Input files:
+"./testing/input/4.png"
+"./testing/input/5.png"
+"./testing/input/2.png"
+"./testing/input/3.png"
+"./testing/input/1.png"
+"./testing/input/0.png"
+Output files:
+./testing/output/4.png
+./testing/output/5.png
+./testing/output/2.png
+./testing/output/3.png
+./testing/output/1.png
+./testing/output/0.png
+```
+Here is the terminal output after running our algorithm with a seed of 0 using the same algorithm as a test function.
+```
+Input files:
+"./testing/input/4.png"
+"./testing/input/5.png"
+"./testing/input/2.png"
+"./testing/input/3.png"
+"./testing/input/1.png"
+"./testing/input/0.png"
+Registered function: default
+Testing function: default
+"./testing/input/4.png", error: 0
+"./testing/input/5.png", error: 0
+"./testing/input/2.png", error: 0
+"./testing/input/3.png", error: 0
+"./testing/input/1.png", error: 0
+"./testing/input/0.png", error: 0
+default is correct
+```
+The error of 0 means that the registered test function produced the exact same result as our baseline implementation. If, for example, I set the seed value to be 1, and then run the test function again, I get the following output.
+```
+Input files:
+"./testing/input/4.png"
+"./testing/input/5.png"
+"./testing/input/2.png"
+"./testing/input/3.png"
+"./testing/input/1.png"
+"./testing/input/0.png"
+Registered function: default
+Testing function: default
+"./testing/input/4.png", error: 43231.6
+default is incorrect
+```
 ## Performance
 To measure performance we chose the cost metric of flops/cycle. To count flops we derived general formula for each block, as we iterate through blocks variable will update the total count of flops.
 The cycles are measured using TSC counter. Performance measurement involves 2 steps:
