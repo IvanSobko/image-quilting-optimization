@@ -131,9 +131,10 @@ The major bottleneck in our code is the ComputeOverlap function that estimates t
 
 ### Advanced
 1. Divide functions into 2 types, with and without bound checks. (Svitlana, Ivan).
-2. In the second stage of the algorithm, we compute the error between one block of the output texture and every block of the input texture. We have spatial locality because we access the matrices row-by-row, but more importantly, we re-use the entire block of the output texture to compute the error multiple times. This suggests that we should create a blocked version of the function so that we can keep some region of the output texture entirely in cache and reduce the number of cache misses. Auto-tuning infrastructure for block sizes. (Tal, Baptiste).
-3. In order to compute the horizontal minimum cut, our dynamic programming traverses the overlap region column by column, which means that we don't have spatial locality. (Svitlana, Ivan).
-4. Vectorization of L2 loss function calculation. (Svitlana, Ivan).
+2. For some blocks that were chosen from the beginning of the input texture we can estimate for sure the block next to it that will have zero error in the overlap region (it's going to be the block next to the previously chosen one on the input image). So there is no need to calculate the loss function for all blocks and the min-cut, we just need to find a starting position for the new block and straightforwardly stitch them together. (?)
+3. In the second stage of the algorithm, we compute the error between one block of the output texture and every block of the input texture. We have spatial locality because we access the matrices row-by-row, but more importantly, we re-use the entire block of the output texture to compute the error multiple times. This suggests that we should create a blocked version of the function so that we can keep some region of the output texture entirely in cache and reduce the number of cache misses. Auto-tuning infrastructure for block sizes. (Tal, Baptiste).
+4. In order to compute the horizontal minimum cut, our dynamic programming traverses the overlap region column by column, which means that we don't have spatial locality. (Svitlana, Ivan).
+5. Vectorization of L2 loss function calculation. (Svitlana, Ivan).
 
 ## Questions
 1. We have a lot of integer computations that can be vectorized nicely. For now, we change pixels values to double to 
