@@ -18,7 +18,7 @@ def performance_plot():
 
     for filename in ["timing_results_-O3-ffast-math-march=native.txt", "timing_results_-O3-fno-tree-vectorize.txt", "timing_results_-O1.txt"]:
         data = []
-        file = open("./gallery/" + filename, "r")
+        file = open("./results/" + filename, "r")
         for line in file:
             x_value = int(line.split('n=')[1].split(',')[0])
             y_value = float(line.split('performance=')[1].split(',')[0])
@@ -31,7 +31,7 @@ def performance_plot():
         label = filename.split('_-')[1].split('.txt')[0]
         plt.plot(*zip(*data), '-o', label=label)
     plt.legend()
-    plt.savefig("./gallery/performance_plot.png")
+    plt.savefig("./results/performance_plot.png")
 
 def runtime_plot():
     ax = plt.axes()
@@ -43,7 +43,7 @@ def runtime_plot():
 
     for filename in ["timing_results_-O3-ffast-math-march=native.txt", "timing_results_-O3-fno-tree-vectorize.txt", "timing_results_-O1.txt"]:
         data = []
-        file = open("./gallery/" + filename, "r")
+        file = open("./results/" + filename, "r")
         for line in file:
             x_value = int(line.split('n=')[1].split(',')[0])
             y_value = float(line.split('cycles=')[1])
@@ -57,7 +57,7 @@ def runtime_plot():
         label = filename.split('_-')[1].split('.txt')[0]
         plt.plot(*zip(*data), '-o', label=label)
     plt.legend()
-    plt.savefig("./gallery/runtime_plot.png")
+    plt.savefig("./results/runtime_plot.png")
 
 
 if __name__ == "__main__":

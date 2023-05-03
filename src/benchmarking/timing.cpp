@@ -12,8 +12,7 @@
 #define REP 2
 
 void timing::run_timing() {
-    std::string directory = "./gallery";
-    std::vector<std::string> files = read_files(directory, "input0_");
+    std::vector<std::string> files = read_files("./gallery", "input0_");
     if (files.empty()) {
         perror("Failed to collect files for timing");
         return;
@@ -24,7 +23,7 @@ void timing::run_timing() {
 #ifdef _CompileFlags // get variable _CompileFlags from CmakeLists.txt
     filename = std::string("timing_results_") + _CompileFlags + ".txt";
 #endif
-    std::string results_path = directory + '/' + filename;
+    std::string results_path = std::string("results") + '/' + filename;
     results_txt = fopen(results_path.c_str(), "w");
 
     for (int i = 0; i < files.size(); i++) {
