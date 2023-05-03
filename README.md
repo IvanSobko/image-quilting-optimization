@@ -117,7 +117,10 @@ We ran performance measurements for different compiler flags: -O3 -ffast-math -m
 ## Benchmark alternatives
 
 ## Bottlenecks
-The major bottleneck in our code is the ComputeOverlap function that estimates the L2 loss function for all possible blocks in all possible positions. 
+The major bottleneck in our code is the ComputeOverlap function that estimates the L2 loss function for all possible blocks in all possible 
+positions. By performing profiling analysis with DTrace tool, we can see that ComputeOverlap takes ~97% of all algorithm computations.
+
+<img align="center" src="./results/flamegraph.png" width=900>
 
 ## Optimization plan
 
