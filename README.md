@@ -116,6 +116,9 @@ We ran performance measurements for different compiler flags: -O3 -ffast-math -m
 
 ## Benchmark alternatives
 
+https://github.com/AirGuanZ/ImageQuilting
+Still ongoing, the code compiles but there's a problem parsing the arguments of the testing function.
+
 ## Bottlenecks
 The major bottleneck in our code is the ComputeOverlap function that estimates the L2 loss function for all possible blocks in all possible 
 positions. By performing profiling analysis with DTrace tool, we can see that ComputeOverlap takes ~85% of all algorithm computations.
