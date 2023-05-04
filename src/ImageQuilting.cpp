@@ -3,7 +3,7 @@
 #include <iostream>
 #include <algorithm>
 #include <random>
-#include <cfloat> 
+#include <cfloat>
 
 // Synthesize a new texture
 void ImageQuilting::Synthesis() {
@@ -67,7 +67,7 @@ void ImageQuilting::WriteBlockOverlap(const int overlapType, const int dstY, con
     int srcOverlapYStart = srcY;
     if (overlapType == vertical) {
         overlapXStart -= overlapWidth / 2;
-        srcOverlapXStart +=  h / 2;
+        srcOverlapXStart += overlapWidth / 2;
         width -= overlapWidth / 2;
     } else if (overlapType == horizontal) {
         overlapYStart -= overlapHeight / 2;
