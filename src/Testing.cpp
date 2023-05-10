@@ -46,7 +46,7 @@ void Testing::GenerateOutputFiles() {
 
         // Run the image quilting algorithm and write the output
         ImgData imgData;
-        file::read_png_file(input.c_str(), imgData);
+        file::read_png_file(input.string().c_str(), imgData);
 
         // Image quilting algorithm
         SetImageQuiltingParameters(&imgData);
@@ -108,7 +108,7 @@ void Testing::TestCorrectness() {
         for (const auto & input : inputPaths) {
             // Read the input image
             ImgData inputImgData;
-            file::read_png_file(input.c_str(), inputImgData);
+            file::read_png_file(input.string().c_str(), inputImgData);
 
             // Read the already computed output image
             auto output = GetOutputfile(input);

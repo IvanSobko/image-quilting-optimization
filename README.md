@@ -102,20 +102,28 @@ default is incorrect
 ```
 ## Performance
 To measure performance we chose the cost metric of flops/cycle. To count flops we derived general formula for each block, as we iterate through blocks variable will update the total count of flops.
-The cycles are measured using TSC counter. Performance measurement involves 2 steps:
+The cycles are measured using TSC counter, which is available on all x86 machines. Performance measurement involves 2 steps:
 
 1. Warm-up phase: used to warm-up the cache and determine the correct amount of runs to avoid inconsistent results.
 
 2. Actual measurement: run algorithm several times and count flops and cycles.
 
-We ran performance measurements for different compiler flags: -O3 -ffast-math -march=native; -O3 -fno-tree-vectorize; -O1.
+We ran performance measurements for different compiler flags: -O3 -ffast-math -march=native; -O3 -fno-tree-vectorize; -O1 and included the results:
 
-TODO: insert performance plots here
+| Performance Plot [Flops/Cycle]                                        | Runtime Plot [Cycles]                                             |
+|-----------------------------------------------------------------------|-------------------------------------------------------------------|
+| <img align="center" src="./results/performance_plot.png" width="480"> | <img align="center" src="./results/runtime_plot.png" width="480"> |
 
 ## Benchmark alternatives
 
+https://github.com/AirGuanZ/ImageQuilting
+Still ongoing, the code compiles but there's a problem parsing the arguments of the testing function.
+
 ## Bottlenecks
-The major bottleneck in our code is the ComputeOverlap function that estimates the L2 loss function for all possible blocks in all possible positions. 
+The major bottleneck in our code is the ComputeOverlap function that estimates the L2 loss function for all possible blocks in all possible 
+positions. By performing profiling analysis with DTrace tool, we can see that ComputeOverlap takes ~85% of all algorithm computations.
+
+<img align="center" src="./results/flamegraph.png" width=900>
 
 ## Optimization plan
 
@@ -129,9 +137,10 @@ The major bottleneck in our code is the ComputeOverlap function that estimates t
 
 ### Advanced
 1. Divide functions into 2 types, with and without bound checks. (Svitlana, Ivan).
-2. In the second stage of the algorithm, we compute the error between one block of the output texture and every block of the input texture. We have spatial locality because we access the matrices row-by-row, but more importantly, we re-use the entire block of the output texture to compute the error multiple times. This suggests that we should create a blocked version of the function so that we can keep some region of the output texture entirely in cache and reduce the number of cache misses. Auto-tuning infrastructure for block sizes. (Tal, Baptiste).
-3. In order to compute the horizontal minimum cut, our dynamic programming traverses the overlap region column by column, which means that we don't have spatial locality. (Svitlana, Ivan).
-4. Vectorization of L2 loss function calculation. (Svitlana, Ivan).
+2. For some blocks that were chosen from the beginning of the input texture we can estimate for sure the block next to it that will have zero error in the overlap region (it's going to be the block next to the previously chosen one on the input image). So there is no need to calculate the loss function for all blocks and the min-cut, we just need to find a starting position for the new block and straightforwardly stitch them together. (?)
+3. In the second stage of the algorithm, we compute the error between one block of the output texture and every block of the input texture. We have spatial locality because we access the matrices row-by-row, but more importantly, we re-use the entire block of the output texture to compute the error multiple times. This suggests that we should create a blocked version of the function so that we can keep some region of the output texture entirely in cache and reduce the number of cache misses. Auto-tuning infrastructure for block sizes. (Tal, Baptiste).
+4. In order to compute the horizontal minimum cut, our dynamic programming traverses the overlap region column by column, which means that we don't have spatial locality. (Svitlana, Ivan).
+5. Vectorization of L2 loss function calculation. (Svitlana, Ivan).
 
 ## Questions
 1. We have a lot of integer computations that can be vectorized nicely. For now, we change pixels values to double to 

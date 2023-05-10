@@ -506,6 +506,7 @@ void ImageQuilting::PlaceEdgeOverlapBlockWithMinCut(
     flopCount += 2 * numBlocks + 2;
 
     // flops for WriteBlockOverlapWithMinCut + some flops are computed in code
+    // TODO: overlapHeightLocal and overlapWidthLocal are actually block_h and block_w. Fix flop count
     // Note: approximating overlapHeightLocal and overlapWidthLocal as overlapHeight and overlapWidth
     if (overlapType == vertical) {
         flopCount += 3 * CHANNEL_NUM * overlapWidth * overlapHeight +  3 * overlapWidth * (overlapHeight - 1) +
