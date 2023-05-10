@@ -192,7 +192,7 @@ void Testing::TestCorrectnessAndTiming() {
 
     // Read the input image
     ImgData inputImgData;
-    file::read_png_file(input.c_str(), inputImgData);
+    file::read_png_file(input.string().c_str(), inputImgData);
 
     // Set the image quilting parameters and allocate the output image
     SetImageQuiltingParameters(&inputImgData);
