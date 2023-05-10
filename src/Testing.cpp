@@ -7,9 +7,7 @@ Testing::Testing(int seed) {
 
     // https://stackoverflow.com/questions/612097/how-can-i-get-the-list-of-files-in-a-directory-using-c-or-c
     // Construct the vector of input files
-    std::cout << "Input files:" << std::endl;
     for (const auto & inputPath : std::filesystem::directory_iterator(inputDirectory)){
-        std::cout << inputPath.path() << std::endl;
         inputPaths.push_back(inputPath);
     }
 }
@@ -35,6 +33,11 @@ void Testing::SetImageQuiltingParameters(ImgData* imgData) {
 
 // Run the image quilting algorithm on all the input files to generate the output files
 void Testing::GenerateOutputFiles() {
+
+    std::cout << "Input files:" << std::endl;
+    for (const auto & input : inputPaths) {
+        std::cout << input << std::endl;
+    }
 
     std::cout << "Output files:" << std::endl;
     for (const auto & input : inputPaths){
@@ -191,10 +194,17 @@ void Testing::TestCorrectnessAndTiming() {
     ImgData inputImgData;
     file::read_png_file(input.c_str(), inputImgData);
 
+    // Set the image quilting parameters and allocate the output image
+    SetImageQuiltingParameters(&inputImgData);
+    inputImgData.AllocateOutput();
+
     // Read the already computed output image
     auto output = GetOutputfile(input);
     ImgData outputImgData;
     file::read_png_file(output.c_str(), outputImgData);
+
+    // Compute the base number of cycles
+    double baseCycles = rdtsc(ImageQuiltingFunction, &inputImgData, seed);
 
     // Test the correctness and timing of all the registered test functions
     for (const auto & pair : testFunctions) {
@@ -202,11 +212,9 @@ void Testing::TestCorrectnessAndTiming() {
         std::string label;
         std::tie(testFunction, label) = pair;
 
-        bool correct = true;
         std::cout << "Testing function: " << label << std::endl;
 
         // Run the test function
-        SetImageQuiltingParameters(&inputImgData);
         inputImgData.AllocateOutput();
         testFunction(&inputImgData, seed);
 
@@ -216,16 +224,22 @@ void Testing::TestCorrectnessAndTiming() {
             outputImgData.height, outputImgData.width);
 
         // Print the correctness
-        if (error == 0) std::cout << label << " is correct" << std::endl;
-        else std::cout << label << " is incorrect" << std::endl;
+        if (error == 0)  std::cout << label << " is correct" << std::endl;
+        else std::cout<< label << " is incorrect" << std::endl;
+
+        // Compute the timing
+        double cycles = rdtsc(testFunction, &inputImgData, seed);
 
         // Print the timing
-        double cycles = rdtsc(testFunction, &inputImgData, seed);
-        std::cout << "Cycles: " << cycles << std::endl;
+        std::cout << "Speedup: " << cycles / baseCycles << std::endl;
+        std::cout << std::endl;
+
+        // Clean up
+        inputImgData.FreeOutput();
     }
 
     // Clean up
-    inputImgData.FreeOutput();
+    inputImgData.FreeInput();
     outputImgData.FreeInput();
     outputImgData.FreeOutput();
 }
