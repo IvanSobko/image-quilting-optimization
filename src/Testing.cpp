@@ -205,6 +205,7 @@ void Testing::TestCorrectnessAndTiming() {
 
     // Compute the base number of cycles
     double baseCycles = rdtsc(ImageQuiltingFunction, &inputImgData, seed);
+    inputImgData.FreeOutput();
 
     // Test the correctness and timing of all the registered test functions
     for (const auto & pair : testFunctions) {
