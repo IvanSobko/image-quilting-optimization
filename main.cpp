@@ -14,6 +14,7 @@ ImgData img_data;
 bool runTiming = false;
 bool generate = false;
 bool test = false;
+bool testCorrectnessAndTiming = false;
 
 void parse_args(int argc, char* argv[]) {
     std::string delimiter = "=";
@@ -37,6 +38,8 @@ void parse_args(int argc, char* argv[]) {
             generate = true;
         } else if (par == "--test") {
             test = true;
+        } else if (par == "--testCorrectnessAndTiming") {
+            testCorrectnessAndTiming = true;
         }
     }
 }
@@ -68,15 +71,22 @@ int main(int argc, char* argv[]) {
     if (runTiming) {
         timing::run_timing();
     }
-    // Testing
+    // Generate output for testing
     else if (generate) {
         Testing testing = Testing(0);
         testing.GenerateOutputFiles();
     }
+    // Test the correctness of our base implementation
     else if (test) {
         Testing testing = Testing(0);
         testing.RegisterTestFunction(Testing::ImageQuiltingFunction, "default");
-        testing.TestRegisteredTestFunctions();
+        testing.TestCorrectness();
+    }
+    // Test the correctness and timing of the variants of our implementation
+    else if (testCorrectnessAndTiming) {
+        Testing testing = Testing(0);
+        testing.RegisterTestFunction(Testing::ImageQuiltingFunction, "default");
+        testing.TestCorrectnessAndTiming();
     }
     // Main
     else {

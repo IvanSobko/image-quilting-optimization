@@ -26,8 +26,10 @@ class Testing {
     static void ImageQuiltingFunction(ImgData* imgData, int seed);
     // Register a function to test
     void RegisterTestFunction(const TestFunction& testFunction, std::string label);
-    // Test all the registered functions
-    void TestRegisteredTestFunctions();
+    // Test the correctness of all the registered functions
+    void TestCorrectness();
+    // Test the correctness and timing of all the registered test functions
+    void TestCorrectnessAndTiming();
 
    private:
     const std::string inputDirectory = "./testing/input/";

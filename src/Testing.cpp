@@ -88,8 +88,8 @@ double Testing::ComputeError(unsigned char** image0, unsigned char** image1, int
     return std::sqrt(l2norm);
 }
 
-// Test all the registered functions
-void Testing::TestRegisteredTestFunctions() {
+// Test the correctness of all the registered functions
+void Testing::TestCorrectness() {
     for (const auto & pair : testFunctions) {
         TestFunction testFunction;
         std::string label;
@@ -137,4 +137,51 @@ void Testing::TestRegisteredTestFunctions() {
         if (correct) std::cout << label << " is correct" << std::endl;
         else std::cout << label << " is incorrect" << std::endl;
     }
+}
+
+// Test the correctness and timing of all the registered test functions
+void Testing::TestCorrectnessAndTiming() {
+    // Use the first input
+    auto input = inputPaths[0];
+
+    // Read the input image
+    ImgData inputImgData;
+    file::read_png_file(input.c_str(), inputImgData);
+
+    // Read the already computed output image
+    auto output = GetOutputfile(input);
+    ImgData outputImgData;
+    file::read_png_file(output.c_str(), outputImgData);
+
+    // Test the correctness and timing of all the registered test functions
+    for (const auto & pair : testFunctions) {
+        TestFunction testFunction;
+        std::string label;
+        std::tie(testFunction, label) = pair;
+
+        bool correct = true;
+        std::cout << "Testing function: " << label << std::endl;
+
+        // Run the test function
+        SetImageQuiltingParameters(&inputImgData);
+        inputImgData.AllocateOutput();
+        testFunction(&inputImgData, seed);
+
+        // Compute the error
+        double error = ComputeError(
+            inputImgData.output_d, outputImgData.data,
+            outputImgData.height, outputImgData.width);
+
+        // Print the correctness
+        if (error == 0) std::cout << label << " is correct" << std::endl;
+        else std::cout << label << " is incorrect" << std::endl;
+
+        // Print the timing
+        std::cout << "TODO" << std::endl;
+    }
+
+    // Clean up
+    inputImgData.FreeOutput();
+    outputImgData.FreeInput();
+    outputImgData.FreeOutput();
 }
