@@ -39,6 +39,10 @@ void Testing::GenerateOutputFiles() {
         std::cout << input << std::endl;
     }
 
+    if (!std::filesystem::exists(outputDirectory)) {
+        std::filesystem::create_directory(outputDirectory);
+    }
+
     std::cout << "Output files:" << std::endl;
     for (const auto & input : inputPaths){
         // Construct the output path
