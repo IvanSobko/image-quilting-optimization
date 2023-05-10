@@ -8,6 +8,12 @@
 
 #include "PngReader.h"
 #include "ImageQuilting.h"
+#include "benchmarking/tsc_x86.h"
+
+// Defines for timing
+#define CYCLES_REQUIRED 1e8
+#define RDTSC_LATENCY 26
+#define REP 2
 
 class Testing {
    public:
@@ -24,6 +30,8 @@ class Testing {
     void GenerateOutputFiles();
     // Functional wrapper for the image quilting algorithm
     static void ImageQuiltingFunction(ImgData* imgData, int seed);
+    // Functional wrapper for the empty image quilting algorithm
+    static void EmptyImageQuiltingFunction(ImgData* imgData, int seed);
     // Register a function to test
     void RegisterTestFunction(const TestFunction& testFunction, std::string label);
     // Test the correctness of all the registered functions
@@ -44,4 +52,6 @@ class Testing {
     static void SetImageQuiltingParameters(ImgData* imgData);
     // Compute the l2 error between two images
     static double ComputeError(unsigned char ** image0, unsigned char ** image1, int height, int width);
+    // Count the number of cycles of a testFunction call
+    static double rdtsc(const TestFunction& testFunction, ImgData* inputData, int seed);
 };

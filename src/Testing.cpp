@@ -66,6 +66,9 @@ void Testing::ImageQuiltingFunction(ImgData* imgData, int seed) {
     imageQuilting.Synthesis(seed);
 }
 
+// Functional wrapper for the empty image quilting algorithm
+void Testing::EmptyImageQuiltingFunction(ImgData* imgData, int seed) { }
+
 // Register a function to test
 void Testing::RegisterTestFunction(const TestFunction& testFunction, const std::string label) {
     testFunctions.emplace_back(testFunction, label);
@@ -139,6 +142,46 @@ void Testing::TestCorrectness() {
     }
 }
 
+// Count the number of cycles of a testFunction call
+double Testing::rdtsc(const TestFunction& testFunction, ImgData* inputData, int seed) {
+    double cycles = 0;
+    int num_runs = 1;
+    double multiplier = 1;
+    myInt64 start, end;
+
+    // Warm-up phase: we determine a number of executions that allows
+    // the code to be executed for at least CYCLES_REQUIRED cycles.
+    // This helps excluding timing overhead when measuring small runtimes.
+    do {
+        num_runs = num_runs * multiplier;
+        start = start_tsc();
+        for (size_t i = 0; i < num_runs; i++) {
+            testFunction(inputData, seed);
+        }
+        end = stop_tsc(start);
+
+        cycles = (double)end;
+        multiplier = (CYCLES_REQUIRED) / (cycles);
+
+    } while (multiplier > 2);
+
+    // Actual performance measurements repeated REP times.
+    // We simply store all results and compute medians during post-processing.
+    double total_cycles = 0;
+    for (size_t j = 0; j < REP; j++) {
+        start = start_tsc();
+        for (size_t i = 0; i < num_runs; ++i) {
+            testFunction(inputData, seed);
+        }
+        end = stop_tsc(start) - RDTSC_LATENCY;
+
+        cycles = (double)end / (double)num_runs;
+        total_cycles += cycles;
+    }
+    total_cycles /= REP;
+    return total_cycles;
+}
+
 // Test the correctness and timing of all the registered test functions
 void Testing::TestCorrectnessAndTiming() {
     // Use the first input
@@ -177,7 +220,8 @@ void Testing::TestCorrectnessAndTiming() {
         else std::cout << label << " is incorrect" << std::endl;
 
         // Print the timing
-        std::cout << "TODO" << std::endl;
+        double cycles = rdtsc(testFunction, &inputImgData, seed);
+        std::cout << "Cycles: " << cycles << std::endl;
     }
 
     // Clean up

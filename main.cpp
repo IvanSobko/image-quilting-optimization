@@ -86,6 +86,7 @@ int main(int argc, char* argv[]) {
     else if (testCorrectnessAndTiming) {
         Testing testing = Testing(0);
         testing.RegisterTestFunction(Testing::ImageQuiltingFunction, "default");
+        testing.RegisterTestFunction(Testing::EmptyImageQuiltingFunction, "empty");
         testing.TestCorrectnessAndTiming();
     }
     // Main
