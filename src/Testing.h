@@ -37,7 +37,7 @@ class Testing {
     // Test the correctness of all the registered functions
     void TestCorrectness();
     // Test the correctness and timing of all the registered test functions
-    void TestCorrectnessAndTiming();
+    void TestCorrectnessAndTiming(bool stabilize);
 
    private:
     const std::string inputDirectory = "./testing/input/";

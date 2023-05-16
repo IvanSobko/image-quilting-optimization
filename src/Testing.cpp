@@ -190,7 +190,7 @@ double Testing::rdtsc(const TestFunction& testFunction, ImgData* inputData, int 
 }
 
 // Test the correctness and timing of all the registered test functions
-void Testing::TestCorrectnessAndTiming() {
+void Testing::TestCorrectnessAndTiming(bool stabilize) {
     // Use the first input
     auto input = inputPaths[0];
 
@@ -207,25 +207,27 @@ void Testing::TestCorrectnessAndTiming() {
     file::read_png_file(output.c_str(), outputImgData);
 
     // Compute the base number of cycles
-    // For some reason this is necessary and doesn't happen in the warmup
-    std::cout << "Stabilizing the rdtsc function calls..." << std::endl;
-    int baselineIterations = 5; // TODO magic number
-    double speedup = 0.0;
-    do {
-        double computedCycles[baselineIterations];
-        for (int j = 0; j < baselineIterations; j++) {
-            inputImgData.AllocateOutput();
-            computedCycles[j] = rdtsc(ImageQuiltingFunction, &inputImgData, seed);
-            inputImgData.FreeOutput();
-        }
-        double averageCycles = 0;
-        for (int j = 0; j < baselineIterations; j++) averageCycles += computedCycles[j];
-        averageCycles /= baselineIterations;
-        speedup = averageCycles / computedCycles[baselineIterations-1];
-        std::cout << "Speedup: " << speedup << std::endl;
-    } while (std::abs(speedup - 1.0) > .01); // TODO magic number
+    if (stabilize) {
+        std::cout << "Stabilizing the rdtsc function calls..." << std::endl;
+        int baselineIterations = 5;  // TODO magic number
+        double speedup = 0.0;
+        do {
+            double computedCycles[baselineIterations];
+            for (int j = 0; j < baselineIterations; j++) {
+                inputImgData.AllocateOutput();
+                computedCycles[j] = rdtsc(ImageQuiltingFunction, &inputImgData, seed);
+                inputImgData.FreeOutput();
+            }
+            double averageCycles = 0;
+            for (int j = 0; j < baselineIterations; j++)
+                averageCycles += computedCycles[j];
+            averageCycles /= baselineIterations;
+            speedup = averageCycles / computedCycles[baselineIterations - 1];
+            std::cout << "Speedup: " << speedup << std::endl;
+        } while (std::abs(speedup - 1.0) > .01);  // TODO magic number
+        std::cout << "Stabilized! Computing the base number of cycles..." << std::endl;
+    }
 
-    std::cout << "Stabilized! Computing the base number of cycles..." << std::endl;
     inputImgData.AllocateOutput();
     double baseCycles = rdtsc(ImageQuiltingFunction, &inputImgData, seed);
     inputImgData.FreeOutput();
