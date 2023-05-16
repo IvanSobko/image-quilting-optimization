@@ -236,7 +236,7 @@ void Testing::TestCorrectnessAndTiming() {
         double cycles = rdtsc(testFunction, &inputImgData, seed);
 
         // Print the timing
-        std::cout << "Speedup: " << cycles / baseCycles << std::endl;
+        std::cout << "Speedup: " << baseCycles / cycles << std::endl;
         std::cout << std::endl;
 
         // Clean up
