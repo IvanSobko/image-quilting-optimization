@@ -74,7 +74,7 @@ int main(int argc, char* argv[]) {
     }
     // Generate output for testing
     else if (generate) {
-        Testing testing = Testing(0);
+        Testing testing = Testing(2);
         testing.GenerateOutputFiles();
     }
     // Test the correctness of our base implementation
@@ -86,9 +86,10 @@ int main(int argc, char* argv[]) {
     }
     // Test the correctness and timing of the variants of our implementation
     else if (testCorrectnessAndTiming) {
-        Testing testing = Testing(0);
+        Testing testing = Testing(2);
         testing.RegisterTestFunction(Testing::ImageQuiltingFunction, "default");
         testing.RegisterTestFunction(CompOverlapOptimiz::BasicOpt, "compBasic");
+        testing.RegisterTestFunction(CompOverlapOptimiz::AlgOpt, "compBasic+AlgImpr");
 
         std::cout << std::endl;
         testing.TestCorrectnessAndTiming();
@@ -102,7 +103,7 @@ int main(int argc, char* argv[]) {
         // Allocate the output data and run the image quilting algorithm
         img_data.AllocateOutput();
         ImageQuilting imageQuilting(&img_data);
-        imageQuilting.Synthesis();
+        imageQuilting.Synthesis(0);
 
         // Write the output file and free the members of img_data
         file::write_png_file(output_file.c_str(), img_data);

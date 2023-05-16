@@ -4,7 +4,13 @@
 
 class CompOverlapOptimiz {
 public:
+    enum OptType {
+        opt_indices = 0,
+        opt_algorithm = 1,
+    };
+
     static void BasicOpt(ImgData* imgData, int seed);
+    static void AlgOpt(ImgData* imgData, int seed);
 
     CompOverlapOptimiz() = delete;
     CompOverlapOptimiz(ImgData* data) { mData = data; }
@@ -12,7 +18,7 @@ public:
     // Synthesize a new texture
     void Synthesis();
     // Synthesize a new texture with the given seed
-    void Synthesis(int seed);
+    void Synthesis(int seed, int opt);
 
     // Seed the random number generator with the system time
     static void SeedRandomNumberGenerator();
@@ -38,10 +44,11 @@ private:
     // Same as WriteBlockOverlap, but uses a minimum cut to write the new block
     void WriteBlockOverlapWithMinCut(int overlapType, int dstY, int dstX, int srcY, int srcX);
 
-    // Compute the overlap between the current block, dst, of the output image
-    // and src, of the input image, given their upper-left corners
-    // and the position of the overlap
+    // Compute the overlap with indices optimization and optimized data access
     double ComputeOverlapBasicOpt(int overlapType, int dstY, int dstX, int srcY, int srcX);
+
+    // Tried to improve the overlap calculations additionally to ComputeOverlapBasicOpt
+    double ComputeOverlapAlgImpr(int overlapType, int dstY, int dstX, int srcY, int srcX);
 
     // Struct to sort blocks by their l2 norm
     struct BlockValue{
@@ -66,4 +73,5 @@ private:
     int overlapHeight = 0;
 
     int64_t flopCount = 0;
+    int opt_type = 0;
 };

@@ -8,7 +8,13 @@
 // Image quilting function wrapper for testing and timing
 void CompOverlapOptimiz::BasicOpt(ImgData* imgData, int seed) {
     CompOverlapOptimiz imageQuilting(imgData);
-    imageQuilting.Synthesis(seed);
+    imageQuilting.Synthesis(seed, opt_indices);
+}
+
+
+void CompOverlapOptimiz::AlgOpt(ImgData* imgData, int seed) {
+    CompOverlapOptimiz imageQuilting(imgData);
+    imageQuilting.Synthesis(seed, opt_algorithm);
 }
 
 // Synthesize a new texture
@@ -19,8 +25,9 @@ void CompOverlapOptimiz::Synthesis() {
 }
 
 // Synthesize a new texture with the given seed
-void CompOverlapOptimiz::Synthesis(int seed) {
+void CompOverlapOptimiz::Synthesis(int seed, int opt) {
     flopCount = 0;
+    opt_type = opt;
     SeedRandomNumberGenerator(seed);
     OverlapConstraintsWithMinCut();
 }
@@ -280,8 +287,8 @@ double CompOverlapOptimiz::ComputeOverlapBasicOpt(const int overlapType, const i
                                                   const int srcY, const int srcX)
 {
     // Compute the overlap region that we are working with
-    int overlapXStart = dstX - overlapWidth;
-    int overlapYStart = dstY - overlapHeight;
+    int overlapXStart = overlapType != horizontal ? (dstX - overlapWidth) : dstX;
+    int overlapYStart = overlapType != vertical ? (dstY - overlapHeight) : dstY;
     int verticalBlockYEnd = std::min(overlapYStart + (int)mData->block_h, (int)mData->output_h);
     int horizontalBlockXEnd = std::min(overlapXStart + (int)mData->block_w, (int)mData->output_w);
     int verticalBlockHeightLocal = verticalBlockYEnd - dstY;
@@ -350,6 +357,60 @@ double CompOverlapOptimiz::ComputeOverlapBasicOpt(const int overlapType, const i
     return std::sqrt(l2norm);
 }
 
+// Tried to improve the overlap calculations additionally to ComputeOverlapBasicOpt
+double CompOverlapOptimiz::ComputeOverlapAlgImpr(int overlapType, int dstY, int dstX, int srcY, int srcX) {
+    // Compute the overlap region that we are working with
+    int overlapXStart = overlapType != horizontal ? (dstX - overlapWidth) : dstX;
+    int overlapYStart = overlapType != vertical ? (dstY - overlapHeight) : dstY;
+    int verticalBlockYEnd = std::min(overlapYStart + (int)mData->block_h, (int)mData->output_h);
+    int horizontalBlockXEnd = std::min(overlapXStart + (int)mData->block_w, (int)mData->output_w);
+    int verticalBlockHeightLocal = verticalBlockYEnd - dstY;
+    int horizontalBlockWidthLocal = horizontalBlockXEnd - overlapXStart;
+
+    // Compute the l2 norm of the overlap between the two blocks
+    int l2norm = 0;
+
+    // Compute the horizontal overlap (+corner if needed)
+    if (overlapType != vertical) {
+        int dstXStart = CHANNEL_NUM * overlapXStart;
+        int srcXStart = CHANNEL_NUM * srcX;
+        for (int i = 0; i < overlapHeight; i++){
+            unsigned char* outputRow = mData->output_d[overlapYStart+i] + dstXStart;
+            unsigned char* srcRow = mData->data[srcY+i] + srcXStart;
+            for (int j = 0; j < horizontalBlockWidthLocal; j++){
+                for (int k = 0; k < CHANNEL_NUM; k++){
+                    int x0 = *(outputRow++);
+                    int x1 = *(srcRow++);
+                    int norm = x0 - x1;
+                    l2norm += norm*norm;
+                }
+            }
+        }
+    }
+
+    // Compute the vertical overlap
+    if (overlapType != horizontal) {
+        int srcYOffset = overlapType == both ? overlapHeight : 0;
+        int srcYStart = srcY+srcYOffset;
+        int dstXStart = CHANNEL_NUM * overlapXStart;
+        int srcXStart = CHANNEL_NUM * srcX;
+        for (int i = 0; i < verticalBlockHeightLocal; i++){
+            unsigned char* outputRow = mData->output_d[dstY+i] + dstXStart;
+            unsigned char* srcRow = mData->data[srcYStart+i] + srcXStart;
+            for (int j = 0; j < overlapWidth; j++){
+                for (int k = 0; k < CHANNEL_NUM; k++){
+                    int x0 = *(outputRow++);
+                    int x1 = *(srcRow++);
+                    int norm = x0 - x1;
+                    l2norm += norm*norm;
+                }
+            }
+        }
+    }
+
+    return std::sqrt(l2norm);
+}
+
 // Place an edge overlap block with respect to the given block of the output image
 void CompOverlapOptimiz::PlaceEdgeOverlapBlockWithMinCut(
         const int blockY, const int blockX, const int maxBlockX, const int maxBlockY, double errorTolerance)
@@ -367,11 +428,16 @@ void CompOverlapOptimiz::PlaceEdgeOverlapBlockWithMinCut(
     int numBlocks = maxBlockY * maxBlockX;
     BlockValue* blocks = (BlockValue*) malloc(sizeof(BlockValue) * numBlocks);
     for (int i = 0; i < maxBlockY; i++){
-        for (int j = 0; j < maxBlockX; j++){
+        for (int j = 0; j < maxBlockX; j++) {
             int blockIndex = i * maxBlockX + j;
             blocks[blockIndex].y = i;
             blocks[blockIndex].x = j;
-            blocks[blockIndex].value = ComputeOverlapBasicOpt(overlapType,blockY, blockX,i, j);
+            if (opt_type == opt_indices) {
+                blocks[blockIndex].value = ComputeOverlapBasicOpt(overlapType, blockY, blockX, i, j);
+            }
+            if (opt_type == opt_algorithm) {
+                blocks[blockIndex].value = ComputeOverlapAlgImpr(overlapType, blockY, blockX, i, j);
+            }
         }
     }
 
