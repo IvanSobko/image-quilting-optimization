@@ -200,7 +200,6 @@ void Testing::TestCorrectnessAndTiming() {
 
     // Set the image quilting parameters and allocate the output image
     SetImageQuiltingParameters(&inputImgData);
-    inputImgData.AllocateOutput();
 
     // Read the already computed output image
     auto output = GetOutputfile(input);
@@ -208,8 +207,29 @@ void Testing::TestCorrectnessAndTiming() {
     file::read_png_file(output.c_str(), outputImgData);
 
     // Compute the base number of cycles
+    // For some reason this is necessary and doesn't happen in the warmup
+    std::cout << "Stabilizing the rdtsc function calls..." << std::endl;
+    int baselineIterations = 5; // TODO magic number
+    double speedup = 0.0;
+    do {
+        double computedCycles[baselineIterations];
+        for (int j = 0; j < baselineIterations; j++) {
+            inputImgData.AllocateOutput();
+            computedCycles[j] = rdtsc(ImageQuiltingFunction, &inputImgData, seed);
+            inputImgData.FreeOutput();
+        }
+        double averageCycles = 0;
+        for (int j = 0; j < baselineIterations; j++) averageCycles += computedCycles[j];
+        averageCycles /= baselineIterations;
+        speedup = averageCycles / computedCycles[baselineIterations-1];
+        std::cout << "Speedup: " << speedup << std::endl;
+    } while (std::abs(speedup - 1.0) > .01); // TODO magic number
+
+    std::cout << "Stabilized! Computing the base number of cycles..." << std::endl;
+    inputImgData.AllocateOutput();
     double baseCycles = rdtsc(ImageQuiltingFunction, &inputImgData, seed);
     inputImgData.FreeOutput();
+    std::cout << "Base number of cycles: " << baseCycles << std::endl << std::endl;
 
     // Test the correctness and timing of all the registered test functions
     for (const auto & pair : testFunctions) {

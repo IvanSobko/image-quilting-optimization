@@ -85,10 +85,8 @@ int main(int argc, char* argv[]) {
     // Test the correctness and timing of the variants of our implementation
     else if (testCorrectnessAndTiming) {
         Testing testing = Testing(0);
-        testing.RegisterTestFunction(Testing::ImageQuiltingFunction, "default1");
-        testing.RegisterTestFunction(Testing::ImageQuiltingFunction, "default2");
-        testing.RegisterTestFunction(Testing::EmptyImageQuiltingFunction, "empty1");
-        testing.RegisterTestFunction(Testing::EmptyImageQuiltingFunction, "empty2");
+        for (int i = 0; i < 10; i++)
+            testing.RegisterTestFunction(Testing::ImageQuiltingFunction, "default");
         std::cout << std::endl;
         testing.TestCorrectnessAndTiming();
     }
