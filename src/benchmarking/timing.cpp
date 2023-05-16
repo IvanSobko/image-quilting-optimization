@@ -2,6 +2,7 @@
 
 #include <dirent.h>
 #include <algorithm>
+#include <cstring>
 
 #include "PngReader.h"
 #include "tsc_x86.h"

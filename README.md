@@ -117,7 +117,11 @@ We ran performance measurements for different compiler flags: -O3 -ffast-math -m
 ## Benchmark alternatives
 
 https://github.com/AirGuanZ/ImageQuilting
-Still ongoing, the code compiles but there's a problem parsing the arguments of the testing function.
+
+In order for the code to run properly, we need to specify the full input and output path:
+```./ImageQuilting --input=./gallery/input0_24x24.png --output=./gallery/output.png --blockW=12 --blockH=12 --width=48 --height=48```
+And not:
+```/ImageQuilting --input=input0_24x24.png --output=output.png --blockW=12 --blockH=12 --width=48 --height=48```
 
 ## Bottlenecks
 The major bottleneck in our code is the ComputeOverlap function that estimates the L2 loss function for all possible blocks in all possible 
