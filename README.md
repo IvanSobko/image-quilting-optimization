@@ -118,9 +118,12 @@ We ran performance measurements for different compiler flags: -O3 -ffast-math -m
 
 https://github.com/AirGuanZ/ImageQuilting
 
-In order for the code to run properly, we need to specify the full input and output path:
+In order for the code to run properly, we need to specify the full input and output path:\
+
 ```./ImageQuilting --input=./gallery/input0_24x24.png --output=./gallery/output.png --blockW=12 --blockH=12 --width=48 --height=48```
-And not:
+
+And not:\
+
 ```/ImageQuilting --input=input0_24x24.png --output=output.png --blockW=12 --blockH=12 --width=48 --height=48```
 
 ## Bottlenecks
