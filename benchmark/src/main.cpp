@@ -130,6 +130,9 @@ void run(int argc, char *argv[])
         return Float3(math::from_color3b<float>(c));
     }));
 
+    std::cout << src.width() << std::endl;
+    std::cout << src.height() << std::endl;
+
     auto dst = imageQuilting.generate(
         src, args->outputWidth, args->outputHeight);
 
@@ -166,8 +169,10 @@ double count_cycles(int argc, char *argv[])
     myInt64 start, end;
 
     const auto args = parseCmdArgs(argc, argv);
-    if(!args)
+    if(!args) {
+        std::cout << "parsing error" << std::endl;
         return 0.0;
+    }
 
     ImageQuilting imageQuilting;
     imageQuilting.setParams(
@@ -183,6 +188,9 @@ double count_cycles(int argc, char *argv[])
     {
         return Float3(math::from_color3b<float>(c));
     }));
+
+    auto dst = imageQuilting.generate(
+        src, args->outputWidth, args->outputHeight);
 
     // Warm-up phase: we determine a number of executions that allows
     // the code to be executed for at least CYCLES_REQUIRED cycles.
@@ -228,29 +236,8 @@ int main(int argc, char *argv[])
     try
     {
         if(runTiming) {
-            for (int i=24; i<=768; i*=2) 
-            {
-                char* argument[7];
-                std::string tmp;
-
-                tmp = "./ImageQuilting";
-                argument[0] = tmp.data();
-                tmp = "--input=input0_" + std::to_string(i) + "x" + std::to_string(i) + ".png";
-                argument[1] = tmp.data();
-                tmp = "--output=output.png";
-                argument[2] = tmp.data();
-                tmp = "--blockW=" + std::to_string(i>>1);
-                argument[3] = tmp.data();
-                tmp = "--blockH=" + std::to_string(i>>1);
-                argument[4] = tmp.data();
-                tmp = "--width=" + std::to_string(i<<1);
-                argument[5] = tmp.data();
-                tmp = "--height=" + std::to_string(i<<1);
-                argument[6] = tmp.data();
-
-                double cycles = count_cycles(7, argument);
-                std::cout << cycles << std::endl;
-            }
+            double cycles = count_cycles(argc, argv);
+            std::cout << cycles << std::endl;
         }
         else
             run(argc, argv);

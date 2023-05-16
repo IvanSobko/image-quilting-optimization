@@ -335,8 +335,10 @@ Image<Float3> ImageQuilting::generate(
 
     std::default_random_engine rng{ std::random_device()() };
 
-    agz::console::progress_bar_t pbar(blockCountY * blockCountX, 80, '=');
-    pbar.display();
+    /*pbar lines commented since we don't care about them for the timing*/
+
+    //agz::console::progress_bar_t pbar(blockCountY * blockCountX, 80, '=');
+    //pbar.display();
 
     for(int blockY = 0; blockY < blockCountY; ++blockY)
     {
@@ -349,13 +351,13 @@ Image<Float3> ImageQuilting::generate(
             const auto block = pickSourceBlock(src, dst, x, y, rng);
             putBlockAt(block, dst, x, y);
 
-            ++pbar;
+            //++pbar;
         }
 
-        pbar.display();
+        //pbar.display();
     }
 
-    pbar.done();
+    //pbar.done();
 
     return dst.subtex(0, generatedHeight, 0, generatedWidth);
 }
