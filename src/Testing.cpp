@@ -39,6 +39,10 @@ void Testing::GenerateOutputFiles() {
         std::cout << input << std::endl;
     }
 
+    if (!std::filesystem::exists(outputDirectory)) {
+        std::filesystem::create_directory(outputDirectory);
+    }
+
     std::cout << "Output files:" << std::endl;
     for (const auto & input : inputPaths){
         // Construct the output path
@@ -192,7 +196,7 @@ void Testing::TestCorrectnessAndTiming() {
 
     // Read the input image
     ImgData inputImgData;
-    file::read_png_file(input.c_str(), inputImgData);
+    file::read_png_file(input.string().c_str(), inputImgData);
 
     // Set the image quilting parameters and allocate the output image
     SetImageQuiltingParameters(&inputImgData);
