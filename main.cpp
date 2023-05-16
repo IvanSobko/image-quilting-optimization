@@ -5,6 +5,7 @@
 
 #include "Testing.h"
 #include "src/benchmarking/timing.h"
+#include "src/CompOverlapOptimiz.h"
 
 // input parameters
 std::string input_file = "./gallery/input0.png";
@@ -80,13 +81,15 @@ int main(int argc, char* argv[]) {
     else if (test) {
         Testing testing = Testing(0);
         testing.RegisterTestFunction(Testing::ImageQuiltingFunction, "default");
+        testing.RegisterTestFunction(CompOverlapOptimiz::BasicOpt, "compBasic");
         testing.TestCorrectness();
     }
     // Test the correctness and timing of the variants of our implementation
     else if (testCorrectnessAndTiming) {
         Testing testing = Testing(0);
-        for (int i = 0; i < 10; i++)
-            testing.RegisterTestFunction(Testing::ImageQuiltingFunction, "default");
+        testing.RegisterTestFunction(Testing::ImageQuiltingFunction, "default");
+        testing.RegisterTestFunction(CompOverlapOptimiz::BasicOpt, "compBasic");
+
         std::cout << std::endl;
         testing.TestCorrectnessAndTiming();
     }

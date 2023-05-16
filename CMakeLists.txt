@@ -11,6 +11,8 @@ add_executable(team19
         src/PngReader.h
         src/ImageQuilting.cpp
         src/ImageQuilting.h
+        src/CompOverlapOptimiz.cpp
+        src/CompOverlapOptimiz.h
         src/ImgData.h
         src/Testing.cpp
         src/Testing.h
