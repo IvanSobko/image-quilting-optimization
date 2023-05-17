@@ -313,8 +313,8 @@ void ImageQuilting::WriteBlockOverlapWithMinCut(
 double ImageQuilting::ComputeOverlap(const int overlapType, const int dstY, const int dstX, const int srcY, const int srcX)
 {
     // Compute the overlap region that we are working with
-    int overlapXStart = dstX - overlapWidth;
-    int overlapYStart = dstY - overlapHeight;
+    int overlapXStart = overlapType != horizontal ? (dstX - overlapWidth) : dstX;
+    int overlapYStart = overlapType != vertical ? (dstY - overlapHeight) : dstY;
     int verticalBlockYEnd = std::min(overlapYStart + (int)mData->block_h, (int)mData->output_h);
     int horizontalBlockXEnd = std::min(overlapXStart + (int)mData->block_w, (int)mData->output_w);
     int verticalBlockHeightLocal = verticalBlockYEnd - dstY;
