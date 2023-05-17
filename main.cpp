@@ -90,6 +90,7 @@ int main(int argc, char* argv[]) {
         testing.RegisterTestFunction(Testing::ImageQuiltingFunction, "default");
         testing.RegisterTestFunction(CompOverlapOptimiz::BasicOpt, "compBasic");
         testing.RegisterTestFunction(CompOverlapOptimiz::AlgOpt, "compBasic+AlgImpr");
+        testing.RegisterTestFunction(CompOverlapOptimiz::UnrollOpt, "compBasic+AlgImpr+Unroll");
 
         std::cout << std::endl;
         testing.TestCorrectnessAndTiming();

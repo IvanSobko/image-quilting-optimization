@@ -7,10 +7,12 @@ public:
     enum OptType {
         opt_indices = 0,
         opt_algorithm = 1,
+        opt_unroll = 2,
     };
 
     static void BasicOpt(ImgData* imgData, int seed);
     static void AlgOpt(ImgData* imgData, int seed);
+    static void UnrollOpt(ImgData* imgData, int seed);
 
     CompOverlapOptimiz() = delete;
     CompOverlapOptimiz(ImgData* data) { mData = data; }
@@ -49,6 +51,9 @@ private:
 
     // Tried to improve the overlap calculations additionally to ComputeOverlapBasicOpt
     double ComputeOverlapAlgImpr(int overlapType, int dstY, int dstX, int srcY, int srcX);
+
+    // Added unroll and ILP to ComputeOverlapAlgImpr
+    double ComputeOverlapUnroll(int overlapType, int dstY, int dstX, int srcY, int srcX);
 
     // Struct to sort blocks by their l2 norm
     struct BlockValue{

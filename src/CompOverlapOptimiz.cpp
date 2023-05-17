@@ -11,10 +11,14 @@ void CompOverlapOptimiz::BasicOpt(ImgData* imgData, int seed) {
     imageQuilting.Synthesis(seed, opt_indices);
 }
 
-
 void CompOverlapOptimiz::AlgOpt(ImgData* imgData, int seed) {
     CompOverlapOptimiz imageQuilting(imgData);
     imageQuilting.Synthesis(seed, opt_algorithm);
+}
+
+void CompOverlapOptimiz::UnrollOpt(ImgData* imgData, int seed) {
+    CompOverlapOptimiz imageQuilting(imgData);
+    imageQuilting.Synthesis(seed, opt_unroll);
 }
 
 // Synthesize a new texture
@@ -411,6 +415,131 @@ double CompOverlapOptimiz::ComputeOverlapAlgImpr(int overlapType, int dstY, int 
     return std::sqrt(l2norm);
 }
 
+double CompOverlapOptimiz::ComputeOverlapUnroll(int overlapType, int dstY, int dstX, int srcY, int srcX) {
+    // Compute the overlap region that we are working with
+    int overlapXStart = overlapType != horizontal ? (dstX - overlapWidth) : dstX;
+    int overlapYStart = overlapType != vertical ? (dstY - overlapHeight) : dstY;
+    int verticalBlockYEnd = std::min(overlapYStart + (int)mData->block_h, (int)mData->output_h);
+    int horizontalBlockXEnd = std::min(overlapXStart + (int)mData->block_w, (int)mData->output_w);
+    int verticalBlockHeightLocal = verticalBlockYEnd - dstY;
+    int horizontalBlockWidthLocal = horizontalBlockXEnd - overlapXStart;
+
+    // Compute the l2 norm of the overlap between the two blocks
+    int l2norm = 0;
+
+    // Compute the horizontal overlap (+corner if needed)
+    if (overlapType != vertical) {
+        int dstXStart = CHANNEL_NUM * overlapXStart;
+        int srcXStart = CHANNEL_NUM * srcX;
+        for (int i = 0; i < overlapHeight; i++){
+            unsigned char* outputRow = mData->output_d[overlapYStart+i] + dstXStart;
+            unsigned char* srcRow = mData->data[srcY+i] + srcXStart;
+            for (int j = 0; j < horizontalBlockWidthLocal; j+=2){
+                int rDst1 = *(outputRow++);
+                int rSrc1 = *(srcRow++);
+                int gDst1 = *(outputRow++);
+                int gSrc1 = *(srcRow++);
+                int bDst1 = *(outputRow++);
+                int bSrc1 = *(srcRow++);
+                int aDst1 = *(outputRow++);
+                int aSrc1 = *(srcRow++);
+
+                int rDst2 = *(outputRow++);
+                int rSrc2 = *(srcRow++);
+                int gDst2 = *(outputRow++);
+                int gSrc2 = *(srcRow++);
+                int bDst2 = *(outputRow++);
+                int bSrc2 = *(srcRow++);
+                int aDst2 = *(outputRow++);
+                int aSrc2 = *(srcRow++);
+
+                int rDiff1 = rDst1 - rSrc1;
+                int gDiff1 = gDst1 - gSrc1;
+                int rNorm1 = rDiff1*rDiff1;
+                int gNorm1 = gDiff1*gDiff1;
+
+                int bDiff1 = bDst1 - bSrc1;
+                int aDiff1 = aDst1 - aSrc1;
+                int bNorm1 = bDiff1*bDiff1;
+                int aNorm1 = aDiff1*aDiff1;
+
+                int rDiff2 = rDst2 - rSrc2;
+                int gDiff2 = gDst2 - gSrc2;
+                int rNorm2 = rDiff2*rDiff2;
+                int gNorm2 = gDiff2*gDiff2;
+
+                int bDiff2 = bDst2 - bSrc2;
+                int aDiff2 = aDst2 - aSrc2;
+                int bNorm2 = bDiff2*bDiff2;
+                int aNorm2 = aDiff2*aDiff2;
+
+                int sum1 = rNorm1 + gNorm1 + bNorm1 + aNorm1;
+                int sum2 = rNorm2 + gNorm2 + bNorm2 + aNorm2;
+
+                l2norm += sum1 + sum2;
+            }
+        }
+    }
+
+    // Compute the vertical overlap
+    if (overlapType != horizontal) {
+        int srcYOffset = overlapType == both ? overlapHeight : 0;
+        int srcYStart = srcY+srcYOffset;
+        int dstXStart = CHANNEL_NUM * overlapXStart;
+        int srcXStart = CHANNEL_NUM * srcX;
+        for (int i = 0; i < verticalBlockHeightLocal; i++){
+            unsigned char* outputRow = mData->output_d[dstY+i] + dstXStart;
+            unsigned char* srcRow = mData->data[srcYStart+i] + srcXStart;
+            for (int j = 0; j < overlapWidth; j+=2){
+                int rDst1 = *(outputRow++);
+                int rSrc1 = *(srcRow++);
+                int gDst1 = *(outputRow++);
+                int gSrc1 = *(srcRow++);
+                int bDst1 = *(outputRow++);
+                int bSrc1 = *(srcRow++);
+                int aDst1 = *(outputRow++);
+                int aSrc1 = *(srcRow++);
+
+                int rDst2 = *(outputRow++);
+                int rSrc2 = *(srcRow++);
+                int gDst2 = *(outputRow++);
+                int gSrc2 = *(srcRow++);
+                int bDst2 = *(outputRow++);
+                int bSrc2 = *(srcRow++);
+                int aDst2 = *(outputRow++);
+                int aSrc2 = *(srcRow++);
+
+                int rDiff1 = rDst1 - rSrc1;
+                int gDiff1 = gDst1 - gSrc1;
+                int rNorm1 = rDiff1*rDiff1;
+                int gNorm1 = gDiff1*gDiff1;
+
+                int bDiff1 = bDst1 - bSrc1;
+                int aDiff1 = aDst1 - aSrc1;
+                int bNorm1 = bDiff1*bDiff1;
+                int aNorm1 = aDiff1*aDiff1;
+
+                int rDiff2 = rDst2 - rSrc2;
+                int gDiff2 = gDst2 - gSrc2;
+                int rNorm2 = rDiff2*rDiff2;
+                int gNorm2 = gDiff2*gDiff2;
+
+                int bDiff2 = bDst2 - bSrc2;
+                int aDiff2 = aDst2 - aSrc2;
+                int bNorm2 = bDiff2*bDiff2;
+                int aNorm2 = aDiff2*aDiff2;
+
+                int sum1 = rNorm1 + gNorm1 + bNorm1 + aNorm1;
+                int sum2 = rNorm2 + gNorm2 + bNorm2 + aNorm2;
+
+                l2norm += sum1 + sum2;
+            }
+        }
+    }
+
+    return std::sqrt(l2norm);
+}
+
 // Place an edge overlap block with respect to the given block of the output image
 void CompOverlapOptimiz::PlaceEdgeOverlapBlockWithMinCut(
         const int blockY, const int blockX, const int maxBlockX, const int maxBlockY, double errorTolerance)
@@ -434,9 +563,10 @@ void CompOverlapOptimiz::PlaceEdgeOverlapBlockWithMinCut(
             blocks[blockIndex].x = j;
             if (opt_type == opt_indices) {
                 blocks[blockIndex].value = ComputeOverlapBasicOpt(overlapType, blockY, blockX, i, j);
-            }
-            if (opt_type == opt_algorithm) {
+            } else if (opt_type == opt_algorithm) {
                 blocks[blockIndex].value = ComputeOverlapAlgImpr(overlapType, blockY, blockX, i, j);
+            } else if (opt_type == opt_unroll) {
+                blocks[blockIndex].value = ComputeOverlapUnroll(overlapType, blockY, blockX, i, j);
             }
         }
     }
