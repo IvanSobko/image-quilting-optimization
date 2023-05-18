@@ -2,6 +2,7 @@
 
 #include <cstdint>
 #include <cstdlib>
+#include <limits>
 
 #define CHANNEL_NUM 4
 
@@ -36,6 +37,24 @@ struct ImgData {
                 for (int k = 0; k < CHANNEL_NUM; k++){
                     output_d[i][CHANNEL_NUM * (j) + k] = 0;
                 }
+            }
+        }
+    }
+
+    // Generate a random number in the range [min, max]
+    int GetRandomInt(int min, int max) {
+        // https://stackoverflow.com/questions/1190870/i-need-to-generate-random-numbers-in-c
+        return rand() % (max - min + 1) + min;
+    }
+
+    // Randomize the output image
+    void RandomizeOutput() {
+        const unsigned char unsigned_char_max = std::numeric_limits<unsigned char>::max();
+        for (int i = 0; i < output_h; i++){
+            for (int j = 0; j < output_w; j++){
+                for (int k = 0; k < CHANNEL_NUM - 1; k++)
+                    output_d[i][CHANNEL_NUM * (j) + k] = GetRandomInt(0, unsigned_char_max);
+                output_d[i][CHANNEL_NUM * (j) + 3] = unsigned_char_max;
             }
         }
     }
