@@ -5,6 +5,7 @@
 #include <filesystem>
 #include <functional>
 #include <cmath>
+#include <tuple>
 
 #include "PngReader.h"
 #include "ImageQuilting.h"
@@ -33,11 +34,16 @@ class Testing {
     // Functional wrapper for the empty image quilting algorithm
     static void EmptyImageQuiltingFunction(ImgData* imgData, int seed);
     // Register a function to test
-    void RegisterTestFunction(const TestFunction& testFunction, std::string label);
+    void RegisterTestFunction(const TestFunction & testFunction, std::string label);
+    // Register a component function to test
+    void RegisterComponentTestFunction(
+        const TestFunction & baseFunction, const TestFunction & testFunction, std::string label);
     // Test the correctness of all the registered functions
     void TestCorrectness();
     // Test the correctness and timing of all the registered test functions
-    void TestCorrectnessAndTiming();
+    void TestCorrectnessAndTiming(bool stabilize);
+    // Test the correctness and timing of all the registered component test functions
+    void TestComponentsTiming(bool stabilize);
 
    private:
     const std::string inputDirectory = "./testing/input/";
@@ -45,6 +51,7 @@ class Testing {
     int seed = 0;
     std::vector<std::filesystem::path> inputPaths;
     std::vector<std::pair<TestFunction, std::string>> testFunctions;
+    std::vector<std::tuple<TestFunction, TestFunction, std::string>> testComponentFunctions;
 
     // Get the output file path
     std::string GetOutputfile(const std::filesystem::path & input);

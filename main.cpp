@@ -16,6 +16,7 @@ bool runTiming = false;
 bool generate = false;
 bool test = false;
 bool testCorrectnessAndTiming = false;
+bool stabilize = false;
 
 void parse_args(int argc, char* argv[]) {
     std::string delimiter = "=";
@@ -41,6 +42,8 @@ void parse_args(int argc, char* argv[]) {
             test = true;
         } else if (par == "--testCorrectnessAndTiming") {
             testCorrectnessAndTiming = true;
+        } else if (par == "--stabilize") {
+            stabilize = true;
         }
     }
 }
@@ -93,7 +96,7 @@ int main(int argc, char* argv[]) {
         testing.RegisterTestFunction(CompOverlapOptimiz::UnrollOpt, "compBasic+AlgImpr+Unroll");
 
         std::cout << std::endl;
-        testing.TestCorrectnessAndTiming();
+        testing.TestCorrectnessAndTiming(stabilize);
     }
     // Main
     else {
