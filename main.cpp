@@ -90,6 +90,7 @@ int main(int argc, char* argv[]) {
     // Test the correctness and timing of the variants of our implementation
     else if (testCorrectnessAndTiming) {
         Testing testing = Testing(2);
+
         testing.RegisterTestFunction(Testing::ImageQuiltingFunction, "default");
         testing.RegisterTestFunction(CompOverlapOptimiz::BasicOpt, "compBasic");
         testing.RegisterTestFunction(CompOverlapOptimiz::AlgOpt, "compBasic+AlgImpr");
@@ -97,6 +98,29 @@ int main(int argc, char* argv[]) {
 
         std::cout << std::endl;
         testing.TestCorrectnessAndTiming(stabilize);
+
+        testing.RegisterComponentTestFunction(
+            CompOverlapOptimiz::BaseComponent,
+            CompOverlapOptimiz::BaseComponent,
+            "default");
+
+        testing.RegisterComponentTestFunction(
+            CompOverlapOptimiz::BaseComponent,
+            CompOverlapOptimiz::BasicOptComponent,
+            "compBasic");
+
+        testing.RegisterComponentTestFunction(
+            CompOverlapOptimiz::BaseComponent,
+            CompOverlapOptimiz::AlgoOptComponent,
+            "compBasic+AlgImpr");
+
+        testing.RegisterComponentTestFunction(
+            CompOverlapOptimiz::BaseComponent,
+            CompOverlapOptimiz::UnrollOptComponent,
+            "compBasic+AlgImpr+Unroll");
+
+        std::cout << std::endl;
+        testing.TestComponentsTiming(stabilize);
     }
     // Main
     else {

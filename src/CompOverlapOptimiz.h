@@ -9,10 +9,19 @@ public:
         opt_algorithm = 1,
         opt_unroll = 2,
     };
+    const static int numOptTypes = 3;
 
+    // Algorithm test functions
     static void BasicOpt(ImgData* imgData, int seed);
     static void AlgOpt(ImgData* imgData, int seed);
     static void UnrollOpt(ImgData* imgData, int seed);
+
+    // Component test functions
+    static void GetComponentParameters(ImgData* imgData,  int & overlapType,  int & dstY,  int & dstX,  int & srcY,  int & srcX);
+    static void BaseComponent(ImgData* imgData, int seed);
+    static void BasicOptComponent(ImgData* imgData, int seed);
+    static void AlgoOptComponent(ImgData* imgData, int seed);
+    static void UnrollOptComponent(ImgData* imgData, int seed);
 
     CompOverlapOptimiz() = delete;
     CompOverlapOptimiz(ImgData* data) { mData = data; }
@@ -45,6 +54,9 @@ private:
 
     // Same as WriteBlockOverlap, but uses a minimum cut to write the new block
     void WriteBlockOverlapWithMinCut(int overlapType, int dstY, int dstX, int srcY, int srcX);
+
+    // Base implementation of ComputeOverlap
+    double ComputeOverlapBase(int overlapType, int dstY, int dstX, int srcY, int srcX);
 
     // Compute the overlap with indices optimization and optimized data access
     double ComputeOverlapBasicOpt(int overlapType, int dstY, int dstX, int srcY, int srcX);

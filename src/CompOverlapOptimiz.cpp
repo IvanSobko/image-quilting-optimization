@@ -21,6 +21,47 @@ void CompOverlapOptimiz::UnrollOpt(ImgData* imgData, int seed) {
     imageQuilting.Synthesis(seed, opt_unroll);
 }
 
+void CompOverlapOptimiz::GetComponentParameters(ImgData* imgData,  int & overlapType,  int & dstY,  int & dstX,  int & srcY,  int & srcX) {
+    int maxBlockYSrc = imgData->height - imgData->block_h;
+    int maxBlockXSrc = imgData->width - imgData->block_w;
+    int maxBlockYDst = imgData->output_h - imgData->block_h;
+    int maxBlockXDst = imgData->output_w - imgData->block_w;
+    srcY = GetRandomInt(0, maxBlockYSrc-1);
+    srcX = GetRandomInt(0, maxBlockXSrc-1);
+    dstY = GetRandomInt(0, maxBlockYDst-1);
+    dstX = GetRandomInt(0, maxBlockXDst-1);
+    overlapType = GetRandomInt(0, numOptTypes-1);
+}
+
+void CompOverlapOptimiz::BaseComponent(ImgData* imgData, int seed) {
+    CompOverlapOptimiz imageQuilting(imgData);
+    int overlapType, dstY, dstX, srcY, srcX;
+    GetComponentParameters(imgData, overlapType, dstY, dstX, srcY, srcX);
+    imageQuilting.ComputeOverlapBase(overlapType, dstY, dstX, srcY, srcX);
+}
+
+void CompOverlapOptimiz::BasicOptComponent(ImgData* imgData, int seed) {
+    CompOverlapOptimiz imageQuilting(imgData);
+    int overlapType, dstY, dstX, srcY, srcX;
+    GetComponentParameters(imgData, overlapType, dstY, dstX, srcY, srcX);
+    imageQuilting.ComputeOverlapBasicOpt(overlapType, dstY, dstX, srcY, srcX);
+}
+
+void CompOverlapOptimiz::AlgoOptComponent(ImgData* imgData, int seed) {
+    CompOverlapOptimiz imageQuilting(imgData);
+    int overlapType, dstY, dstX, srcY, srcX;
+    GetComponentParameters(imgData, overlapType, dstY, dstX, srcY, srcX);
+    imageQuilting.ComputeOverlapAlgImpr(overlapType, dstY, dstX, srcY, srcX);
+}
+
+void CompOverlapOptimiz::UnrollOptComponent(ImgData* imgData, int seed) {
+    CompOverlapOptimiz imageQuilting(imgData);
+    int overlapType, dstY, dstX, srcY, srcX;
+    GetComponentParameters(imgData, overlapType, dstY, dstX, srcY, srcX);
+    imageQuilting.ComputeOverlapUnroll(overlapType, dstY, dstX, srcY, srcX);
+}
+
+
 // Synthesize a new texture
 void CompOverlapOptimiz::Synthesis() {
     flopCount = 0;
@@ -533,6 +574,67 @@ double CompOverlapOptimiz::ComputeOverlapUnroll(int overlapType, int dstY, int d
                 int sum2 = rNorm2 + gNorm2 + bNorm2 + aNorm2;
 
                 l2norm += sum1 + sum2;
+            }
+        }
+    }
+
+    return std::sqrt(l2norm);
+}
+
+// Base implementation of ComputeOverlap
+double CompOverlapOptimiz::ComputeOverlapBase(const int overlapType, const int dstY, const int dstX, const int srcY, const int srcX)
+{
+    // Compute the overlap region that we are working with
+    int overlapXStart = overlapType != horizontal ? (dstX - overlapWidth) : dstX;
+    int overlapYStart = overlapType != vertical ? (dstY - overlapHeight) : dstY;
+    int verticalBlockYEnd = std::min(overlapYStart + (int)mData->block_h, (int)mData->output_h);
+    int horizontalBlockXEnd = std::min(overlapXStart + (int)mData->block_w, (int)mData->output_w);
+    int verticalBlockHeightLocal = verticalBlockYEnd - dstY;
+    int horizontalBlockWidthLocal = horizontalBlockXEnd - dstX;
+
+    // Compute the l2 norm of the overlap between the two blocks
+    double l2norm = 0;
+
+    // Compute the vertical overlap
+    if (overlapType == vertical || overlapType == both) {
+        int srcYOffset = overlapType == both ? overlapHeight : 0;
+        for (int i = 0; i < verticalBlockHeightLocal; i++){
+            for (int j = 0; j < overlapWidth; j++){
+                for (int k = 0; k < CHANNEL_NUM; k++){
+                    double x0 = mData->output_d[dstY+i][CHANNEL_NUM*(overlapXStart +j)+k];
+                    double x1 = mData->data[srcY+srcYOffset+i][CHANNEL_NUM*(srcX + j)+k];
+                    double norm = x0 - x1;
+                    l2norm += norm*norm;
+                }
+            }
+        }
+    }
+
+    // Compute the horizontal overlap
+    if (overlapType == horizontal  || overlapType == both) {
+        int srcXOffset = overlapType == both ? overlapWidth : 0;
+        for (int i = 0; i < overlapHeight; i++){
+            for (int j = 0; j < horizontalBlockWidthLocal; j++){
+                for (int k = 0; k < CHANNEL_NUM; k++){
+                    double x0 = mData->output_d[overlapYStart +i][CHANNEL_NUM*(dstX+j)+k];
+                    double x1 = mData->data[srcY + i][CHANNEL_NUM*(srcX+srcXOffset+j)+k];
+                    double norm = x0 - x1;
+                    l2norm += norm*norm;
+                }
+            }
+        }
+    }
+
+    // Compute the corner edge overlap
+    if (overlapType == both) {
+        for (int i = 0; i < overlapHeight; i++) {
+            for (int j = 0; j < overlapWidth; j++) {
+                for (int k = 0; k < CHANNEL_NUM; k++) {
+                    double x0 = mData->output_d[overlapYStart + i][CHANNEL_NUM * (overlapXStart + j) + k];
+                    double x1 = mData->data[srcY + i][CHANNEL_NUM * (srcX + j) + k];
+                    double norm = x0 - x1;
+                    l2norm += norm * norm;
+                }
             }
         }
     }
