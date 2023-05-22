@@ -18,13 +18,17 @@ public:
 
     // Component test functions
     static void GetComponentParameters(ImgData* imgData,  int & overlapType,  int & dstY,  int & dstX,  int & srcY,  int & srcX);
-    static void BaseComponent(ImgData* imgData, int seed);
-    static void BasicOptComponent(ImgData* imgData, int seed);
-    static void AlgoOptComponent(ImgData* imgData, int seed);
-    static void UnrollOptComponent(ImgData* imgData, int seed);
+    volatile static void BaseComponent(ImgData* imgData, int seed);
+    volatile static void BasicOptComponent(ImgData* imgData, int seed);
+    volatile static void AlgoOptComponent(ImgData* imgData, int seed);
+    volatile static void UnrollOptComponent(ImgData* imgData, int seed);
 
     CompOverlapOptimiz() = delete;
-    CompOverlapOptimiz(ImgData* data) { mData = data; }
+    CompOverlapOptimiz(ImgData* data) {
+        mData = data;
+        overlapHeight = mData->block_h / 6;
+        overlapWidth = mData->block_w / 6;
+    }
 
     // Synthesize a new texture
     void Synthesis();

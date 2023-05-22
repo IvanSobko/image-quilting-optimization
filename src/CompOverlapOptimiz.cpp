@@ -28,37 +28,49 @@ void CompOverlapOptimiz::GetComponentParameters(ImgData* imgData,  int & overlap
     int maxBlockXDst = imgData->output_w - imgData->block_w;
     srcY = GetRandomInt(0, maxBlockYSrc-1);
     srcX = GetRandomInt(0, maxBlockXSrc-1);
-    dstY = GetRandomInt(0, maxBlockYDst-1);
-    dstX = GetRandomInt(0, maxBlockXDst-1);
-    overlapType = GetRandomInt(0, numOptTypes-1);
+    dstY = GetRandomInt(imgData->block_h, maxBlockYDst-1);
+    dstX = GetRandomInt(imgData->block_w, maxBlockXDst-1);
+    overlapType = both;
 }
 
-void CompOverlapOptimiz::BaseComponent(ImgData* imgData, int seed) {
+volatile void CompOverlapOptimiz::BaseComponent(ImgData* imgData, int seed) {
     CompOverlapOptimiz imageQuilting(imgData);
     int overlapType, dstY, dstX, srcY, srcX;
-    GetComponentParameters(imgData, overlapType, dstY, dstX, srcY, srcX);
-    imageQuilting.ComputeOverlapBase(overlapType, dstY, dstX, srcY, srcX);
+    volatile double dummy = 0;
+    for (int k = 0; k < 10000; k++) {
+        GetComponentParameters(imgData, overlapType, dstY, dstX, srcY, srcX);
+        dummy += imageQuilting.ComputeOverlapBase(overlapType, dstY, dstX, srcY, srcX);
+    }
 }
 
-void CompOverlapOptimiz::BasicOptComponent(ImgData* imgData, int seed) {
+volatile void CompOverlapOptimiz::BasicOptComponent(ImgData* imgData, int seed) {
     CompOverlapOptimiz imageQuilting(imgData);
     int overlapType, dstY, dstX, srcY, srcX;
-    GetComponentParameters(imgData, overlapType, dstY, dstX, srcY, srcX);
-    imageQuilting.ComputeOverlapBasicOpt(overlapType, dstY, dstX, srcY, srcX);
+    volatile double dummy = 0;
+    for (int k = 0; k < 10000; k++) {
+        GetComponentParameters(imgData, overlapType, dstY, dstX, srcY, srcX);
+        dummy += imageQuilting.ComputeOverlapBasicOpt(overlapType, dstY, dstX, srcY, srcX);
+    }
 }
 
-void CompOverlapOptimiz::AlgoOptComponent(ImgData* imgData, int seed) {
+volatile void CompOverlapOptimiz::AlgoOptComponent(ImgData* imgData, int seed) {
     CompOverlapOptimiz imageQuilting(imgData);
     int overlapType, dstY, dstX, srcY, srcX;
-    GetComponentParameters(imgData, overlapType, dstY, dstX, srcY, srcX);
-    imageQuilting.ComputeOverlapAlgImpr(overlapType, dstY, dstX, srcY, srcX);
+    volatile double dummy = 0;
+    for (int k = 0; k < 10000; k++) {
+        GetComponentParameters(imgData, overlapType, dstY, dstX, srcY, srcX);
+        dummy += imageQuilting.ComputeOverlapAlgImpr(overlapType, dstY, dstX, srcY, srcX);
+    }
 }
 
-void CompOverlapOptimiz::UnrollOptComponent(ImgData* imgData, int seed) {
+volatile void CompOverlapOptimiz::UnrollOptComponent(ImgData* imgData, int seed) {
     CompOverlapOptimiz imageQuilting(imgData);
     int overlapType, dstY, dstX, srcY, srcX;
-    GetComponentParameters(imgData, overlapType, dstY, dstX, srcY, srcX);
-    imageQuilting.ComputeOverlapUnroll(overlapType, dstY, dstX, srcY, srcX);
+    volatile double dummy = 0;
+    for (int k = 0; k < 10000; k++) {
+        GetComponentParameters(imgData, overlapType, dstY, dstX, srcY, srcX);
+        dummy += imageQuilting.ComputeOverlapUnroll(overlapType, dstY, dstX, srcY, srcX);
+    }
 }
 
 
@@ -737,8 +749,6 @@ void CompOverlapOptimiz::PlaceEdgeOverlapBlockWithMinCut(
 void CompOverlapOptimiz::OverlapConstraintsWithMinCut(){
 
     // Compute block parameters
-    overlapHeight = mData->block_h / 6;
-    overlapWidth = mData->block_w / 6;
     int hStep = mData->block_h - overlapHeight;
     int wStep = mData->block_w - overlapWidth;
 
