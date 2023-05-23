@@ -89,16 +89,18 @@ int main(int argc, char* argv[]) {
     // Test the correctness and timing of the variants of our implementation
     else if (testCorrectnessAndTiming) {
         Testing testing = Testing(0);
-        testing.RegisterTestFunction(Testing::ImageQuiltingFunction, "default");
+        //testing.RegisterTestFunction(Testing::ImageQuiltingFunction, "default");
         testing.RegisterTestFunction(Blocking::Base, "base");
         testing.RegisterTestFunction(Blocking::Refactor, "refactor");
+        testing.RegisterTestFunction(Blocking::Blocked, "blocking");
         std::cout << std::endl;
         testing.TestCorrectnessAndTiming(stabilize);
 
-        testing.RegisterComponentTestFunction(Blocking::BaseComponent, Blocking::BaseComponent, "base");
-        testing.RegisterComponentTestFunction(Blocking::BaseComponent, Blocking::RefactorComponent, "refactor");
-        std::cout << std::endl;
-        testing.TestComponentsTiming(stabilize);
+        //testing.RegisterComponentTestFunction(Blocking::BaseComponent, Blocking::BaseComponent, "base");
+        //testing.RegisterComponentTestFunction(Blocking::BaseComponent, Blocking::RefactorComponent, "refactor");
+        //testing.RegisterComponentTestFunction(Blocking::BaseComponent, Blocking::BlockedComponent, "blocked");
+        //std::cout << std::endl;
+        //testing.TestComponentsTiming(stabilize);
     }
     // Main
     else {
