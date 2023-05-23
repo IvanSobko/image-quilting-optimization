@@ -15,7 +15,7 @@ ImgData img_data;
 bool runTiming = false;
 bool generate = false;
 bool test = false;
-bool testCorrectnessAndTiming = false;
+bool testCorrectnessAndTiming = true;
 bool stabilize = false;
 
 void parse_args(int argc, char* argv[]) {
@@ -95,6 +95,7 @@ int main(int argc, char* argv[]) {
         testing.RegisterTestFunction(CompOverlapOptimiz::BasicOpt, "compBasic");
         testing.RegisterTestFunction(CompOverlapOptimiz::AlgOpt, "compBasic+AlgImpr");
         testing.RegisterTestFunction(CompOverlapOptimiz::UnrollOpt, "compBasic+AlgImpr+Unroll");
+        testing.RegisterTestFunction(CompOverlapOptimiz::VectorizeOpt, "compBasic+AlgImpr+Unroll+Vectorize");
 
         std::cout << std::endl;
         testing.TestCorrectnessAndTiming(stabilize);
@@ -118,6 +119,11 @@ int main(int argc, char* argv[]) {
             CompOverlapOptimiz::BaseComponent,
             CompOverlapOptimiz::UnrollOptComponent,
             "compBasic+AlgImpr+Unroll");
+
+        testing.RegisterComponentTestFunction(
+            CompOverlapOptimiz::BaseComponent,
+            CompOverlapOptimiz::VectorizeOptComponent,
+            "compBasic+AlgImpr+Unroll+Vectorize");
 
         std::cout << std::endl;
         testing.TestComponentsTiming(stabilize);

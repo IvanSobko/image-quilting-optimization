@@ -5,6 +5,7 @@
 #include <random>
 #include <cfloat>
 
+#include <immintrin.h>
 // IMPORTANT: make sure it's the same for all functions that you compare
 // Added this because we only need to increase the REP # for individual functions
 #define IND_FUNC_REP 10000
@@ -25,7 +26,13 @@ void CompOverlapOptimiz::UnrollOpt(ImgData* imgData, int seed) {
     imageQuilting.Synthesis(seed, opt_unroll);
 }
 
-void CompOverlapOptimiz::GetComponentParameters(ImgData* imgData,  int & overlapType,  int & dstY,  int & dstX,  int & srcY,  int & srcX) {
+void CompOverlapOptimiz::VectorizeOpt(ImgData* imgData, int seed) {
+    CompOverlapOptimiz imageQuilting(imgData);
+    imageQuilting.Synthesis(seed, opt_vectorize);
+}
+
+void CompOverlapOptimiz::GetComponentParameters(ImgData* imgData, int& overlapType, int& dstY, int& dstX,
+                                                int& srcY, int& srcX) {
     int maxBlockYSrc = imgData->height - imgData->block_h;
     int maxBlockXSrc = imgData->width - imgData->block_w;
     int maxBlockYDst = imgData->output_h - imgData->block_h;
@@ -75,6 +82,13 @@ volatile void CompOverlapOptimiz::UnrollOptComponent(ImgData* imgData, int seed)
         GetComponentParameters(imgData, overlapType, dstY, dstX, srcY, srcX);
         dummy += imageQuilting.ComputeOverlapUnroll(overlapType, dstY, dstX, srcY, srcX);
     }
+}
+
+void CompOverlapOptimiz::VectorizeOptComponent(ImgData* imgData, int seed) {
+    CompOverlapOptimiz imageQuilting(imgData);
+    int overlapType, dstY, dstX, srcY, srcX;
+    GetComponentParameters(imgData, overlapType, dstY, dstX, srcY, srcX);
+    imageQuilting.ComputeOverlapVectorize(overlapType, dstY, dstX, srcY, srcX);
 }
 
 
@@ -597,6 +611,96 @@ double CompOverlapOptimiz::ComputeOverlapUnroll(int overlapType, int dstY, int d
     return std::sqrt(l2norm);
 }
 
+
+double CompOverlapOptimiz::ComputeOverlapVectorize(int overlapType, int dstY, int dstX, int srcY, int srcX) {
+    // Compute the overlap region that we are working with
+    int overlapXStart = overlapType != horizontal ? (dstX - overlapWidth) : dstX;
+    int overlapYStart = overlapType != vertical ? (dstY - overlapHeight) : dstY;
+    int verticalBlockYEnd = std::min(overlapYStart + (int)mData->block_h, (int)mData->output_h);
+    int horizontalBlockXEnd = std::min(overlapXStart + (int)mData->block_w, (int)mData->output_w);
+    int verticalBlockHeightLocal = verticalBlockYEnd - dstY;
+    int horizontalBlockWidthLocal = horizontalBlockXEnd - overlapXStart;
+    // Compute the l2 norm of the overlap between the two blocks
+    volatile int l2norm = 0;
+
+    // Compute the horizontal overlap (+corner if needed)
+    if (overlapType != vertical) {
+        int dstXStart = CHANNEL_NUM * overlapXStart;
+        int srcXStart = CHANNEL_NUM * srcX;
+        for (int i = 0; i < overlapHeight; i++) {
+            unsigned char* outputRow = mData->output_d[overlapYStart + i] + dstXStart;
+            unsigned char* srcRow = mData->data[srcY + i] + srcXStart;
+            //TODO: check for edge cases (horizontalBlockWidthLocal is not power of 4)
+            for (int j = 0; j < horizontalBlockWidthLocal; j += 4) {
+                // load 16 8-bit integers(chars)
+                __m128i dst = _mm_loadu_si128((__m128i*)(outputRow + j * 4));
+                __m128i src = _mm_loadu_si128((__m128i*)(srcRow + j * 4));
+
+                // now each value is int16, we need it to avoid overflow problems
+                __m256i dst_16bit = _mm256_cvtepu8_epi16(dst);
+                __m256i src_16bit = _mm256_cvtepu8_epi16(src);
+                __m256i diff = _mm256_sub_epi16(dst_16bit, src_16bit);
+
+                // convert diff to int32, again: to avoid overflow
+                __m256i diff_high = _mm256_cvtepi16_epi32(_mm256_castsi256_si128(diff));
+                __m256i diff_low = _mm256_cvtepi16_epi32(_mm256_extractf128_si256(diff, 1));
+
+                __m256i norm_high = _mm256_mullo_epi32(diff_high, diff_high);
+                __m256i norm_low = _mm256_mullo_epi32(diff_low, diff_low);
+
+                __m256i norm_sum = _mm256_add_epi32(norm_high, norm_low);
+
+                // The hadd instruction is inefficient, and may be split into two instructions for faster decoding
+                __m128i sum =
+                    _mm_add_epi32(_mm256_extracti128_si256(norm_sum, 1), _mm256_castsi256_si128(norm_sum));
+                sum = _mm_add_epi32(sum, _mm_unpackhi_epi64(sum, sum));
+                sum = _mm_add_epi32(sum, _mm_shuffle_epi32(sum, 1));
+                l2norm += _mm_cvtsi128_si32(sum);
+            }
+        }
+    }
+
+    // Compute the vertical overlap
+    if (overlapType != horizontal) {
+        int srcYOffset = overlapType == both ? overlapHeight : 0;
+        int srcYStart = srcY + srcYOffset;
+        int dstXStart = CHANNEL_NUM * overlapXStart;
+        int srcXStart = CHANNEL_NUM * srcX;
+        for (int i = 0; i < verticalBlockHeightLocal; i++) {
+            unsigned char* outputRow = mData->output_d[dstY + i] + dstXStart;
+            unsigned char* srcRow = mData->data[srcYStart + i] + srcXStart;
+            for (int j = 0; j < overlapWidth; j += 4) {
+                // load 16 8-bit integers(chars)
+                __m128i dst = _mm_loadu_si128((__m128i*)(outputRow + j * 4));
+                __m128i src = _mm_loadu_si128((__m128i*)(srcRow + j * 4));
+
+                // now each value is int16, we need it to avoid overflow problems
+                __m256i dst_16bit = _mm256_cvtepu8_epi16(dst);
+                __m256i src_16bit = _mm256_cvtepu8_epi16(src);
+                __m256i diff = _mm256_sub_epi16(dst_16bit, src_16bit);
+
+                // convert diff to int32, again: to avoid overflow
+                __m256i diff_high = _mm256_cvtepi16_epi32(_mm256_castsi256_si128(diff));
+                __m256i diff_low = _mm256_cvtepi16_epi32(_mm256_extractf128_si256(diff, 1));
+
+                __m256i norm_high = _mm256_mullo_epi32(diff_high, diff_high);
+                __m256i norm_low = _mm256_mullo_epi32(diff_low, diff_low);
+
+                __m256i norm_sum = _mm256_add_epi32(norm_high, norm_low);
+
+                // The hadd instruction is inefficient, and may be split into two instructions for faster decoding
+                __m128i sum =
+                    _mm_add_epi32(_mm256_extracti128_si256(norm_sum, 1), _mm256_castsi256_si128(norm_sum));
+                sum = _mm_add_epi32(sum, _mm_unpackhi_epi64(sum, sum));
+                sum = _mm_add_epi32(sum, _mm_shuffle_epi32(sum, 1));
+                l2norm += _mm_cvtsi128_si32(sum);
+            }
+        }
+    }
+
+    return std::sqrt(l2norm);
+}
+
 // Base implementation of ComputeOverlap
 double CompOverlapOptimiz::ComputeOverlapBase(const int overlapType, const int dstY, const int dstX, const int srcY, const int srcX)
 {
@@ -685,6 +789,8 @@ void CompOverlapOptimiz::PlaceEdgeOverlapBlockWithMinCut(
                 blocks[blockIndex].value = ComputeOverlapAlgImpr(overlapType, blockY, blockX, i, j);
             } else if (opt_type == opt_unroll) {
                 blocks[blockIndex].value = ComputeOverlapUnroll(overlapType, blockY, blockX, i, j);
+            } else if (opt_type == opt_vectorize) {
+                blocks[blockIndex].value = ComputeOverlapVectorize(overlapType, blockY, blockX, i, j);
             }
         }
     }

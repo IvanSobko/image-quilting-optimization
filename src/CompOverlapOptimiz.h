@@ -8,6 +8,7 @@ public:
         opt_indices = 0,
         opt_algorithm = 1,
         opt_unroll = 2,
+        opt_vectorize,
     };
     const static int numOptTypes = 3;
 
@@ -15,6 +16,7 @@ public:
     static void BasicOpt(ImgData* imgData, int seed);
     static void AlgOpt(ImgData* imgData, int seed);
     static void UnrollOpt(ImgData* imgData, int seed);
+    static void VectorizeOpt(ImgData* imgData, int seed);
 
     // Component test functions
     static void GetComponentParameters(ImgData* imgData,  int & overlapType,  int & dstY,  int & dstX,  int & srcY,  int & srcX);
@@ -22,6 +24,7 @@ public:
     volatile static void BasicOptComponent(ImgData* imgData, int seed);
     volatile static void AlgoOptComponent(ImgData* imgData, int seed);
     volatile static void UnrollOptComponent(ImgData* imgData, int seed);
+    static void VectorizeOptComponent(ImgData* imgData, int seed);
 
     CompOverlapOptimiz() = delete;
     CompOverlapOptimiz(ImgData* data) {
@@ -70,6 +73,9 @@ private:
 
     // Added unroll and ILP to ComputeOverlapAlgImpr
     double ComputeOverlapUnroll(int overlapType, int dstY, int dstX, int srcY, int srcX);
+
+
+    double ComputeOverlapVectorize(int overlapType, int dstY, int dstX, int srcY, int srcX);
 
     // Struct to sort blocks by their l2 norm
     struct BlockValue{
