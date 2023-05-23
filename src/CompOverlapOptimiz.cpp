@@ -5,6 +5,10 @@
 #include <random>
 #include <cfloat>
 
+// IMPORTANT: make sure it's the same for all functions that you compare
+// Added this because we only need to increase the REP # for individual functions
+#define IND_FUNC_REP 10000
+
 // Image quilting function wrapper for testing and timing
 void CompOverlapOptimiz::BasicOpt(ImgData* imgData, int seed) {
     CompOverlapOptimiz imageQuilting(imgData);
@@ -37,7 +41,7 @@ volatile void CompOverlapOptimiz::BaseComponent(ImgData* imgData, int seed) {
     CompOverlapOptimiz imageQuilting(imgData);
     int overlapType, dstY, dstX, srcY, srcX;
     volatile double dummy = 0;
-    for (int k = 0; k < 10000; k++) {
+    for (int k = 0; k < IND_FUNC_REP; k++) {
         GetComponentParameters(imgData, overlapType, dstY, dstX, srcY, srcX);
         dummy += imageQuilting.ComputeOverlapBase(overlapType, dstY, dstX, srcY, srcX);
     }
@@ -47,7 +51,7 @@ volatile void CompOverlapOptimiz::BasicOptComponent(ImgData* imgData, int seed) 
     CompOverlapOptimiz imageQuilting(imgData);
     int overlapType, dstY, dstX, srcY, srcX;
     volatile double dummy = 0;
-    for (int k = 0; k < 10000; k++) {
+    for (int k = 0; k < IND_FUNC_REP; k++) {
         GetComponentParameters(imgData, overlapType, dstY, dstX, srcY, srcX);
         dummy += imageQuilting.ComputeOverlapBasicOpt(overlapType, dstY, dstX, srcY, srcX);
     }
@@ -57,7 +61,7 @@ volatile void CompOverlapOptimiz::AlgoOptComponent(ImgData* imgData, int seed) {
     CompOverlapOptimiz imageQuilting(imgData);
     int overlapType, dstY, dstX, srcY, srcX;
     volatile double dummy = 0;
-    for (int k = 0; k < 10000; k++) {
+    for (int k = 0; k < IND_FUNC_REP; k++) {
         GetComponentParameters(imgData, overlapType, dstY, dstX, srcY, srcX);
         dummy += imageQuilting.ComputeOverlapAlgImpr(overlapType, dstY, dstX, srcY, srcX);
     }
@@ -67,7 +71,7 @@ volatile void CompOverlapOptimiz::UnrollOptComponent(ImgData* imgData, int seed)
     CompOverlapOptimiz imageQuilting(imgData);
     int overlapType, dstY, dstX, srcY, srcX;
     volatile double dummy = 0;
-    for (int k = 0; k < 10000; k++) {
+    for (int k = 0; k < IND_FUNC_REP; k++) {
         GetComponentParameters(imgData, overlapType, dstY, dstX, srcY, srcX);
         dummy += imageQuilting.ComputeOverlapUnroll(overlapType, dstY, dstX, srcY, srcX);
     }
