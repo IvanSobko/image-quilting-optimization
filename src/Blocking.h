@@ -36,9 +36,6 @@ class Blocking {
     // Write a block from the source data to the output data given their upper-left corners
     void WriteBlock(int dstY, int dstX, int srcY, int srcX);
 
-    // Same as WriteBlock but leaves the half of the dst overlapping region untouched
-    void WriteBlockOverlap(int overlapType, int dstY, int dstX, int srcY, int srcX);
-
     // Same as WriteBlockOverlap, but uses a minimum cut to write the new block
     void WriteBlockOverlapWithMinCut(int overlapType, int dstY, int dstX, int srcY, int srcX);
 
@@ -59,9 +56,6 @@ class Blocking {
         horizontal = 1,
         both = 2
     };
-
-    // Place an edge overlap block with respect to the given block of the output image
-    void PlaceEdgeOverlapBlock(int blockY, int blockX, int maxBlockX, int maxBlockY, double errorTolerance);
 
     // Place an edge overlap block with respect to the given block of the output image
     void PlaceEdgeOverlapBlockWithMinCut(int blockY, int blockX, int maxBlockX, int maxBlockY, double errorTolerance);

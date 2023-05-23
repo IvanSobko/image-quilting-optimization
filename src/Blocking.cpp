@@ -67,46 +67,6 @@ void Blocking::WriteBlock(const int dstY, const int dstX, const int srcY, const 
     }
 }
 
-// Same as WriteBlock but leaves the half of the dst overlapping region untouched
-void Blocking::WriteBlockOverlap(const int overlapType, const int dstY, const int dstX, const int srcY,
-                                      const int srcX)
-{
-    // Compute the height and width of the block to write
-    int height = mData->block_h;
-    int width = mData->block_w;
-    int overlapXStart = dstX;
-    int overlapYStart = dstY;
-    int srcOverlapXStart = srcX;
-    int srcOverlapYStart = srcY;
-    if (overlapType == vertical) {
-        overlapXStart -= overlapWidth / 2;
-        srcOverlapXStart += overlapWidth / 2;
-        width -= overlapWidth / 2;
-    } else if (overlapType == horizontal) {
-        overlapYStart -= overlapHeight / 2;
-        srcOverlapYStart += overlapHeight / 2;
-        height -= overlapHeight / 2;
-    } else {
-        overlapXStart -= overlapWidth / 2;
-        overlapYStart -= overlapHeight / 2;
-        srcOverlapXStart += overlapWidth / 2;
-        srcOverlapYStart += overlapHeight / 2;
-        width -= overlapWidth / 2;
-        height -= overlapHeight / 2;
-    }
-    // Clamp the height and width to the output image dimensions
-    height = std::min(height, std::min(overlapYStart + height, (int)mData->output_h) - overlapYStart);
-    width = std::min(width, std::min(overlapXStart + width, (int)mData->output_w) - overlapXStart);
-    for (int i = 0; i < height; i++){
-        for (int j = 0; j < width; j++){
-            for (int k = 0; k < CHANNEL_NUM; k++){
-                mData->output_d[overlapYStart + i][CHANNEL_NUM * (overlapXStart + j) + k] =
-                    mData->data[srcOverlapYStart + i][CHANNEL_NUM * (srcOverlapXStart + j) + k];
-            }
-        }
-    }
-}
-
 // Same as WriteBlockOverlap, but uses a minimum cut to write the new block
 void Blocking::WriteBlockOverlapWithMinCut(
     const int overlapType, const int dstY, const int dstX, const int srcY, const int srcX)
@@ -381,71 +341,6 @@ double Blocking::ComputeOverlap(const int overlapType, const int dstY, const int
     }
 
     return std::sqrt(l2norm);
-}
-
-// Place an edge overlap block with respect to the given block of the output image
-void Blocking::PlaceEdgeOverlapBlock(
-    const int blockY, const int blockX, const int maxBlockX, const int maxBlockY, double errorTolerance)
-{
-    // Calculate the overlap start position and the offset from where to write the block to the output
-    int overlapXStart = blockX,  overlapYStart = blockY;
-
-    // Calculate the overlap type
-    int overlapType;
-    if (blockY == 0){
-        overlapType = vertical;
-        overlapXStart = blockX - overlapWidth;
-    }
-    else if (blockX == 0){
-        overlapType = horizontal;
-        overlapYStart = blockY - overlapHeight;
-    }
-    else{
-        overlapType = both;
-        overlapYStart = blockY - overlapHeight;
-        overlapXStart = blockX - overlapWidth;
-    }
-
-    // Compute the value of each block
-    int numBlocks = maxBlockY * maxBlockX;
-    BlockValue* blocks = (BlockValue*) malloc(sizeof(BlockValue) * numBlocks);
-    for (int i = 0; i < maxBlockY; i++){
-        for (int j = 0; j < maxBlockX; j++){
-            int blockIndex = i * maxBlockX + j;
-            blocks[blockIndex].y = i;
-            blocks[blockIndex].x = j;
-            blocks[blockIndex].value = ComputeOverlap(overlapType, blockY, blockX,
-                                                      i, j);
-        }
-    }
-
-    // Find the minimum block value
-    double minVal = DBL_MAX;
-    for (int i = 0; i < numBlocks; i++) {
-        if (blocks[i].value < minVal) {
-            minVal = blocks[i].value;
-        }
-    }
-
-    // Choose a random block within the tolerance
-    double upperBound = (1.0 + errorTolerance) * minVal;
-    BlockValue* suitableBlocks = (BlockValue*) malloc(sizeof(BlockValue) * numBlocks);
-    int numSuitableBlocks = 0;
-    for (int i = 0; i < numBlocks; i++) {
-        if (blocks[i].value <= upperBound) {
-            suitableBlocks[numSuitableBlocks] = blocks[i];
-            numSuitableBlocks++;
-        }
-    }
-
-    // Sample and place a block
-    int blockIndex = GetRandomInt(0, numSuitableBlocks-1);
-    WriteBlockOverlap(overlapType, blockY, blockX,
-                      suitableBlocks[blockIndex].y, suitableBlocks[blockIndex].x);
-
-    // Clean up
-    free(blocks);
-    free(suitableBlocks);
 }
 
 // Place an edge overlap block with respect to the given block of the output image
