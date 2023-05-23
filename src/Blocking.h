@@ -21,7 +21,8 @@ class Blocking {
     // Enum representing the different optimization variations
     enum OptType {
         none = 0,
-        refactor = 1
+        refactor = 1,
+        blocking = 2
     };
     OptType optType = none;
 
@@ -41,6 +42,13 @@ class Blocking {
         BlockValue* blockValues);
     static void Refactor(ImgData* imgData, int seed);
     static void RefactorComponent(ImgData* imgData, int seed);
+
+    // Block computing the block values
+    void ComputeBlockValuesBlocked(
+        int dstY, int dstX, int maxBlockY, int maxBlockX, int overlapType,
+        BlockValue* blockValues);
+    static void Blocked(ImgData* imgData, int seed);
+    static void BlockedComponent(ImgData* imgData, int seed);
 
     // Compute the block values for a given destination block
     void ComputeBlockValues(

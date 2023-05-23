@@ -164,6 +164,32 @@ void Blocking::ComputeBlockValuesRefactor(
         blockValues[i].value = std::sqrt(blockValues[i].value);
 }
 
+// Block computing the block values
+void Blocking::ComputeBlockValuesBlocked(
+    int dstY, int dstX, int maxBlockY, int maxBlockX, int overlapType,
+    BlockValue* blockValues)
+{
+    // TODO block this function
+    ComputeBlockValuesRefactor(dstY, dstX, maxBlockY, maxBlockX, overlapType, blockValues);
+}
+
+// Block computing the block values
+void Blocking::Blocked(ImgData* imgData, int seed) {
+    Blocking imageQuilting(imgData);
+    imageQuilting.optType = blocking;
+    imageQuilting.Synthesis(seed);
+}
+
+// Block computing the block values
+void Blocking::BlockedComponent(ImgData* imgData, int seed) {
+    Blocking imageQuilting(imgData);
+    int dstY, dstX, maxBlockY, maxBlockX, overlapType;
+    BlockValue* blockValues;
+    GetComponentParameters(imgData, dstY, dstX, maxBlockY, maxBlockX, overlapType, &blockValues);
+    imageQuilting.ComputeBlockValuesBlocked(dstY, dstX, maxBlockY, maxBlockX, overlapType, blockValues);
+    free(blockValues);
+}
+
 // Compute the block values for a given destination block
 void Blocking::ComputeBlockValues(
     const int dstY, const int dstX, const int maxBlockY, const int maxBlockX, const int overlapType,
@@ -532,6 +558,9 @@ void Blocking::PlaceEdgeOverlapBlockWithMinCut(
     }
     else if (optType == refactor) {
         ComputeBlockValuesRefactor(blockY, blockX, maxBlockY, maxBlockX, overlapType, blocks);
+    }
+    else if (optType == blocking) {
+        ComputeBlockValuesBlocked(blockY, blockX, maxBlockY, maxBlockX, overlapType, blocks);
     }
 
     // Find the minimum block value
