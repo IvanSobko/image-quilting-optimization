@@ -19,7 +19,7 @@ void Blocking::GetComponentParameters(
     dstX = GetRandomInt(imgData->block_w, maxBlockXDst);
     maxBlockY = imgData->height - imgData->block_h - 1;
     maxBlockX = imgData->width - imgData->block_w - 1;
-    overlapType = GetRandomInt(0, 2);
+    overlapType = both;
     int numBlocks = maxBlockY * maxBlockX;
     *blockValues = (BlockValue*) malloc(sizeof(BlockValue) * numBlocks);
 }
