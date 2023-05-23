@@ -4,8 +4,8 @@
 #include "PngReader.h"
 
 #include "Testing.h"
-#include "src/benchmarking/timing.h"
 #include "src/CompOverlapOptimiz.h"
+#include "src/benchmarking/timing.h"
 
 // input parameters
 std::string input_file = "./gallery/input0.png";
@@ -100,30 +100,22 @@ int main(int argc, char* argv[]) {
         std::cout << std::endl;
         testing.TestCorrectnessAndTiming(stabilize);
 
-        testing.RegisterComponentTestFunction(
-            CompOverlapOptimiz::BaseComponent,
-            CompOverlapOptimiz::BaseComponent,
-            "default");
+        testing.RegisterComponentTestFunction(CompOverlapOptimiz::BaseComponent,
+                                              CompOverlapOptimiz::BaseComponent, "default");
 
-        testing.RegisterComponentTestFunction(
-            CompOverlapOptimiz::BaseComponent,
-            CompOverlapOptimiz::BasicOptComponent,
-            "compBasic");
+        testing.RegisterComponentTestFunction(CompOverlapOptimiz::BaseComponent,
+                                              CompOverlapOptimiz::BasicOptComponent, "compBasic");
 
-        testing.RegisterComponentTestFunction(
-            CompOverlapOptimiz::BaseComponent,
-            CompOverlapOptimiz::AlgoOptComponent,
-            "compBasic+AlgImpr");
+        testing.RegisterComponentTestFunction(CompOverlapOptimiz::BaseComponent,
+                                              CompOverlapOptimiz::AlgoOptComponent, "compBasic+AlgImpr");
 
-        testing.RegisterComponentTestFunction(
-            CompOverlapOptimiz::BaseComponent,
-            CompOverlapOptimiz::UnrollOptComponent,
-            "compBasic+AlgImpr+Unroll");
+        testing.RegisterComponentTestFunction(CompOverlapOptimiz::BaseComponent,
+                                              CompOverlapOptimiz::UnrollOptComponent,
+                                              "compBasic+AlgImpr+Unroll");
 
-        testing.RegisterComponentTestFunction(
-            CompOverlapOptimiz::BaseComponent,
-            CompOverlapOptimiz::VectorizeOptComponent,
-            "compBasic+AlgImpr+Unroll+Vectorize");
+        testing.RegisterComponentTestFunction(CompOverlapOptimiz::BaseComponent,
+                                              CompOverlapOptimiz::VectorizeOptComponent,
+                                              "compBasic+AlgImpr+Unroll+Vectorize");
 
         std::cout << std::endl;
         testing.TestComponentsTiming(stabilize);
