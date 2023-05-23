@@ -5,10 +5,80 @@
 #include <random>
 #include <cfloat>
 
+// Get the parameters required to call a component test function
+void Blocking::GetComponentParameters(
+    ImgData* imgData,
+    int & dstY, int & dstX, int & maxBlockY, int & maxBlockX, int & overlapType,
+    BlockValue** blockValues)
+{
+    // Choose a destination block that is not the first block
+    // We are aggressive, we just make sure our first block does not come from the first row or column
+    int maxBlockYDst = imgData->output_h - imgData->block_h - 1;
+    int maxBlockXDst = imgData->output_w - imgData->block_w - 1;
+    dstY = GetRandomInt(imgData->block_h, maxBlockYDst);
+    dstX = GetRandomInt(imgData->block_w, maxBlockXDst);
+    maxBlockY = imgData->height - imgData->block_h - 1;
+    maxBlockX = imgData->width - imgData->block_w - 1;
+    overlapType = GetRandomInt(0, 2);
+    int numBlocks = maxBlockY * maxBlockX;
+    *blockValues = (BlockValue*) malloc(sizeof(BlockValue) * numBlocks);
+}
+
+// Refactor computing the block values into its own function
+void Blocking::Base(ImgData* imgData, int seed) {
+    Blocking imageQuilting(imgData);
+    imageQuilting.optType = none;
+    imageQuilting.Synthesis(seed);
+}
+
+// Refactor computing the block values into its own function
+void Blocking::BaseComponent(ImgData* imgData, int seed) {
+    Blocking imageQuilting(imgData);
+    int dstY, dstX, maxBlockY, maxBlockX, overlapType;
+    BlockValue* blockValues;
+    GetComponentParameters(imgData, dstY, dstX, maxBlockY, maxBlockX, overlapType, &blockValues);
+    imageQuilting.ComputeBlockValues(dstY, dstX, maxBlockY, maxBlockX, overlapType, blockValues);
+    free(blockValues);
+}
+
 // Refactor computing the potential block errors to iterate over the output overlap region exactly once
 void Blocking::Refactor(ImgData* imgData, int seed) {
     Blocking imageQuilting(imgData);
+    imageQuilting.optType = refactor;
     imageQuilting.Synthesis(seed);
+}
+
+// Refactor computing the potential block errors to iterate over the output overlap region exactly once
+void Blocking::RefactorComponent(ImgData* imgData, int seed) {
+    Blocking imageQuilting(imgData);
+    int dstY, dstX, maxBlockY, maxBlockX, overlapType;
+    BlockValue* blockValues;
+    GetComponentParameters(imgData, dstY, dstX, maxBlockY, maxBlockX, overlapType, &blockValues);
+    imageQuilting.ComputeBlockValuesRefactor(dstY, dstX, maxBlockY, maxBlockX, overlapType, blockValues);
+    free(blockValues);
+}
+
+// Refactor computing the potential block errors to iterate over the output overlap region exactly once
+void Blocking::ComputeBlockValuesRefactor(
+    const int dstY, const int dstX, const int maxBlockY, const int maxBlockX, const int overlapType,
+    BlockValue* blockValues)
+{
+    // TODO
+}
+
+// Compute the block values for a given destination block
+void Blocking::ComputeBlockValues(
+    const int dstY, const int dstX, const int maxBlockY, const int maxBlockX, const int overlapType,
+    BlockValue* blockValues)
+{
+    for (int i = 0; i < maxBlockY; i++){
+        for (int j = 0; j < maxBlockX; j++){
+            int blockIndex = i * maxBlockX + j;
+            blockValues[blockIndex].y = i;
+            blockValues[blockIndex].x = j;
+            blockValues[blockIndex].value = ComputeOverlap(overlapType,dstY, dstX,i, j);
+        }
+    }
 }
 
 // Initialize overlapHeight and overlapWidth
@@ -348,7 +418,7 @@ void Blocking::PlaceEdgeOverlapBlockWithMinCut(
     const int blockY, const int blockX, const int maxBlockX, const int maxBlockY, double errorTolerance)
 {
     // Calculate the overlap type
-    int overlapType;
+    OverlapType overlapType;
     if (blockY == 0)
         overlapType = vertical;
     else if (blockX == 0)
@@ -359,14 +429,11 @@ void Blocking::PlaceEdgeOverlapBlockWithMinCut(
     // Compute the value of each block
     int numBlocks = maxBlockY * maxBlockX;
     BlockValue* blocks = (BlockValue*) malloc(sizeof(BlockValue) * numBlocks);
-    for (int i = 0; i < maxBlockY; i++){
-        for (int j = 0; j < maxBlockX; j++){
-            int blockIndex = i * maxBlockX + j;
-            blocks[blockIndex].y = i;
-            blocks[blockIndex].x = j;
-            blocks[blockIndex].value = ComputeOverlap(overlapType,blockY, blockX,
-                                                      i, j);
-        }
+    if (optType == none) {
+        ComputeBlockValues(blockY, blockX, maxBlockY, maxBlockX, overlapType, blocks);
+    }
+    else if (optType == refactor) {
+        ComputeBlockValuesRefactor(blockY, blockX, maxBlockY, maxBlockX, overlapType, blocks);
     }
 
     // Find the minimum block value

@@ -5,8 +5,47 @@
 class Blocking {
    public:
 
+    // Struct to keep track of blocks and an associated value
+    struct BlockValue{
+        int y, x;
+        double value;
+    };
+
+    // Enum representing the type of overlap between blocks
+    enum OverlapType {
+        vertical = 0,
+        horizontal = 1,
+        both = 2
+    };
+
+    // Enum representing the different optimization variations
+    enum OptType {
+        none = 0,
+        refactor = 1
+    };
+    OptType optType = none;
+
+    // Get the parameters required to call a component test function
+    static void GetComponentParameters(
+        ImgData* imgData,
+        int & dstY, int & dstX, int & maxBlockY, int & maxBlockX, int & overlapType,
+        BlockValue** blockValues);
+
+    // Refactor computing the block values into its own function
+    static void Base(ImgData* imgData, int seed);
+    static void BaseComponent(ImgData* imgData, int seed);
+
     // Refactor computing the potential block errors to iterate over the output overlap region exactly once
+    void ComputeBlockValuesRefactor(
+        int dstY, int dstX, int maxBlockY, int maxBlockX, int overlapType,
+        BlockValue* blockValues);
     static void Refactor(ImgData* imgData, int seed);
+    static void RefactorComponent(ImgData* imgData, int seed);
+
+    // Compute the block values for a given destination block
+    void ComputeBlockValues(
+        int dstY, int dstX, int maxBlockY, int maxBlockX, int overlapType,
+        BlockValue* blockValues);
 
     Blocking() = delete;
     Blocking(ImgData* data);
@@ -43,19 +82,6 @@ class Blocking {
     // and src, of the input image, given their upper-left corners
     // and the position of the overlap
     double ComputeOverlap(int overlapType, int dstY, int dstX, int srcY, int srcX);
-
-    // Struct to sort blocks by their l2 norm
-    struct BlockValue{
-        int y, x;
-        double value;
-    };
-
-    // Enum representing the type of overlap between blocks
-    enum OverlapType {
-        vertical = 0,
-        horizontal = 1,
-        both = 2
-    };
 
     // Place an edge overlap block with respect to the given block of the output image
     void PlaceEdgeOverlapBlockWithMinCut(int blockY, int blockX, int maxBlockX, int maxBlockY, double errorTolerance);
