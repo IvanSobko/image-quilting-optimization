@@ -63,7 +63,74 @@ void Blocking::ComputeBlockValuesRefactor(
     const int dstY, const int dstX, const int maxBlockY, const int maxBlockX, const int overlapType,
     BlockValue* blockValues)
 {
-    // TODO
+    // Compute the overlap region that we are working with
+    int overlapXStart = overlapType != horizontal ? (dstX - overlapWidth) : dstX;
+    int overlapYStart = overlapType != vertical ? (dstY - overlapHeight) : dstY;
+    int verticalBlockYEnd = std::min(overlapYStart + (int)mData->block_h, (int)mData->output_h);
+    int horizontalBlockXEnd = std::min(overlapXStart + (int)mData->block_w, (int)mData->output_w);
+    int verticalBlockHeightLocal = verticalBlockYEnd - dstY;
+    int horizontalBlockWidthLocal = horizontalBlockXEnd - dstX;
+    int srcYOffset = overlapType == both ? overlapHeight : 0;
+    int srcXOffset = overlapType == both ? overlapWidth : 0;
+
+    for (int i = 0; i < maxBlockY; i++){
+        for (int j = 0; j < maxBlockX; j++){
+            int blockIndex = i * maxBlockX + j;
+            blockValues[blockIndex].y = i;
+            blockValues[blockIndex].x = j;
+            {
+                int srcY = i;
+                int srcX = j;
+
+                // Compute the l2 norm of the overlap between the two blocks
+                double l2norm = 0;
+
+                // Compute the vertical overlap
+                if (overlapType == vertical || overlapType == both) {
+                    for (int i = 0; i < verticalBlockHeightLocal; i++) {
+                        for (int j = 0; j < overlapWidth; j++) {
+                            for (int k = 0; k < CHANNEL_NUM; k++) {
+                                double x0 = mData->output_d[dstY + i][CHANNEL_NUM * (overlapXStart + j) + k];
+                                double x1 = mData->data[srcY + srcYOffset + i][CHANNEL_NUM * (srcX + j) + k];
+                                double norm = x0 - x1;
+                                l2norm += norm * norm;
+                            }
+                        }
+                    }
+                }
+
+                // Compute the horizontal overlap
+                if (overlapType == horizontal || overlapType == both) {
+                    for (int i = 0; i < overlapHeight; i++) {
+                        for (int j = 0; j < horizontalBlockWidthLocal; j++) {
+                            for (int k = 0; k < CHANNEL_NUM; k++) {
+                                double x0 = mData->output_d[overlapYStart + i][CHANNEL_NUM * (dstX + j) + k];
+                                double x1 = mData->data[srcY + i][CHANNEL_NUM * (srcX + srcXOffset + j) + k];
+                                double norm = x0 - x1;
+                                l2norm += norm * norm;
+                            }
+                        }
+                    }
+                }
+
+                // Compute the corner edge overlap
+                if (overlapType == both) {
+                    for (int i = 0; i < overlapHeight; i++) {
+                        for (int j = 0; j < overlapWidth; j++) {
+                            for (int k = 0; k < CHANNEL_NUM; k++) {
+                                double x0 = mData->output_d[overlapYStart + i][CHANNEL_NUM * (overlapXStart + j) + k];
+                                double x1 = mData->data[srcY + i][CHANNEL_NUM * (srcX + j) + k];
+                                double norm = x0 - x1;
+                                l2norm += norm * norm;
+                            }
+                        }
+                    }
+                }
+
+                blockValues[blockIndex].value = std::sqrt(l2norm);
+            }
+        }
+    }
 }
 
 // Compute the block values for a given destination block
