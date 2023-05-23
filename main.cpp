@@ -5,6 +5,7 @@
 
 #include "Testing.h"
 #include "src/benchmarking/timing.h"
+#include "Blocking.h"
 
 // input parameters
 std::string input_file = "./gallery/input0.png";
@@ -88,8 +89,8 @@ int main(int argc, char* argv[]) {
     // Test the correctness and timing of the variants of our implementation
     else if (testCorrectnessAndTiming) {
         Testing testing = Testing(0);
-        for (int i = 0; i < 10; i++)
-            testing.RegisterTestFunction(Testing::ImageQuiltingFunction, "default");
+        testing.RegisterTestFunction(Testing::ImageQuiltingFunction, "default");
+        testing.RegisterTestFunction(Blocking::Refactor, "refactor");
         std::cout << std::endl;
         testing.TestCorrectnessAndTiming(stabilize);
     }
