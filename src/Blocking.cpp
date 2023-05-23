@@ -73,69 +73,95 @@ void Blocking::ComputeBlockValuesRefactor(
     int srcYOffset = overlapType == both ? overlapHeight : 0;
     int srcXOffset = overlapType == both ? overlapWidth : 0;
 
-    for (int i = 0; i < maxBlockY; i++){
-        for (int j = 0; j < maxBlockX; j++){
-            int blockIndex = i * maxBlockX + j;
-            blockValues[blockIndex].y = i;
-            blockValues[blockIndex].x = j;
-            {
-                int srcY = i;
-                int srcX = j;
+    // Initialize the block values to zero
+    int numBlockValues = maxBlockY * maxBlockX;
+    for (int i = 0; i < numBlockValues; i++)
+        blockValues[i].value = 0;
 
-                // Compute the l2 norm of the overlap between the two blocks
-                double l2norm = 0;
+    // Compute the vertical overlap
+    if (overlapType == vertical || overlapType == both) {
+        // Iterate over the overlap region
+        for (int i = 0; i < verticalBlockHeightLocal; i++) {
+            for (int j = 0; j < overlapWidth; j++) {
+                for (int k = 0; k < CHANNEL_NUM; k++) {
+                    // Pixel in the destination overlap region
+                    double x0 = mData->output_d[dstY + i][CHANNEL_NUM * (overlapXStart + j) + k];
 
-                // Compute the vertical overlap
-                if (overlapType == vertical || overlapType == both) {
-                    for (int i = 0; i < verticalBlockHeightLocal; i++) {
-                        for (int j = 0; j < overlapWidth; j++) {
-                            for (int k = 0; k < CHANNEL_NUM; k++) {
-                                double x0 = mData->output_d[dstY + i][CHANNEL_NUM * (overlapXStart + j) + k];
-                                double x1 = mData->data[srcY + srcYOffset + i][CHANNEL_NUM * (srcX + j) + k];
-                                double norm = x0 - x1;
-                                l2norm += norm * norm;
-                            }
+                    // Iterate over the pixels of the different blocks of the input region
+                    for (int l = 0; l < maxBlockY; l++) {
+                        for (int m = 0; m < maxBlockX; m++) {
+                            // Pixel in the source overlap region
+                            double x1 = mData->data[l + srcYOffset + i][CHANNEL_NUM * (m + j) + k];
+
+                            // Contribution to the L2 norm
+                            double norm = x0 - x1;
+                            double norm2 = norm * norm;
+                            int blockIndex = l * maxBlockX + m;
+                            blockValues[blockIndex].value += norm2;
                         }
                     }
                 }
-
-                // Compute the horizontal overlap
-                if (overlapType == horizontal || overlapType == both) {
-                    for (int i = 0; i < overlapHeight; i++) {
-                        for (int j = 0; j < horizontalBlockWidthLocal; j++) {
-                            for (int k = 0; k < CHANNEL_NUM; k++) {
-                                double x0 = mData->output_d[overlapYStart + i][CHANNEL_NUM * (dstX + j) + k];
-                                double x1 = mData->data[srcY + i][CHANNEL_NUM * (srcX + srcXOffset + j) + k];
-                                double norm = x0 - x1;
-                                l2norm += norm * norm;
-                            }
-                        }
-                    }
-                }
-
-                // Compute the corner edge overlap
-                if (overlapType == both) {
-                    for (int i = 0; i < overlapHeight; i++) {
-                        for (int j = 0; j < overlapWidth; j++) {
-                            for (int k = 0; k < CHANNEL_NUM; k++) {
-                                double x0 = mData->output_d[overlapYStart + i][CHANNEL_NUM * (overlapXStart + j) + k];
-                                double x1 = mData->data[srcY + i][CHANNEL_NUM * (srcX + j) + k];
-                                double norm = x0 - x1;
-                                l2norm += norm * norm;
-                            }
-                        }
-                    }
-                }
-
-                blockValues[blockIndex].value = l2norm;
             }
         }
     }
 
-    int numBlockValues = maxBlockY * maxBlockX;
-    for (int i = 0; i < numBlockValues; i++) {
-        blockValues[i].value = std::sqrt(blockValues[i].value);
+    // Compute the horizontal overlap
+    if (overlapType == horizontal || overlapType == both) {
+        // Iterate over the overlap region
+        for (int i = 0; i < overlapHeight; i++) {
+            for (int j = 0; j < horizontalBlockWidthLocal; j++) {
+                for (int k = 0; k < CHANNEL_NUM; k++) {
+                    // Pixel in the destination overlap region
+                    double x0 = mData->output_d[overlapYStart + i][CHANNEL_NUM * (dstX + j) + k];
+
+                    // Iterate over the pixels of the different blocks of the input region
+                    for (int l = 0; l < maxBlockY; l++) {
+                        for (int m = 0; m < maxBlockX; m++) {
+                            // Pixel in the source overlap region
+                            double x1 = mData->data[l + i][CHANNEL_NUM * (m + srcXOffset + j) + k];
+
+                            // Contribution to the L2 norm
+                            double norm = x0 - x1;
+                            double norm2 = norm * norm;
+                            int blockIndex = l * maxBlockX + m;
+                            blockValues[blockIndex].value += norm2;
+                        }
+                    }
+                }
+            }
+        }
     }
+
+    // Compute the corner edge overlap
+    if (overlapType == both) {
+        // Iterate over the overlap region
+        for (int i = 0; i < overlapHeight; i++) {
+            for (int j = 0; j < overlapWidth; j++) {
+                for (int k = 0; k < CHANNEL_NUM; k++) {
+                    // Pixel in the destination overlap region
+                    double x0 = mData->output_d[overlapYStart + i][CHANNEL_NUM * (overlapXStart + j) + k];
+
+                    // Iterate over the pixels of the different blocks of the input region
+                    for (int l = 0; l < maxBlockY; l++) {
+                        for (int m = 0; m < maxBlockX; m++) {
+                            // Pixel in the source overlap region
+                            double x1 = mData->data[l + i][CHANNEL_NUM * (m + j) + k];
+
+                            // Contribution to the L2 norm
+                            double norm = x0 - x1;
+                            double norm2 = norm * norm;
+                            int blockIndex = l * maxBlockX + m;
+                            blockValues[blockIndex].value += norm2;
+                        }
+                    }
+                }
+            }
+        }
+    }
+
+    // Apply the square root to each of the block values
+    for (int i = 0; i < numBlockValues; i++)
+        blockValues[i].value = std::sqrt(blockValues[i].value);
 }
 
 // Compute the block values for a given destination block
