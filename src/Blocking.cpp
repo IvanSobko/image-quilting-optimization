@@ -127,9 +127,14 @@ void Blocking::ComputeBlockValuesRefactor(
                     }
                 }
 
-                blockValues[blockIndex].value = std::sqrt(l2norm);
+                blockValues[blockIndex].value = l2norm;
             }
         }
+    }
+
+    int numBlockValues = maxBlockY * maxBlockX;
+    for (int i = 0; i < numBlockValues; i++) {
+        blockValues[i].value = std::sqrt(blockValues[i].value);
     }
 }
 
