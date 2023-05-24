@@ -39,6 +39,11 @@ void Testing::SetImageQuiltingParameters(ImgData* imgData) {
     parameterFunction(imgData);
 }
 
+// Set the image quilting parameters function
+void Testing::SetParameterFunction(const ImgDataFunction & parameterFunction) {
+    this->parameterFunction = parameterFunction;
+}
+
 // Run the image quilting algorithm on all the input files to generate the output files
 void Testing::GenerateOutputFiles() {
 
