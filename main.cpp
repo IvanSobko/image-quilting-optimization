@@ -78,6 +78,7 @@ int main(int argc, char* argv[]) {
     // Generate output for testing
     else if (generate) {
         Testing testing = Testing(0);
+        testing.SetParameterFunction(Blocking::SetParameters);
         testing.GenerateOutputFiles();
     }
     // Test the correctness of our base implementation
@@ -89,6 +90,7 @@ int main(int argc, char* argv[]) {
     // Test the correctness and timing of the variants of our implementation
     else if (testCorrectnessAndTiming) {
         Testing testing = Testing(0);
+        testing.SetParameterFunction(Blocking::SetParameters);
         //testing.RegisterTestFunction(Testing::ImageQuiltingFunction, "default");
         testing.RegisterTestFunction(Blocking::Base, "base");
         testing.RegisterTestFunction(Blocking::Refactor, "refactor");

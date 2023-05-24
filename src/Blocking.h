@@ -26,6 +26,9 @@ class Blocking {
     };
     OptType optType = none;
 
+    // Set custom image quilting parameters
+    static void SetParameters(ImgData * imgData);
+
     // Get the parameters required to call a component test function
     static void GetComponentParameters(
         ImgData* imgData,

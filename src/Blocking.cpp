@@ -5,6 +5,14 @@
 #include <random>
 #include <cfloat>
 
+// Set custom image quilting parameters
+void Blocking::SetParameters(ImgData* imgData) {
+    imgData->output_h = 2 * imgData->height;
+    imgData->output_w = 2 * imgData->width;
+    imgData->block_h = imgData->height / 4 * 3;
+    imgData->block_w = imgData->width / 4 * 3;
+}
+
 // Get the parameters required to call a component test function
 void Blocking::GetComponentParameters(
     ImgData* imgData,
