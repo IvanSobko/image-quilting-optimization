@@ -26,7 +26,10 @@ class Testing {
 
     // TestFunction applies the image quilting algorithm to imgData
     typedef std::function<void(ImgData* imgData, int seed)> TestFunction;
+    typedef std::function<void(ImgData* imgData)> ImgDataFunction;
 
+    // Set the image quilting parameters function
+    void SetParameterFunction(const ImgDataFunction & parameterFunction);
     // Run the image quilting algorithm on all the input files to generate the output files
     void GenerateOutputFiles();
     // Functional wrapper for the image quilting algorithm
@@ -52,11 +55,14 @@ class Testing {
     std::vector<std::filesystem::path> inputPaths;
     std::vector<std::pair<TestFunction, std::string>> testFunctions;
     std::vector<std::tuple<TestFunction, TestFunction, std::string>> testComponentFunctions;
+    ImgDataFunction parameterFunction;
 
     // Get the output file path
     std::string GetOutputfile(const std::filesystem::path & input);
-    // Set the image quilting algorithm parameters
-    static void SetImageQuiltingParameters(ImgData* imgData);
+    // Default image quilting algorithm parameters
+    static void DefaultParameters(ImgData* imgData);
+    // Call the parameter function to set the image quilting algorithm parameters
+    void SetImageQuiltingParameters(ImgData* imgData);
     // Compute the l2 error between two images
     static double ComputeError(unsigned char ** image0, unsigned char ** image1, int height, int width);
     // Count the number of cycles of a testFunction call
