@@ -58,6 +58,11 @@ class Blocking {
                                 int dstY, int overlapXStart, int maxBlockY, int maxBlockX, int srcYOffset,
                                 BlockValue * blockValues);
 
+    // Helper function to block the horizontal overlap
+    void BlockingHelperHorizontal(int iMin, int iMax, int jMin, int jMax,
+                                  int overlapYStart, int overlapXStart, int maxBlockY, int maxBlockX,
+                                  BlockValue * blockValues);
+
     // Compute the block values for a given destination block
     void ComputeBlockValues(
         int dstY, int dstX, int maxBlockY, int maxBlockX, int overlapType,

@@ -181,6 +181,36 @@ void Blocking::BlockingHelperVertical(
     }
 }
 
+// Helper function to block the horizontal overlap
+void Blocking::BlockingHelperHorizontal(
+    const int iMin, const int iMax, const int jMin, const int jMax,
+    const int overlapYStart, const int overlapXStart, const int maxBlockY, const int maxBlockX,
+    BlockValue * blockValues)
+{
+    for (int i = iMin; i < iMax; i++) {
+        for (int j = jMin; j < jMax; j++) {
+            for (int k = 0; k < CHANNEL_NUM; k++) {
+                // Pixel in the destination overlap region
+                double x0 = mData->output_d[overlapYStart + i][CHANNEL_NUM * (overlapXStart + j) + k];
+
+                // Iterate over the pixels of the different blocks of the input region
+                for (int l = 0; l < maxBlockY; l++) {
+                    for (int m = 0; m < maxBlockX; m++) {
+                        // Pixel in the source overlap region
+                        double x1 = mData->data[l + i][CHANNEL_NUM * (m + j) + k];
+
+                        // Contribution to the L2 norm
+                        double norm = x0 - x1;
+                        double norm2 = norm * norm;
+                        int blockIndex = l * maxBlockX + m;
+                        blockValues[blockIndex].value += norm2;
+                    }
+                }
+            }
+        }
+    }
+}
+
 // Block computing the block values
 void Blocking::ComputeBlockValuesBlocked(
     int dstY, int dstX, int maxBlockY, int maxBlockX, int overlapType,
@@ -238,7 +268,7 @@ void Blocking::ComputeBlockValuesBlocked(
                     dstY, overlapXStart, maxBlockY, maxBlockX, srcYOffset, blockValues);
             }
         }
-        // If there s a y remainder, handle it
+        // If there is a y remainder, handle it
         if (remainderY > 0) {
             int iMin = numBlocksY * blockSizeY;
             int iMax = iMin + remainderY;
@@ -266,24 +296,8 @@ void Blocking::ComputeBlockValuesBlocked(
         // Iterate over the overlap region
         for (int i = 0; i < overlapHeight; i++) {
             for (int j = 0; j < horizontalBlockWidthLocal; j++) {
-                for (int k = 0; k < CHANNEL_NUM; k++) {
-                    // Pixel in the destination overlap region
-                    double x0 = mData->output_d[overlapYStart + i][CHANNEL_NUM * (overlapXStart + j) + k];
-
-                    // Iterate over the pixels of the different blocks of the input region
-                    for (int l = 0; l < maxBlockY; l++) {
-                        for (int m = 0; m < maxBlockX; m++) {
-                            // Pixel in the source overlap region
-                            double x1 = mData->data[l + i][CHANNEL_NUM * (m + j) + k];
-
-                            // Contribution to the L2 norm
-                            double norm = x0 - x1;
-                            double norm2 = norm * norm;
-                            int blockIndex = l * maxBlockX + m;
-                            blockValues[blockIndex].value += norm2;
-                        }
-                    }
-                }
+                BlockingHelperHorizontal(
+                    i, i+1, j, j+1, overlapYStart, overlapXStart, maxBlockY, maxBlockX, blockValues);
             }
         }
     }
