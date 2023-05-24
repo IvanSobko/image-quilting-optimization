@@ -8,7 +8,8 @@ class CompOverlapOptimiz {
         opt_indices = 0,
         opt_algorithm = 1,
         opt_unroll = 2,
-        opt_vectorize,
+        opt_unroll_max = 3,
+        opt_vectorize = 4,
     };
     const static int numOptTypes = 3;
 
@@ -16,6 +17,7 @@ class CompOverlapOptimiz {
     static void BasicOpt(ImgData* imgData, int seed);
     static void AlgOpt(ImgData* imgData, int seed);
     static void UnrollOpt(ImgData* imgData, int seed);
+    static void UnrollMaxOpt(ImgData* imgData, int seed);
     static void VectorizeOpt(ImgData* imgData, int seed);
 
     // Component test functions
@@ -25,6 +27,7 @@ class CompOverlapOptimiz {
     volatile static void BasicOptComponent(ImgData* imgData, int seed);
     volatile static void AlgoOptComponent(ImgData* imgData, int seed);
     volatile static void UnrollOptComponent(ImgData* imgData, int seed);
+    volatile static void UnrollMaxOptComponent(ImgData* imgData, int seed);
     volatile static void VectorizeOptComponent(ImgData* imgData, int seed);
 
     CompOverlapOptimiz() = delete;
@@ -72,6 +75,9 @@ class CompOverlapOptimiz {
 
     // Added unroll and ILP to ComputeOverlapAlgImpr
     double ComputeOverlapUnroll(int overlapType, int dstY, int dstX, int srcY, int srcX);
+
+    // Forced compiler to parallelize computations
+    double ComputeOverlapUnrollMax(int overlapType, int dstY, int dstX, int srcY, int srcX);
 
     double ComputeOverlapVectorize(int overlapType, int dstY, int dstX, int srcY, int srcX);
 

@@ -26,6 +26,11 @@ void CompOverlapOptimiz::UnrollOpt(ImgData* imgData, int seed) {
     imageQuilting.Synthesis(seed, opt_unroll);
 }
 
+void CompOverlapOptimiz::UnrollMaxOpt(ImgData* imgData, int seed) {
+    CompOverlapOptimiz imageQuilting(imgData);
+    imageQuilting.Synthesis(seed, opt_unroll_max);
+}
+
 void CompOverlapOptimiz::VectorizeOpt(ImgData* imgData, int seed) {
     CompOverlapOptimiz imageQuilting(imgData);
     imageQuilting.Synthesis(seed, opt_vectorize);
@@ -81,6 +86,16 @@ volatile void CompOverlapOptimiz::UnrollOptComponent(ImgData* imgData, int seed)
     for (int k = 0; k < IND_FUNC_REP; k++) {
         GetComponentParameters(imgData, overlapType, dstY, dstX, srcY, srcX);
         dummy += imageQuilting.ComputeOverlapUnroll(overlapType, dstY, dstX, srcY, srcX);
+    }
+}
+
+volatile void CompOverlapOptimiz::UnrollMaxOptComponent(ImgData* imgData, int seed) {
+    CompOverlapOptimiz imageQuilting(imgData);
+    int overlapType, dstY, dstX, srcY, srcX;
+    volatile double dummy = 0;
+    for (int k = 0; k < IND_FUNC_REP; k++) {
+        GetComponentParameters(imgData, overlapType, dstY, dstX, srcY, srcX);
+        dummy += imageQuilting.ComputeOverlapUnrollMax(overlapType, dstY, dstX, srcY, srcX);
     }
 }
 
@@ -611,6 +626,179 @@ double CompOverlapOptimiz::ComputeOverlapUnroll(int overlapType, int dstY, int d
     return std::sqrt(l2norm);
 }
 
+// Forced compiler to parallelize computations
+double CompOverlapOptimiz::ComputeOverlapUnrollMax(int overlapType, int dstY, int dstX, int srcY, int srcX) {
+    // Compute the overlap region that we are working with
+    int overlapXStart = overlapType != horizontal ? (dstX - overlapWidth) : dstX;
+    int overlapYStart = overlapType != vertical ? (dstY - overlapHeight) : dstY;
+    int verticalBlockYEnd = std::min(overlapYStart + (int)mData->block_h, (int)mData->output_h);
+    int horizontalBlockXEnd = std::min(overlapXStart + (int)mData->block_w, (int)mData->output_w);
+    int verticalBlockHeightLocal = verticalBlockYEnd - dstY;
+    int horizontalBlockWidthLocal = horizontalBlockXEnd - overlapXStart;
+
+    // Compute the l2 norm of the overlap between the two blocks
+    int l2norm = 0;
+
+    // Compute the horizontal overlap (+corner if needed)
+    if (overlapType != vertical) {
+        int dstXStart = CHANNEL_NUM * overlapXStart;
+        int srcXStart = CHANNEL_NUM * srcX;
+        for (int i = 0; i < overlapHeight; i++) {
+            unsigned char* outputRow = mData->output_d[overlapYStart + i] + dstXStart;
+            unsigned char* srcRow = mData->data[srcY + i] + srcXStart;
+            int norm0 = 0; int norm1 = 0; int norm2 = 0; int norm3 = 0;
+            int j;
+            for (j = 0; j < horizontalBlockWidthLocal-3; j+=4) {
+                int rDiff1 = outputRow[0] - srcRow[0];
+                int gDiff1 = outputRow[1] - srcRow[1];
+                int bDiff1 = outputRow[2] - srcRow[2];
+                int aDiff1 = outputRow[3] - srcRow[3];
+
+                rDiff1 = rDiff1 * rDiff1;
+                int rDiff2 = outputRow[4] - srcRow[4];
+                int gDiff2 = outputRow[5] - srcRow[5];
+                int bDiff2 = outputRow[6] - srcRow[6];
+
+                gDiff1 = gDiff1 * gDiff1;
+                int aDiff2 = outputRow[7] - srcRow[7];
+                int rDiff3 = outputRow[8] - srcRow[8];
+                int gDiff3 = outputRow[9] - srcRow[9];
+
+                bDiff1 = bDiff1 * bDiff1;
+                int bDiff3 = outputRow[10] - srcRow[10];
+                int aDiff3 = outputRow[11] - srcRow[11];
+                int rDiff4 = outputRow[12] - srcRow[12];
+
+                aDiff1 = aDiff1 * aDiff1;
+                int gDiff4 = outputRow[13] - srcRow[13];
+                int bDiff4 = outputRow[14] - srcRow[14];
+                int aDiff4 = outputRow[15] - srcRow[15];
+
+                rDiff2 = rDiff2 * rDiff2;
+                gDiff2 = gDiff2 * gDiff2;
+                bDiff2 = bDiff2 * bDiff2;
+                aDiff2 = aDiff2 * aDiff2;
+                l2norm += rDiff1 + gDiff1 + bDiff1 + aDiff1;
+
+                rDiff3 = rDiff3 * rDiff3;
+                gDiff3 = gDiff3 * gDiff3;
+                bDiff3 = bDiff3 * bDiff3;
+                aDiff3 = aDiff3 * aDiff3;
+                l2norm += rDiff2 + gDiff2 + bDiff2 + aDiff2;
+
+                rDiff4 = rDiff4 * rDiff4;
+                gDiff4 = gDiff4 * gDiff4;
+                bDiff4 = bDiff4 * bDiff4;
+                aDiff4 = aDiff4 * aDiff4;
+
+                l2norm += rDiff3 + gDiff3 + bDiff3 + aDiff3;
+                l2norm += rDiff4 + gDiff4 + bDiff4 + aDiff4;
+
+                outputRow += 16;
+                srcRow += 16;
+            }
+            for (;j < horizontalBlockWidthLocal; j++) {
+                int rDst = *(outputRow++);
+                int rSrc = *(srcRow++);
+                int gDst = *(outputRow++);
+                int gSrc = *(srcRow++);
+                int bDst = *(outputRow++);
+                int bSrc = *(srcRow++);
+                int aDst = *(outputRow++);
+                int aSrc = *(srcRow++);
+
+                int rDiff = rDst - rSrc;
+                int gDiff = gDst - gSrc;
+                int bDiff = bDst - bSrc;
+                int aDiff = aDst - aSrc;
+
+                l2norm += rDiff * rDiff + gDiff * gDiff + bDiff * bDiff + aDiff * aDiff;
+            }
+        }
+    }
+
+    // Compute the vertical overlap
+    if (overlapType != horizontal) {
+        int srcYOffset = overlapType == both ? overlapHeight : 0;
+        int srcYStart = srcY + srcYOffset;
+        int dstXStart = CHANNEL_NUM * overlapXStart;
+        int srcXStart = CHANNEL_NUM * srcX;
+        for (int i = 0; i < verticalBlockHeightLocal; i++) {
+            unsigned char* outputRow = mData->output_d[dstY + i] + dstXStart;
+            unsigned char* srcRow = mData->data[srcYStart + i] + srcXStart;
+            int j;
+            for (j = 0; j < overlapWidth-3; j+=4) {
+                int rDiff1 = outputRow[0] - srcRow[0];
+                int gDiff1 = outputRow[1] - srcRow[1];
+                int bDiff1 = outputRow[2] - srcRow[2];
+                int aDiff1 = outputRow[3] - srcRow[3];
+
+                rDiff1 = rDiff1 * rDiff1;
+                int rDiff2 = outputRow[4] - srcRow[4];
+                int gDiff2 = outputRow[5] - srcRow[5];
+                int bDiff2 = outputRow[6] - srcRow[6];
+
+                gDiff1 = gDiff1 * gDiff1;
+                int aDiff2 = outputRow[7] - srcRow[7];
+                int rDiff3 = outputRow[8] - srcRow[8];
+                int gDiff3 = outputRow[9] - srcRow[9];
+
+                bDiff1 = bDiff1 * bDiff1;
+                int bDiff3 = outputRow[10] - srcRow[10];
+                int aDiff3 = outputRow[11] - srcRow[11];
+                int rDiff4 = outputRow[12] - srcRow[12];
+
+                aDiff1 = aDiff1 * aDiff1;
+                int gDiff4 = outputRow[13] - srcRow[13];
+                int bDiff4 = outputRow[14] - srcRow[14];
+                int aDiff4 = outputRow[15] - srcRow[15];
+
+                rDiff2 = rDiff2 * rDiff2;
+                gDiff2 = gDiff2 * gDiff2;
+                bDiff2 = bDiff2 * bDiff2;
+                aDiff2 = aDiff2 * aDiff2;
+                l2norm += rDiff1 + gDiff1 + bDiff1 + aDiff1;
+
+                rDiff3 = rDiff3 * rDiff3;
+                gDiff3 = gDiff3 * gDiff3;
+                bDiff3 = bDiff3 * bDiff3;
+                aDiff3 = aDiff3 * aDiff3;
+                l2norm += rDiff2 + gDiff2 + bDiff2 + aDiff2;
+
+                rDiff4 = rDiff4 * rDiff4;
+                gDiff4 = gDiff4 * gDiff4;
+                bDiff4 = bDiff4 * bDiff4;
+                aDiff4 = aDiff4 * aDiff4;
+
+                l2norm += rDiff3 + gDiff3 + bDiff3 + aDiff3;
+                l2norm += rDiff4 + gDiff4 + bDiff4 + aDiff4;
+
+                outputRow += 16;
+                srcRow += 16;
+            }
+            for (; j < overlapWidth; j++) {
+                int rDst = *(outputRow++);
+                int rSrc = *(srcRow++);
+                int gDst = *(outputRow++);
+                int gSrc = *(srcRow++);
+                int bDst = *(outputRow++);
+                int bSrc = *(srcRow++);
+                int aDst = *(outputRow++);
+                int aSrc = *(srcRow++);
+
+                int rDiff = rDst - rSrc;
+                int gDiff = gDst - gSrc;
+                int bDiff = bDst - bSrc;
+                int aDiff = aDst - aSrc;
+
+                l2norm +=  rDiff * rDiff + gDiff * gDiff + bDiff * bDiff + aDiff * aDiff;
+            }
+        }
+    }
+
+    return std::sqrt(l2norm);
+}
+
 double CompOverlapOptimiz::ComputeOverlapVectorize(int overlapType, int dstY, int dstX, int srcY, int srcX) {
     // Compute the overlap region that we are working with
     int overlapXStart = overlapType != horizontal ? (dstX - overlapWidth) : dstX;
@@ -788,6 +976,8 @@ void CompOverlapOptimiz::PlaceEdgeOverlapBlockWithMinCut(const int blockY, const
                 blocks[blockIndex].value = ComputeOverlapAlgImpr(overlapType, blockY, blockX, i, j);
             } else if (opt_type == opt_unroll) {
                 blocks[blockIndex].value = ComputeOverlapUnroll(overlapType, blockY, blockX, i, j);
+            } else if (opt_type == opt_unroll_max) {
+                blocks[blockIndex].value = ComputeOverlapUnrollMax(overlapType, blockY, blockX, i, j);
             } else if (opt_type == opt_vectorize) {
                 blocks[blockIndex].value = ComputeOverlapVectorize(overlapType, blockY, blockX, i, j);
             }

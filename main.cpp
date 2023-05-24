@@ -95,6 +95,7 @@ int main(int argc, char* argv[]) {
         testing.RegisterTestFunction(CompOverlapOptimiz::BasicOpt, "compBasic");
         testing.RegisterTestFunction(CompOverlapOptimiz::AlgOpt, "compBasic+AlgImpr");
         testing.RegisterTestFunction(CompOverlapOptimiz::UnrollOpt, "compBasic+AlgImpr+Unroll");
+        testing.RegisterTestFunction(CompOverlapOptimiz::UnrollMaxOpt, "compBasic+AlgImpr+UnrollTheoreticalMax");
         testing.RegisterTestFunction(CompOverlapOptimiz::VectorizeOpt, "compBasic+AlgImpr+Unroll+Vectorize");
 
         std::cout << std::endl;
@@ -112,6 +113,10 @@ int main(int argc, char* argv[]) {
         testing.RegisterComponentTestFunction(CompOverlapOptimiz::BaseComponent,
                                               CompOverlapOptimiz::UnrollOptComponent,
                                               "compBasic+AlgImpr+Unroll");
+
+        testing.RegisterComponentTestFunction(CompOverlapOptimiz::BaseComponent,
+                                              CompOverlapOptimiz::UnrollMaxOptComponent,
+                                              "compBasic+AlgImpr+UnrollTheoreticalMax");
 
         testing.RegisterComponentTestFunction(CompOverlapOptimiz::BaseComponent,
                                               CompOverlapOptimiz::VectorizeOptComponent,
