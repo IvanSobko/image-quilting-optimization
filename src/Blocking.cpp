@@ -9,8 +9,8 @@
 void Blocking::SetParameters(ImgData* imgData) {
     imgData->output_h = 2 * imgData->height;
     imgData->output_w = 2 * imgData->width;
-    imgData->block_h = imgData->height / 4;
-    imgData->block_w = imgData->width / 4;
+    imgData->block_h = imgData->height / 4 * 3;
+    imgData->block_w = imgData->width / 4 * 3;
 }
 
 // Get the parameters required to call a component test function
@@ -235,7 +235,7 @@ void Blocking::ComputeBlockValuesBlocked(
     }
 
     // Compute the vertical overlap
-    if (overlapType == vertical || overlapType == both) {
+    if (overlapType == vertical || overlapType == both && verticalBlockHeightLocal != 0) {
         int srcYOffset = overlapType == both ? overlapHeight : 0;
 
         // Compute blocking parameters; TODO magic numbers
@@ -291,7 +291,7 @@ void Blocking::ComputeBlockValuesBlocked(
     }
 
     // Compute the horizontal overlap (+ corner if needed)
-    if (overlapType == horizontal || overlapType == both) {
+    if (overlapType == horizontal || overlapType == both && horizontalBlockWidthLocal != 0) {
         int srcXOffset = overlapType == both ? overlapWidth : 0;
 
         // Compute blocking parameters; TODO magic numbers
