@@ -151,7 +151,6 @@ void Blocking::ComputeBlockValuesRefactor(
         blockValues[i].value = std::sqrt(blockValues[i].value);
 }
 
-
 // Helper function to block the vertical overlap
 void Blocking::BlockingHelperVertical(
     const int iMin, const int iMax, const int jMin, const int jMax,
@@ -216,31 +215,10 @@ void Blocking::ComputeBlockValuesBlocked(
     // Compute the vertical overlap
     if (overlapType == vertical || overlapType == both) {
         int srcYOffset = overlapType == both ? overlapHeight : 0;
-
         // Iterate over the overlap region
         for (int i = 0; i < numBlocksY; i++) {
             int iMin = i * blockSizeY;
             int iMax = iMin + blockSizeY;
-            for (int j = 0; j < numBlocksX; j++) {
-                int jMin = j * blockSizeX;
-                int jMax = jMin + blockSizeX;
-                BlockingHelperVertical(
-                    iMin, iMax, jMin, jMax,
-                    dstY, overlapXStart, maxBlockY, maxBlockX, srcYOffset, blockValues);
-            }
-            // Handle the last column if the x remainder is greater than zero
-            if (remainderX > 0) {
-                int jMin = numBlocksX * blockSizeX;
-                int jMax = jMin + remainderX;
-                BlockingHelperVertical(
-                    iMin, iMax, jMin, jMax,
-                    dstY, overlapXStart, maxBlockY, maxBlockX, srcYOffset, blockValues);
-            }
-        }
-        // Handle the last row if the y remainder is greater than zero
-        if (remainderY > 0) {
-            int iMin = numBlocksY * blockSizeY;
-            int iMax = iMin + remainderY;
             for (int j = 0; j < numBlocksX; j++) {
                 int jMin = j * blockSizeX;
                 int jMax = jMin + blockSizeX;
