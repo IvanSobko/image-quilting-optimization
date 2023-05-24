@@ -53,6 +53,11 @@ class Blocking {
     static void Blocked(ImgData* imgData, int seed);
     static void BlockedComponent(ImgData* imgData, int seed);
 
+    // Helper function to block the vertical overlap
+    void BlockingHelperVertical(int iMin, int iMax, int jMin, int jMax,
+                                int dstY, int overlapXStart, int maxBlockY, int maxBlockX, int srcYOffset,
+                                BlockValue * blockValues);
+
     // Compute the block values for a given destination block
     void ComputeBlockValues(
         int dstY, int dstX, int maxBlockY, int maxBlockX, int overlapType,

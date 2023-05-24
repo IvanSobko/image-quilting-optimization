@@ -151,13 +151,138 @@ void Blocking::ComputeBlockValuesRefactor(
         blockValues[i].value = std::sqrt(blockValues[i].value);
 }
 
+
+// Helper function to block the vertical overlap
+void Blocking::BlockingHelperVertical(
+    const int iMin, const int iMax, const int jMin, const int jMax,
+    const int dstY, const int overlapXStart, const int maxBlockY, const int maxBlockX, const int srcYOffset,
+    BlockValue * blockValues)
+{
+    for (int i = iMin; i < iMax; i++) {
+        for (int j = jMin; j < jMax; j++) {
+            for (int k = 0; k < CHANNEL_NUM; k++) {
+                // Pixel in the destination overlap region
+                double x0 = mData->output_d[dstY + i][CHANNEL_NUM * (overlapXStart + j) + k];
+
+                // Iterate over the pixels of the different blocks of the input region
+                for (int l = 0; l < maxBlockY; l++) {
+                    for (int m = 0; m < maxBlockX; m++) {
+                        // Pixel in the source overlap region
+                        double x1 = mData->data[l + srcYOffset + i][CHANNEL_NUM * (m + j) + k];
+
+                        // Contribution to the L2 norm
+                        double norm = x0 - x1;
+                        double norm2 = norm * norm;
+                        int blockIndex = l * maxBlockX + m;
+                        blockValues[blockIndex].value += norm2;
+                    }
+                }
+            }
+        }
+    }
+}
+
 // Block computing the block values
 void Blocking::ComputeBlockValuesBlocked(
     int dstY, int dstX, int maxBlockY, int maxBlockX, int overlapType,
     BlockValue* blockValues)
 {
-    // TODO block this function
-    ComputeBlockValuesRefactor(dstY, dstX, maxBlockY, maxBlockX, overlapType, blockValues);
+    // Compute the overlap region that we are working with
+    int overlapXStart = overlapType != horizontal ? (dstX - overlapWidth) : dstX;
+    int overlapYStart = overlapType != vertical ? (dstY - overlapHeight) : dstY;
+    int verticalBlockYEnd = std::min(overlapYStart + (int)mData->block_h, (int)mData->output_h);
+    int horizontalBlockXEnd = std::min(overlapXStart + (int)mData->block_w, (int)mData->output_w);
+    int verticalBlockHeightLocal = verticalBlockYEnd - dstY;
+    int horizontalBlockWidthLocal = horizontalBlockXEnd - overlapXStart;
+
+    // Initialize the block values
+    for (int i = 0; i < maxBlockY; i++){
+        for (int j = 0; j < maxBlockX; j++){
+            int blockIndex = i * maxBlockX + j;
+            blockValues[blockIndex].y = i;
+            blockValues[blockIndex].x = j;
+            blockValues[blockIndex].value = 0;
+        }
+    }
+
+    // Compute the block sizes; TODO magic numbers
+    int blockSizeY = 1;
+    int blockSizeX = 1;
+    int numBlocksY = verticalBlockHeightLocal / blockSizeY;
+    int remainderY = verticalBlockHeightLocal % blockSizeY;
+    int numBlocksX = overlapWidth / blockSizeX;
+    int remainderX = overlapWidth / blockSizeX;
+
+    // Compute the vertical overlap
+    if (overlapType == vertical || overlapType == both) {
+        int srcYOffset = overlapType == both ? overlapHeight : 0;
+
+        // Iterate over the overlap region
+        for (int i = 0; i < numBlocksY; i++) {
+            int iMin = i * blockSizeY;
+            int iMax = iMin + blockSizeY;
+            for (int j = 0; j < numBlocksX; j++) {
+                int jMin = j * blockSizeX;
+                int jMax = jMin + blockSizeX;
+                BlockingHelperVertical(
+                    iMin, iMax, jMin, jMax,
+                    dstY, overlapXStart, maxBlockY, maxBlockX, srcYOffset, blockValues);
+            }
+            // Handle the last column if the x remainder is greater than zero
+            if (remainderX > 0) {
+                int jMin = numBlocksX * blockSizeX;
+                int jMax = jMin + remainderX;
+                BlockingHelperVertical(
+                    iMin, iMax, jMin, jMax,
+                    dstY, overlapXStart, maxBlockY, maxBlockX, srcYOffset, blockValues);
+            }
+        }
+        // Handle the last row if the y remainder is greater than zero
+        if (remainderY > 0) {
+            int iMin = numBlocksY * blockSizeY;
+            int iMax = iMin + remainderY;
+            for (int j = 0; j < numBlocksX; j++) {
+                int jMin = j * blockSizeX;
+                int jMax = jMin + blockSizeX;
+                BlockingHelperVertical(
+                    iMin, iMax, jMin, jMax,
+                    dstY, overlapXStart, maxBlockY, maxBlockX, srcYOffset, blockValues);
+            }
+        }
+    }
+
+    // Compute the horizontal overlap (+ corner if needed)
+    if (overlapType == horizontal || overlapType == both) {
+        int srcXOffset = overlapType == both ? overlapWidth : 0;
+        // Iterate over the overlap region
+        for (int i = 0; i < overlapHeight; i++) {
+            for (int j = 0; j < horizontalBlockWidthLocal; j++) {
+                for (int k = 0; k < CHANNEL_NUM; k++) {
+                    // Pixel in the destination overlap region
+                    double x0 = mData->output_d[overlapYStart + i][CHANNEL_NUM * (overlapXStart + j) + k];
+
+                    // Iterate over the pixels of the different blocks of the input region
+                    for (int l = 0; l < maxBlockY; l++) {
+                        for (int m = 0; m < maxBlockX; m++) {
+                            // Pixel in the source overlap region
+                            double x1 = mData->data[l + i][CHANNEL_NUM * (m + j) + k];
+
+                            // Contribution to the L2 norm
+                            double norm = x0 - x1;
+                            double norm2 = norm * norm;
+                            int blockIndex = l * maxBlockX + m;
+                            blockValues[blockIndex].value += norm2;
+                        }
+                    }
+                }
+            }
+        }
+    }
+
+    // Apply the square root to each of the block values
+    int numBlockValues = maxBlockY * maxBlockX;
+    for (int i = 0; i < numBlockValues; i++)
+        blockValues[i].value = std::sqrt(blockValues[i].value);
 }
 
 // Block computing the block values
