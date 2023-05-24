@@ -151,6 +151,12 @@ void Blocking::ComputeBlockValuesRefactor(
         blockValues[i].value = std::sqrt(blockValues[i].value);
 }
 
+// Set the block size
+void Blocking::SetBlockSize(int blockSizeY, int blockSizeX) {
+    this->targetBlockSizeY = blockSizeY;
+    this->targetBlockSizeX = blockSizeX;
+}
+
 // Helper function to block the vertical overlap
 void Blocking::BlockingHelperVertical(
     const int iMin, const int iMax, const int jMin, const int jMax,
@@ -239,8 +245,6 @@ void Blocking::ComputeBlockValuesBlocked(
         int srcYOffset = overlapType == both ? overlapHeight : 0;
 
         // Compute blocking parameters; TODO magic numbers
-        int targetBlockSizeY = 100;
-        int targetBlockSizeX = 100;
         int blockSizeY = std::min(targetBlockSizeY, verticalBlockHeightLocal);
         int blockSizeX = std::min(targetBlockSizeX, overlapWidth);
         int numBlocksY = verticalBlockHeightLocal / blockSizeY;
@@ -295,8 +299,6 @@ void Blocking::ComputeBlockValuesBlocked(
         int srcXOffset = overlapType == both ? overlapWidth : 0;
 
         // Compute blocking parameters; TODO magic numbers
-        int targetBlockSizeY = 100;
-        int targetBlockSizeX = 100;
         int blockSizeY = std::min(targetBlockSizeY, overlapHeight);
         int blockSizeX = std::min(targetBlockSizeX, horizontalBlockWidthLocal);
         int numBlocksY = overlapHeight / blockSizeY;
@@ -353,10 +355,13 @@ void Blocking::ComputeBlockValuesBlocked(
 }
 
 // Block computing the block values
-void Blocking::Blocked(ImgData* imgData, int seed) {
-    Blocking imageQuilting(imgData);
-    imageQuilting.optType = blocking;
-    imageQuilting.Synthesis(seed);
+Testing::TestFunction Blocking::Blocked(int blockSize) {
+    return [=](ImgData* imgData, int seed) {
+        Blocking imageQuilting(imgData);
+        imageQuilting.optType = blocking;
+        imageQuilting.SetBlockSize(blockSize, blockSize);
+        imageQuilting.Synthesis(seed);
+    };
 }
 
 // Block computing the block values

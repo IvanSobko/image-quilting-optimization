@@ -1,6 +1,7 @@
 #pragma once
 
 #include "ImgData.h"
+#include "Testing.h"
 
 class Blocking {
    public:
@@ -47,10 +48,13 @@ class Blocking {
     static void RefactorComponent(ImgData* imgData, int seed);
 
     // Block computing the block values
+    int targetBlockSizeY = 1;
+    int targetBlockSizeX = 1;
+    void SetBlockSize(int blockSizeY, int blockSizeX);
     void ComputeBlockValuesBlocked(
         int dstY, int dstX, int maxBlockY, int maxBlockX, int overlapType,
         BlockValue* blockValues);
-    static void Blocked(ImgData* imgData, int seed);
+    static Testing::TestFunction Blocked(int blockSize);
     static void BlockedComponent(ImgData* imgData, int seed);
 
     // Helper function to block the vertical overlap
