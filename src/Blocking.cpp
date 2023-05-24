@@ -9,8 +9,8 @@
 void Blocking::SetParameters(ImgData* imgData) {
     imgData->output_h = 2 * imgData->height;
     imgData->output_w = 2 * imgData->width;
-    imgData->block_h = imgData->height / 4 * 3;
-    imgData->block_w = imgData->width / 4 * 3;
+    imgData->block_h = imgData->height / 4;
+    imgData->block_w = imgData->width / 4;
 }
 
 // Get the parameters required to call a component test function
@@ -205,12 +205,14 @@ void Blocking::ComputeBlockValuesBlocked(
     }
 
     // Compute the block sizes; TODO magic numbers
-    int blockSizeY = 1;
-    int blockSizeX = 1;
+    int targetBlockSizeY = 100;
+    int targetBlockSizeX = 100;
+    int blockSizeY = std::min(targetBlockSizeY, verticalBlockHeightLocal);
+    int blockSizeX = std::min(targetBlockSizeX, overlapWidth);
     int numBlocksY = verticalBlockHeightLocal / blockSizeY;
     int remainderY = verticalBlockHeightLocal % blockSizeY;
     int numBlocksX = overlapWidth / blockSizeX;
-    int remainderX = overlapWidth / blockSizeX;
+    int remainderX = overlapWidth % blockSizeX;
 
     // Compute the vertical overlap
     if (overlapType == vertical || overlapType == both) {
@@ -222,6 +224,34 @@ void Blocking::ComputeBlockValuesBlocked(
             for (int j = 0; j < numBlocksX; j++) {
                 int jMin = j * blockSizeX;
                 int jMax = jMin + blockSizeX;
+                BlockingHelperVertical(
+                    iMin, iMax, jMin, jMax,
+                    dstY, overlapXStart, maxBlockY, maxBlockX, srcYOffset, blockValues);
+            }
+            // If there is an x remainder, handle it
+            if (remainderX > 0) {
+                int jMin = numBlocksX * blockSizeX;
+                int jMax = jMin + remainderX;
+                BlockingHelperVertical(
+                    iMin, iMax, jMin, jMax,
+                    dstY, overlapXStart, maxBlockY, maxBlockX, srcYOffset, blockValues);
+            }
+        }
+        // If there s a y remainder, handle it
+        if (remainderY > 0) {
+            int iMin = numBlocksY * blockSizeY;
+            int iMax = iMin + remainderY;
+            for (int j = 0; j < numBlocksX; j++) {
+                int jMin = j * blockSizeX;
+                int jMax = jMin + blockSizeX;
+                BlockingHelperVertical(
+                    iMin, iMax, jMin, jMax,
+                    dstY, overlapXStart, maxBlockY, maxBlockX, srcYOffset, blockValues);
+            }
+            // If there is an x remainder, handle it
+            if (remainderX > 0) {
+                int jMin = numBlocksX * blockSizeX;
+                int jMax = jMin + remainderX;
                 BlockingHelperVertical(
                     iMin, iMax, jMin, jMax,
                     dstY, overlapXStart, maxBlockY, maxBlockX, srcYOffset, blockValues);
