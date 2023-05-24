@@ -94,7 +94,12 @@ int main(int argc, char* argv[]) {
         //testing.RegisterTestFunction(Testing::ImageQuiltingFunction, "default");
         testing.RegisterTestFunction(Blocking::Base, "base");
         testing.RegisterTestFunction(Blocking::Refactor, "refactor");
-        testing.RegisterTestFunction(Blocking::Blocked, "blocking");
+        for (int i = 4; i < 9; i++) {
+            int blockSize = 1 << i;
+            std::string blockSizeString = std::to_string(blockSize);
+            std::string label = "blocking " + blockSizeString + "x" + blockSizeString;
+            testing.RegisterTestFunction(Blocking::Blocked(blockSize), label);
+        }
         std::cout << std::endl;
         testing.TestCorrectnessAndTiming(stabilize);
 
