@@ -271,8 +271,11 @@ void Testing::TestCorrectnessAndTiming(bool stabilize) {
             outputImgData.height, outputImgData.width);
 
         // Print the correctness
-        if (error == 0)  std::cout << label << " is correct" << std::endl;
-        else std::cout<< label << " is incorrect" << std::endl;
+        if (std::abs(error) < 1e-8f) {
+            std::cout << label << " is correct" << std::endl;
+        } else {
+            std::cout << label << " is incorrect" << std::endl;
+        }
 
         // Compute the timing
         double cycles = rdtsc(testFunction, &inputImgData, seed);
