@@ -21,14 +21,14 @@ add_executable(team19
         src/Blocking.cpp)
 
 # We can use different compiler flags
-#set(CompileFlags "-O3" "-ffast-math" "-march=native")
-#add_definitions(-D_CompileFlags="-O3-ffast-math-march=native") # pass variable _CompileFlags to c++ code
+set(CompileFlags "-O3" "-ffast-math" "-march=native")
+add_definitions(-D_CompileFlags="-O3-ffast-math-march=native") # pass variable _CompileFlags to c++ code
 
 #set(CompileFlags "-O3" "-fno-tree-vectorize")
 #add_definitions(-D_CompileFlags="-O3-fno-tree-vectorize")
 
-set(CompileFlags "-O1")
-add_definitions(-D_CompileFlags="-O1")
+#set(CompileFlags "-O1")
+#add_definitions(-D_CompileFlags="-O1")
 
 target_compile_options(team19 PRIVATE ${CompileFlags})
 
