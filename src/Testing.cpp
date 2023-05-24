@@ -5,6 +5,9 @@ Testing::Testing(int seed) {
     // Set the seed
     this->seed = seed;
 
+    // Initialize the parameter function
+    parameterFunction = DefaultParameters;
+
     // https://stackoverflow.com/questions/612097/how-can-i-get-the-list-of-files-in-a-directory-using-c-or-c
     // Construct the vector of input files
     for (const auto & inputPath : std::filesystem::directory_iterator(inputDirectory)){
@@ -23,12 +26,22 @@ std::string Testing::GetOutputfile(const std::filesystem::path & input) {
     return outputDirectory + input.stem().string() + input.extension().string();
 }
 
-// Set the image quilting algorithm parameters
-void Testing::SetImageQuiltingParameters(ImgData* imgData) {
+// Default image quilting algorithm parameters
+void Testing::DefaultParameters(ImgData* imgData) {
     imgData->output_h = 2 * imgData->height;
     imgData->output_w = 2 * imgData->width;
     imgData->block_h = imgData->height / 4;
     imgData->block_w = imgData->width / 4;
+}
+
+// Call the parameter function to set the image quilting algorithm parameters
+void Testing::SetImageQuiltingParameters(ImgData* imgData) {
+    parameterFunction(imgData);
+}
+
+// Set the image quilting parameters function
+void Testing::SetParameterFunction(const ImgDataFunction & parameterFunction) {
+    this->parameterFunction = parameterFunction;
 }
 
 // Run the image quilting algorithm on all the input files to generate the output files
