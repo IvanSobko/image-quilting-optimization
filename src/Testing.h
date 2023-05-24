@@ -6,6 +6,7 @@
 #include <functional>
 #include <cmath>
 #include <tuple>
+#include <map>
 
 #include "PngReader.h"
 #include "ImageQuilting.h"
@@ -41,11 +42,13 @@ class Testing {
     // Register a component function to test
     void RegisterComponentTestFunction(
         const TestFunction & baseFunction, const TestFunction & testFunction, std::string label);
-    // Test the correctness of all the registered functions
+    // Test the correctness of all the registered functions on every input
     void TestCorrectness();
-    // Test the correctness and timing of all the registered test functions
+    // Set the input for the TestCorrectnessAndTiming test suite
+    void SetCorrectnessAndTimingInput(const std::string & label);
+    // Test the correctness and timing of all the registered test functions against the specified input
     void TestCorrectnessAndTiming(bool stabilize);
-    // Test the correctness and timing of all the registered component test functions
+    // Test the correctness and timing of all the registered component test functions against the specified input
     void TestComponentsTiming(bool stabilize);
 
    private:
@@ -53,9 +56,11 @@ class Testing {
     const std::string outputDirectory = "./testing/output/";
     int seed = 0;
     std::vector<std::filesystem::path> inputPaths;
+    std::map<std::string, int> inputLabelsToIndices;
     std::vector<std::pair<TestFunction, std::string>> testFunctions;
     std::vector<std::tuple<TestFunction, TestFunction, std::string>> testComponentFunctions;
     ImgDataFunction parameterFunction;
+    int testingInputIndex = 0;
 
     // Get the output file path
     std::string GetOutputfile(const std::filesystem::path & input);
