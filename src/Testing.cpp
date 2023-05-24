@@ -12,7 +12,6 @@ Testing::Testing(int seed) {
     // Construct the vector of input files
     for (const std::filesystem::path & inputPath : std::filesystem::directory_iterator(inputDirectory)){
         inputPaths.push_back(inputPath);
-        std::cout << inputPath << std::endl;
         inputLabelsToIndices.emplace(inputPath.filename().string(), inputPaths.size()-1);
     }
 }
