@@ -204,19 +204,20 @@ void Blocking::ComputeBlockValuesBlocked(
         }
     }
 
-    // Compute the block sizes; TODO magic numbers
-    int targetBlockSizeY = 100;
-    int targetBlockSizeX = 100;
-    int blockSizeY = std::min(targetBlockSizeY, verticalBlockHeightLocal);
-    int blockSizeX = std::min(targetBlockSizeX, overlapWidth);
-    int numBlocksY = verticalBlockHeightLocal / blockSizeY;
-    int remainderY = verticalBlockHeightLocal % blockSizeY;
-    int numBlocksX = overlapWidth / blockSizeX;
-    int remainderX = overlapWidth % blockSizeX;
-
     // Compute the vertical overlap
     if (overlapType == vertical || overlapType == both) {
         int srcYOffset = overlapType == both ? overlapHeight : 0;
+
+        // Compute blocking parameters; TODO magic numbers
+        int targetBlockSizeY = 100;
+        int targetBlockSizeX = 100;
+        int blockSizeY = std::min(targetBlockSizeY, verticalBlockHeightLocal);
+        int blockSizeX = std::min(targetBlockSizeX, overlapWidth);
+        int numBlocksY = verticalBlockHeightLocal / blockSizeY;
+        int remainderY = verticalBlockHeightLocal % blockSizeY;
+        int numBlocksX = overlapWidth / blockSizeX;
+        int remainderX = overlapWidth % blockSizeX;
+
         // Iterate over the overlap region
         for (int i = 0; i < numBlocksY; i++) {
             int iMin = i * blockSizeY;
