@@ -81,10 +81,15 @@ void Blocking::ComputeBlockValuesRefactor(
     int srcYOffset = overlapType == both ? overlapHeight : 0;
     int srcXOffset = overlapType == both ? overlapWidth : 0;
 
-    // Initialize the block values to zero
-    int numBlockValues = maxBlockY * maxBlockX;
-    for (int i = 0; i < numBlockValues; i++)
-        blockValues[i].value = 0;
+    // Initialize the block values
+    for (int i = 0; i < maxBlockY; i++){
+        for (int j = 0; j < maxBlockX; j++){
+            int blockIndex = i * maxBlockX + j;
+            blockValues[blockIndex].y = i;
+            blockValues[blockIndex].x = j;
+            blockValues[blockIndex].value = 0;
+        }
+    }
 
     // Compute the vertical overlap
     if (overlapType == vertical || overlapType == both) {
@@ -168,6 +173,7 @@ void Blocking::ComputeBlockValuesRefactor(
     }
 
     // Apply the square root to each of the block values
+    int numBlockValues = maxBlockY * maxBlockX;
     for (int i = 0; i < numBlockValues; i++)
         blockValues[i].value = std::sqrt(blockValues[i].value);
 }
