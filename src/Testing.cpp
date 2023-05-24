@@ -10,8 +10,10 @@ Testing::Testing(int seed) {
 
     // https://stackoverflow.com/questions/612097/how-can-i-get-the-list-of-files-in-a-directory-using-c-or-c
     // Construct the vector of input files
-    for (const auto & inputPath : std::filesystem::directory_iterator(inputDirectory)){
+    for (const std::filesystem::path & inputPath : std::filesystem::directory_iterator(inputDirectory)){
         inputPaths.push_back(inputPath);
+        std::cout << inputPath << std::endl;
+        inputLabelsToIndices.emplace(inputPath.filename().string(), inputPaths.size()-1);
     }
 }
 
@@ -169,6 +171,17 @@ void Testing::TestCorrectness() {
     }
 }
 
+// Set the input for the TestCorrectnessAndTiming test suite
+void Testing::SetCorrectnessAndTimingInput(const std::string & label) {
+    if (auto search = inputLabelsToIndices.find(label); search != inputLabelsToIndices.end()) {
+        testingInputIndex = search->second;
+        std::cout << "Set TestCorrectnessAndTiming input to \"" << label << "\"" << std::endl;
+    }
+    else {
+        std::cout << "Input with label \"" << label << "\" not found" << std::endl;
+    }
+}
+
 // Count the number of cycles of a testFunction call
 double Testing::rdtsc(const TestFunction& testFunction, ImgData* inputData, int seed) {
     double cycles = 0;
@@ -211,8 +224,8 @@ double Testing::rdtsc(const TestFunction& testFunction, ImgData* inputData, int 
 
 // Test the correctness and timing of all the registered test functions
 void Testing::TestCorrectnessAndTiming(bool stabilize) {
-    // Use the first input
-    auto input = inputPaths[0];
+    // Use the specified input
+    auto input = inputPaths[testingInputIndex];
 
     // Read the input image
     ImgData inputImgData;
