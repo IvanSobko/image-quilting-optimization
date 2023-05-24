@@ -635,25 +635,26 @@ double CompOverlapOptimiz::ComputeOverlapVectorize(int overlapType, int dstY, in
                 __m128i dst = _mm_load_si128((__m128i*)(outputRow + j * 4));
                 __m128i src = _mm_load_si128((__m128i*)(srcRow + j * 4));
 
-                // now each value is int16, we need it to avoid overflow problems
-                __m256i dst_16bit = _mm256_cvtepu8_epi16(dst);
-                __m256i src_16bit = _mm256_cvtepu8_epi16(src);
-                __m256i diff = _mm256_sub_epi16(dst_16bit, src_16bit);
+                // convert to 2 vectors of 8xint32
+                __m256i dst32_low = _mm256_cvtepu8_epi32( dst);
+                __m256i dst32_high = _mm256_cvtepu16_epi32( _mm_unpackhi_epi8(dst, _mm_setzero_si128()));
+                __m256i src32_low = _mm256_cvtepu8_epi32( src);
+                __m256i src32_high = _mm256_cvtepu16_epi32( _mm_unpackhi_epi8(src, _mm_setzero_si128()));
 
-                // convert diff to int32, again: to avoid overflow
-                __m256i diff_high = _mm256_cvtepi16_epi32(_mm256_castsi256_si128(diff));
-                __m256i diff_low = _mm256_cvtepi16_epi32(_mm256_extractf128_si256(diff, 1));
+                __m256i diff_low = _mm256_sub_epi32(dst32_low, src32_low);
+                __m256i diff_high =  _mm256_sub_epi32(dst32_high, src32_high);
 
-                __m256i norm_high = _mm256_mullo_epi32(diff_high, diff_high);
+                // we need mullo because mul give int64 as result
                 __m256i norm_low = _mm256_mullo_epi32(diff_low, diff_low);
+                __m256i norm_high = _mm256_mullo_epi32(diff_high, diff_high);
 
                 __m256i norm_sum = _mm256_add_epi32(norm_high, norm_low);
-
                 // The hadd instruction is inefficient, and may be split into two instructions for faster decoding
                 __m128i sum =
                     _mm_add_epi32(_mm256_extracti128_si256(norm_sum, 1), _mm256_castsi256_si128(norm_sum));
                 sum = _mm_add_epi32(sum, _mm_unpackhi_epi64(sum, sum));
                 sum = _mm_add_epi32(sum, _mm_shuffle_epi32(sum, 1));
+
                 l2norm += _mm_cvtsi128_si32(sum);
             }
         }
@@ -673,25 +674,26 @@ double CompOverlapOptimiz::ComputeOverlapVectorize(int overlapType, int dstY, in
                 __m128i dst = _mm_load_si128((__m128i*)(outputRow + j * 4));
                 __m128i src = _mm_load_si128((__m128i*)(srcRow + j * 4));
 
-                // now each value is int16, we need it to avoid overflow problems
-                __m256i dst_16bit = _mm256_cvtepu8_epi16(dst);
-                __m256i src_16bit = _mm256_cvtepu8_epi16(src);
-                __m256i diff = _mm256_sub_epi16(dst_16bit, src_16bit);
+                //convert to 2 vectors of 8xint32
+                __m256i dst32_low = _mm256_cvtepu8_epi32( dst);
+                __m256i dst32_high = _mm256_cvtepu16_epi32( _mm_unpackhi_epi8(dst, _mm_setzero_si128()));
+                __m256i src32_low = _mm256_cvtepu8_epi32( src);
+                __m256i src32_high = _mm256_cvtepu16_epi32( _mm_unpackhi_epi8(src, _mm_setzero_si128()));
 
-                // convert diff to int32, again: to avoid overflow
-                __m256i diff_high = _mm256_cvtepi16_epi32(_mm256_castsi256_si128(diff));
-                __m256i diff_low = _mm256_cvtepi16_epi32(_mm256_extractf128_si256(diff, 1));
+                __m256i diff_low = _mm256_sub_epi32(dst32_low, src32_low);
+                __m256i diff_high =  _mm256_sub_epi32(dst32_high, src32_high);
 
-                __m256i norm_high = _mm256_mul_epi32(diff_high, diff_high);
-                __m256i norm_low = _mm256_mul_epi32(diff_low, diff_low);
+                // we need mullo because mul give int64 as result
+                __m256i norm_low = _mm256_mullo_epi32(diff_low, diff_low);
+                __m256i norm_high = _mm256_mullo_epi32(diff_high, diff_high);
 
                 __m256i norm_sum = _mm256_add_epi32(norm_high, norm_low);
-
                 // The hadd instruction is inefficient, and may be split into two instructions for faster decoding
                 __m128i sum =
                     _mm_add_epi32(_mm256_extracti128_si256(norm_sum, 1), _mm256_castsi256_si128(norm_sum));
                 sum = _mm_add_epi32(sum, _mm_unpackhi_epi64(sum, sum));
                 sum = _mm_add_epi32(sum, _mm_shuffle_epi32(sum, 1));
+
                 l2norm += _mm_cvtsi128_si32(sum);
             }
         }
