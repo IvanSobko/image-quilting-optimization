@@ -293,11 +293,55 @@ void Blocking::ComputeBlockValuesBlocked(
     // Compute the horizontal overlap (+ corner if needed)
     if (overlapType == horizontal || overlapType == both) {
         int srcXOffset = overlapType == both ? overlapWidth : 0;
+
+        // Compute blocking parameters; TODO magic numbers
+        int targetBlockSizeY = 100;
+        int targetBlockSizeX = 100;
+        int blockSizeY = std::min(targetBlockSizeY, overlapHeight);
+        int blockSizeX = std::min(targetBlockSizeX, horizontalBlockWidthLocal);
+        int numBlocksY = overlapHeight / blockSizeY;
+        int remainderY = overlapHeight % blockSizeY;
+        int numBlocksX = horizontalBlockWidthLocal / blockSizeX;
+        int remainderX = horizontalBlockWidthLocal % blockSizeX;
+
         // Iterate over the overlap region
-        for (int i = 0; i < overlapHeight; i++) {
-            for (int j = 0; j < horizontalBlockWidthLocal; j++) {
+        for (int i = 0; i < numBlocksY; i++) {
+            int iMin = i * blockSizeY;
+            int iMax = iMin + blockSizeY;
+            for (int j = 0; j < numBlocksX; j++) {
+                int jMin = j * blockSizeX;
+                int jMax = jMin + blockSizeX;
                 BlockingHelperHorizontal(
-                    i, i+1, j, j+1, overlapYStart, overlapXStart, maxBlockY, maxBlockX, blockValues);
+                    iMin, iMax, jMin, jMax,
+                    overlapYStart, overlapXStart, maxBlockY, maxBlockX, blockValues);
+            }
+            // If there is an x remainder, handle it
+            if (remainderX > 0) {
+                int jMin = numBlocksX * blockSizeX;
+                int jMax = jMin + remainderX;
+                BlockingHelperHorizontal(
+                    iMin, iMax, jMin, jMax,
+                    overlapYStart, overlapXStart, maxBlockY, maxBlockX, blockValues);
+            }
+        }
+        // If there is a y remainder, handle it
+        if (remainderY > 0) {
+            int iMin = numBlocksY * blockSizeY;
+            int iMax = iMin + remainderY;
+            for (int j = 0; j < numBlocksX; j++) {
+                int jMin = j * blockSizeX;
+                int jMax = jMin + blockSizeX;
+                BlockingHelperHorizontal(
+                    iMin, iMax, jMin, jMax,
+                    overlapYStart, overlapXStart, maxBlockY, maxBlockX, blockValues);
+            }
+            // If there is an x remainder, handle it
+            if (remainderX > 0) {
+                int jMin = numBlocksX * blockSizeX;
+                int jMax = jMin + remainderX;
+                BlockingHelperHorizontal(
+                    iMin, iMax, jMin, jMax,
+                    overlapYStart, overlapXStart, maxBlockY, maxBlockX, blockValues);
             }
         }
     }
