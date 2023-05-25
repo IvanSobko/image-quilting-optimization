@@ -4,9 +4,15 @@ from matplotlib.ticker import FormatStrFormatter
 
 # Note: set working directory to root of repo
 
-# don't forget to modify these if you generate plot on your pc
-cpu = "AMD Ryzen 7 5800H @3.2GHz"
-compiler = "Compiler: GCC 12.2.0"
+# DO NOT modify here
+cpu_ivan = "AMD Ryzen 7 5800H @3.2GHz"
+cpu_baptiste = "Intel(R) Core(TM) i7-10510U @1.8GHz"
+compiler_ivan = "Compiler: GCC 12.2.0"
+compiler_baptiste = "Compiler: GCC 10.2.1"
+
+# Modify here
+cpu = cpu_baptiste
+compiler = compiler_baptiste
 
 def performance_plot():
     ax = plt.axes()
@@ -16,7 +22,7 @@ def performance_plot():
     plt.grid(axis = 'y', color = 'white')
     plt.title(cpu + ', ' + compiler, loc='left', pad=15)
 
-    for filename in ["timing_results_-O3-ffast-math-march=native.txt", "timing_results_-O3-fno-tree-vectorize.txt", "timing_results_-O1.txt"]:
+    for filename in ["timing_results_-other_implementation_O3-ffast-math-march=native.txt", "timing_results_-O3-ffast-math-march=native.txt", "timing_results_-O3-fno-tree-vectorize.txt", "timing_results_-O1.txt"]:
         data = []
         file = open("./results/" + filename, "r")
         for line in file:
@@ -41,7 +47,7 @@ def runtime_plot():
     plt.grid(axis = 'y', color = 'white')
     plt.title(cpu + ', ' + compiler, loc='left', pad=15)
 
-    for filename in ["timing_results_-O3-ffast-math-march=native.txt", "timing_results_-O3-fno-tree-vectorize.txt", "timing_results_-O1.txt"]:
+    for filename in ["timing_results_-other_implementation_O3-ffast-math-march=native.txt", "timing_results_-O3-ffast-math-march=native.txt", "timing_results_-O3-fno-tree-vectorize.txt", "timing_results_-O1.txt"]:
         data = []
         file = open("./results/" + filename, "r")
         for line in file:

@@ -116,15 +116,21 @@ We ran performance measurements for different compiler flags: -O3 -ffast-math -m
 
 ## Benchmark alternatives
 
-https://github.com/AirGuanZ/ImageQuilting
+We benchmark the code found at: https://github.com/AirGuanZ/ImageQuilting
 
-In order for the code to run properly, we need to specify the full input and output path:\
+In order to do a performance analysis on this code, simply run `./write_result` in the `src/benchmarking/other_implementation` directory. 
 
-```./ImageQuilting --input=./gallery/input0_24x24.png --output=./gallery/output.png --blockW=12 --blockH=12 --width=48 --height=48```
+This will write the benchmark to the file:
 
-And not:\
+```results/timing_results_other_implementation_-O3-ffast-math-march=native.txt```
 
-```/ImageQuilting --input=input0_24x24.png --output=output.png --blockW=12 --blockH=12 --width=48 --height=48```
+We can then regenerate a performance plot by running:
+
+```python3 src/benchmarking/performance_plot.py```
+
+And a runtime plot by running:
+
+```python3 src/benchmarking/runtime_plot.py```
 
 ## Bottlenecks
 The major bottleneck in our code is the ComputeOverlap function that estimates the L2 loss function for all possible blocks in all possible 

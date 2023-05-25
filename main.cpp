@@ -35,6 +35,8 @@ void parse_args(int argc, char* argv[]) {
             img_data.block_w = std::stoi(val);
         } else if (par == "--blockH") {
             img_data.block_h = std::stoi(val);
+        } else if (par == "--timing") {
+            runTiming = true;
         } else if (par == "--generate") {
             generate = true;
         } else if (par == "--test") {
@@ -72,7 +74,9 @@ int main(int argc, char* argv[]) {
 
     // Benchmarking
     if (runTiming) {
-        timing::run_timing();
+        timing::run_timing(2);
+        // timing::run_timing(4);
+        // timing::run_timing(8);
     }
     // Generate output for testing
     else if (generate) {

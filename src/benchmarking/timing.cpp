@@ -12,7 +12,7 @@
 #define RDTSC_LATENCY 26
 #define REP 2
 
-void timing::run_timing() {
+void timing::run_timing(int inputBlockRatio) {
     std::vector<std::string> files = read_files("./gallery", "input0_");
     if (files.empty()) {
         perror("Failed to collect files for timing");
@@ -21,9 +21,11 @@ void timing::run_timing() {
 
     FILE* results_txt = NULL;
     std::string filename = "timing_results_default_flags.txt";
-#ifdef _CompileFlags // get variable _CompileFlags from CmakeLists.txt
-    filename = std::string("timing_results_") + _CompileFlags + ".txt";
-#endif
+
+    #ifdef _CompileFlags // get variable _CompileFlags from CmakeLists.txt
+        filename = std::string("timing_results_") + _CompileFlags + ".txt";
+    #endif
+    
     std::string results_path = std::string("results") + '/' + filename;
     results_txt = fopen(results_path.c_str(), "w");
 
@@ -33,8 +35,8 @@ void timing::run_timing() {
         file::read_png_file(files[i].c_str(), img_data);
         img_data.output_w = img_data.width * 2;
         img_data.output_h = img_data.height * 2;
-        img_data.block_w = img_data.width / 2;
-        img_data.block_h = img_data.height / 2;
+        img_data.block_w = img_data.width / inputBlockRatio;
+        img_data.block_h = img_data.height / inputBlockRatio;
         img_data.AllocateOutput();
 
         ImageQuilting quilting(&img_data);

@@ -7,7 +7,7 @@
 
 namespace timing {
 
-void run_timing();
+void run_timing(int inputBlockRatio);
 double rdtsc(ImageQuilting* quilting);
 
 std::vector<std::string> read_files(const std::string &directory, const std::string &filename_filter);
