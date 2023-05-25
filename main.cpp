@@ -5,6 +5,7 @@
 
 #include "Testing.h"
 #include "src/CompOverlapOptimiz.h"
+#include "src/AdvanceAlgOptimiz.h"
 #include "src/benchmarking/timing.h"
 
 // input parameters
@@ -95,6 +96,7 @@ int main(int argc, char* argv[]) {
         testing.RegisterTestFunction(CompOverlapOptimiz::BasicOpt, "compBasic");
         testing.RegisterTestFunction(CompOverlapOptimiz::AlgOpt, "compBasic+AlgImpr");
         testing.RegisterTestFunction(CompOverlapOptimiz::UnrollOpt, "compBasic+AlgImpr+Unroll");
+        testing.RegisterTestFunction(AdvanceAlgOptimiz::DividedFuncOpt, "Unroll+DividedFunctions");
         testing.RegisterTestFunction(CompOverlapOptimiz::UnrollMaxOpt, "compBasic+AlgImpr+UnrollTheoreticalMax");
         testing.RegisterTestFunction(CompOverlapOptimiz::VectorizeOpt, "compBasic+AlgImpr+Unroll+Vectorize");
 

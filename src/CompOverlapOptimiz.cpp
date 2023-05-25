@@ -520,7 +520,8 @@ double CompOverlapOptimiz::ComputeOverlapUnroll(int overlapType, int dstY, int d
         for (int i = 0; i < overlapHeight; i++) {
             unsigned char* outputRow = mData->output_d[overlapYStart + i] + dstXStart;
             unsigned char* srcRow = mData->data[srcY + i] + srcXStart;
-            for (int j = 0; j < horizontalBlockWidthLocal; j += 2) {
+            int j;
+            for (j = 0; j < horizontalBlockWidthLocal-1; j += 2) {
                 int rDst1 = *(outputRow++);
                 int rSrc1 = *(srcRow++);
                 int gDst1 = *(outputRow++);
@@ -564,6 +565,23 @@ double CompOverlapOptimiz::ComputeOverlapUnroll(int overlapType, int dstY, int d
 
                 l2norm += sum1 + sum2;
             }
+            for (;j < horizontalBlockWidthLocal; j++) {
+                int rDst = *(outputRow++);
+                int rSrc = *(srcRow++);
+                int gDst = *(outputRow++);
+                int gSrc = *(srcRow++);
+                int bDst = *(outputRow++);
+                int bSrc = *(srcRow++);
+                int aDst = *(outputRow++);
+                int aSrc = *(srcRow++);
+
+                int rDiff = rDst - rSrc;
+                int gDiff = gDst - gSrc;
+                int bDiff = bDst - bSrc;
+                int aDiff = aDst - aSrc;
+
+                l2norm += rDiff * rDiff + gDiff * gDiff + bDiff * bDiff + aDiff * aDiff;
+            }
         }
     }
 
@@ -576,7 +594,8 @@ double CompOverlapOptimiz::ComputeOverlapUnroll(int overlapType, int dstY, int d
         for (int i = 0; i < verticalBlockHeightLocal; i++) {
             unsigned char* outputRow = mData->output_d[dstY + i] + dstXStart;
             unsigned char* srcRow = mData->data[srcYStart + i] + srcXStart;
-            for (int j = 0; j < overlapWidth; j += 2) {
+            int j;
+            for (j = 0; j < overlapWidth-1; j += 2) {
                 int rDst1 = *(outputRow++);
                 int rSrc1 = *(srcRow++);
                 int gDst1 = *(outputRow++);
@@ -619,6 +638,23 @@ double CompOverlapOptimiz::ComputeOverlapUnroll(int overlapType, int dstY, int d
                 int sum2 = rNorm2 + gNorm2 + bNorm2 + aNorm2;
 
                 l2norm += sum1 + sum2;
+            }
+            for (;j < overlapWidth; j++) {
+                int rDst = *(outputRow++);
+                int rSrc = *(srcRow++);
+                int gDst = *(outputRow++);
+                int gSrc = *(srcRow++);
+                int bDst = *(outputRow++);
+                int bSrc = *(srcRow++);
+                int aDst = *(outputRow++);
+                int aSrc = *(srcRow++);
+
+                int rDiff = rDst - rSrc;
+                int gDiff = gDst - gSrc;
+                int bDiff = bDst - bSrc;
+                int aDiff = aDst - aSrc;
+
+                l2norm += rDiff * rDiff + gDiff * gDiff + bDiff * bDiff + aDiff * aDiff;
             }
         }
     }
@@ -791,7 +827,7 @@ double CompOverlapOptimiz::ComputeOverlapUnrollMax(int overlapType, int dstY, in
                 int bDiff = bDst - bSrc;
                 int aDiff = aDst - aSrc;
 
-                l2norm +=  rDiff * rDiff + gDiff * gDiff + bDiff * bDiff + aDiff * aDiff;
+                l2norm += rDiff * rDiff + gDiff * gDiff + bDiff * bDiff + aDiff * aDiff;
             }
         }
     }
