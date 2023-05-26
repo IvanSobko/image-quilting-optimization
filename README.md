@@ -145,8 +145,12 @@ positions. By performing profiling analysis with DTrace tool, we can see that Co
 2. Everything is a c-style array except for the one structure holding all the algorithm's relevant information; we can get rid of all the indirection with the struct references.
 3. Basic block optimization: loop unrolling with scalar replacement and optimization of dependencies / ILP for computing the overlap error and in computing the minimum cuts. We will apply these optimizations to the following three intensive functions:
    * ComputeOverlap (Svitlana, Ivan).
-   * WriteBlockOverlapWithMinCut (Tal, Baptiste).
    * PlaceEdgeOverlapBlockWithMinCut (TBD).
+
+#### WriteBlockOverlapWithMinCut (Tal, Baptiste)
+We applied index precomputation. We choose to unroll the computation for the error surfaces because the computation for each channel and the computation for each pair of pixels is independant. For computing the error surfaces, we fully unrolled the color channel k loop, and we unrolled the column loop j by 2. We did not choose to unroll the dynamic programming computations because there is no path parallelism.
+
+We found that these three optimizations made no noticiable impact on the runtime of the entire algorithm. This makes sense, since our first flame graph illustrated that calls to the `WriteBlockOverlapWithMinCut` function take up 3% of the algorithm's runtime whereas calls to the `ComputeOverlap` function take up to 85% of the algorithm's runtime. As a sanity check, we timed the individual function on random input data, and we found that TODO
 
 ### Advanced
 1. Divide functions into 2 types, with and without bound checks. (Svitlana, Ivan).
@@ -154,7 +158,6 @@ positions. By performing profiling analysis with DTrace tool, we can see that Co
 3. In the second stage of the algorithm, we compute the error between one block of the output texture and every block of the input texture. We have spatial locality because we access the matrices row-by-row, but more importantly, we re-use the entire block of the output texture to compute the error multiple times. This suggests that we should create a blocked version of the function so that we can keep some region of the output texture entirely in cache and reduce the number of cache misses. Auto-tuning infrastructure for block sizes. (Tal, Baptiste).
 4. In order to compute the horizontal minimum cut, our dynamic programming traverses the overlap region column by column, which means that we don't have spatial locality. (Svitlana, Ivan).
 5. Vectorization of L2 loss function calculation. (Svitlana, Ivan).
-
 
 ## Instruction-Level Parallelism
 The most common calculation in this algorithm is the computation of the L2 error function between different overlap regions.
