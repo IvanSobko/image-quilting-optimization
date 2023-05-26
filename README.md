@@ -165,14 +165,16 @@ that we won't wait unnecessary time till computations are finished.
 We have 4 independent subtractions, 4 multiplication, and 4 final additions per iteration. We can perform adds/subs on 4 ports, and mults only on 1 of these 4 ports. So multiplication is going to be the bottleneck of the computation. Without taking into account dependencies, the best runtime per iteration: max(4 {1 mult per cycle}, 8/3 {3 adds/subs per cycle}) = 4 cycles per pixel if we won't wait for any computations to finish. Here is the dependency graph:
 
 <p align="center">
-   <img src="./docs/DependencyGraph.png" width=75%>
+   <img src="./docs/DependencyGraph.png" width=85%>
 </p>
 
-Because of the dependencies we need more that twice longer for iteration. The most important part is to improve efficiency during multiplications - to also use other ports to perform additions. But after the analysis of unrolling by different strides (2/4), we understood that we will always be limited by multiplications. With bigger stride we will improve the multiplication for first pixels (we will make them in parallel with the subtraction of next pixels), but we will still have to wait for the multiplication of next pixels values. The best way is not manually unroll, but force compiler to perform all possible additions and multiplications in parallel, and sum all of these values together only in the end:
+Because of the dependencies we need more that twice more time per iteration. The most important part is to improve efficiency during multiplications - also use other ports to perform additions. Because we have twice as many additions as multiplication, but also the throughput of additions is bigger by 4, the best that we can hope for is to parallelize a bit more than half of all multiplications. We can parallelize half of the multiplication with stride equal to 4: first pixel channels multiplication are parallel with subtractions; last pixel channels multiplication are parallel with final additions:
 
 <p align="center">
-   <img src="./docs/Unrolling.png" width=75%>
+   <img src="./docs/Unroll.png" width=85%>
 </p>
+
+Even though this is the best option in theory (with stride=2 runtime is 6.5 cycles per pixel), it's not the best one in practice, probably because we already have too many accumulators. 
 
 ## Questions
 1. We have a lot of integer computations that can be vectorized nicely. For now, we change pixels values to double to 

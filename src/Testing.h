@@ -15,7 +15,7 @@
 // Defines for timing
 #define CYCLES_REQUIRED 1e8
 #define RDTSC_LATENCY 26
-#define REP 2
+#define REP 5
 
 class Testing {
    public:

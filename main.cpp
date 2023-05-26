@@ -4,6 +4,8 @@
 #include "PngReader.h"
 
 #include "Testing.h"
+#include "src/CompOverlapOptimiz.h"
+#include "src/AdvanceAlgOptimiz.h"
 #include "src/benchmarking/timing.h"
 
 // input parameters
@@ -14,7 +16,7 @@ ImgData img_data;
 bool runTiming = false;
 bool generate = false;
 bool test = false;
-bool testCorrectnessAndTiming = false;
+bool testCorrectnessAndTiming = true;
 bool stabilize = false;
 
 void parse_args(int argc, char* argv[]) {
@@ -80,22 +82,54 @@ int main(int argc, char* argv[]) {
     }
     // Generate output for testing
     else if (generate) {
-        Testing testing = Testing(0);
+        Testing testing = Testing(2);
         testing.GenerateOutputFiles();
     }
     // Test the correctness of our base implementation
     else if (test) {
         Testing testing = Testing(0);
         testing.RegisterTestFunction(Testing::ImageQuiltingFunction, "default");
+        testing.RegisterTestFunction(CompOverlapOptimiz::BasicOpt, "compBasic");
         testing.TestCorrectness();
     }
     // Test the correctness and timing of the variants of our implementation
     else if (testCorrectnessAndTiming) {
-        Testing testing = Testing(0);
-        for (int i = 0; i < 10; i++)
-            testing.RegisterTestFunction(Testing::ImageQuiltingFunction, "default");
+        Testing testing = Testing(2);
+
+        testing.RegisterTestFunction(Testing::ImageQuiltingFunction, "default");
+        testing.RegisterTestFunction(CompOverlapOptimiz::BasicOpt, "compBasic");
+        testing.RegisterTestFunction(CompOverlapOptimiz::AlgOpt, "compBasic+AlgImpr");
+        testing.RegisterTestFunction(CompOverlapOptimiz::UnrollOpt, "compBasic+AlgImpr+Unroll");
+        testing.RegisterTestFunction(AdvanceAlgOptimiz::DividedFuncOpt, "Unroll+DividedFunctions");
+        testing.RegisterTestFunction(CompOverlapOptimiz::UnrollMaxOpt, "compBasic+AlgImpr+UnrollTheoreticalMax");
+        testing.RegisterTestFunction(CompOverlapOptimiz::VectorizeOpt, "compBasic+AlgImpr+Unroll+Vectorize");
+
         std::cout << std::endl;
         testing.TestCorrectnessAndTiming(stabilize);
+
+        testing.RegisterComponentTestFunction(CompOverlapOptimiz::BaseComponent,
+                                              CompOverlapOptimiz::BaseComponent, "default");
+
+        testing.RegisterComponentTestFunction(CompOverlapOptimiz::BaseComponent,
+                                              CompOverlapOptimiz::BasicOptComponent, "compBasic");
+
+        testing.RegisterComponentTestFunction(CompOverlapOptimiz::BaseComponent,
+                                              CompOverlapOptimiz::AlgoOptComponent, "compBasic+AlgImpr");
+
+        testing.RegisterComponentTestFunction(CompOverlapOptimiz::BaseComponent,
+                                              CompOverlapOptimiz::UnrollOptComponent,
+                                              "compBasic+AlgImpr+Unroll");
+
+        testing.RegisterComponentTestFunction(CompOverlapOptimiz::BaseComponent,
+                                              CompOverlapOptimiz::UnrollMaxOptComponent,
+                                              "compBasic+AlgImpr+UnrollTheoreticalMax");
+
+        testing.RegisterComponentTestFunction(CompOverlapOptimiz::BaseComponent,
+                                              CompOverlapOptimiz::VectorizeOptComponent,
+                                              "compBasic+AlgImpr+Unroll+Vectorize");
+
+        std::cout << std::endl;
+        testing.TestComponentsTiming(stabilize);
     }
     // Main
     else {
@@ -106,7 +140,7 @@ int main(int argc, char* argv[]) {
         // Allocate the output data and run the image quilting algorithm
         img_data.AllocateOutput();
         ImageQuilting imageQuilting(&img_data);
-        imageQuilting.Synthesis();
+        imageQuilting.Synthesis(0);
 
         // Write the output file and free the members of img_data
         file::write_png_file(output_file.c_str(), img_data);
