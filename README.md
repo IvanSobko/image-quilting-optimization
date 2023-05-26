@@ -181,8 +181,19 @@ Even though this is the best option in theory (with stride=2 runtime is 6.5 cycl
 
 ## Vectorisation 
 
+To vectorize ComputeOverlap function we used different intrinsics that operate on 16-bit integers. In each iteration we load 16 unsigned chars 
+into m128i vector and convert it to m256i 16-bit integer to avoid overflow during subtraction and multiplication, that means that we have unroll 
+by 4.  We also calculated latency for each intrinsic and reordered them to minimize wait time .
+All timing was done with max possible compile flag optimizations (-O3-ffast-math-march=native).
 
-#### Blocking (Tal)
+| Performance Plot [Flops/Cycle]                                                | Runtime Plot [Cycles]                                                        |
+|-------------------------------------------------------------------------------|------------------------------------------------------------------------------|
+| <img align="center" src="./results/performance_plot_compOpt.png" width="480"> | <img align="center" src="./results/runtime_plot_compOpt.png" width="480"> |
+
+
+Room to expand: vectorize computing of square root by storing raw values of L2 loss function and then compute roots in vector form.
+
+## Blocking (Tal)
 
 The image quilting algorithm chooses a new block by minimizing the overlap L2 norm between the generated output and every potential block from the input image. While computing the overlap between the output and input overlap regions, there is no re-use since the pixel-pixel differences are computed exactly once. So there would be no benefit from blocking the individual overlap L2 norm computation. However, because the output overlap region is compared to every potential input overlap region, we could block the L2 norm computation so that the entire output overlap region remains in cache.
 
