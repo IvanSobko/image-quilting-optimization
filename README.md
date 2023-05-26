@@ -179,6 +179,9 @@ Because of the dependencies we need more that twice more time per iteration. The
 
 Even though this is the best option in theory (with stride=2 runtime is 6.5 cycles per pixel), it's not the best one in practice, probably because we already have too many accumulators. 
 
+## Vectorisation 
+
+
 #### Blocking (Tal)
 
 The image quilting algorithm chooses a new block by minimizing the overlap L2 norm between the generated output and every potential block from the input image. While computing the overlap between the output and input overlap regions, there is no re-use since the pixel-pixel differences are computed exactly once. So there would be no benefit from blocking the individual overlap L2 norm computation. However, because the output overlap region is compared to every potential input overlap region, we could block the L2 norm computation so that the entire output overlap region remains in cache.
