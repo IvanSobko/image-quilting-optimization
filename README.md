@@ -179,6 +179,19 @@ Because of the dependencies we need more that twice more time per iteration. The
 
 Even though this is the best option in theory (with stride=2 runtime is 6.5 cycles per pixel), it's not the best one in practice, probably because we already have too many accumulators. 
 
+#### Blocking (Tal)
+
+The image quilting algorithm chooses a new block by minimizing the overlap L2 norm between the generated output and every potential block from the input image. While computing the overlap between the output and input overlap regions, there is no re-use since the pixel-pixel differences are computed exactly once. So there would be no benefit from blocking the individual overlap L2 norm computation. However, because the output overlap region is compared to every potential input overlap region, we could block the L2 norm computation so that the entire output overlap region remains in cache.
+
+Let us assume that our blocks are square. We have that overlap width is 1/6 of the block width. Because most of the overlap regions are of the corner type, we have that the most common overlap region contains 2 w^2/6 + w^2/36 = 13/16 w^2 pixels. Our image is represented as an array of unsigned chars, each pixel has four color channels, and an unsigned char is one byte. Hence, the most common overlap region contains 4 * 13/36 w^2 = 13/9 w^2 bytes.
+
+The image quilting algorithm iteratively compares the output region to the input region, which means that 2 * 13/9 w^2 = 26/9 w^2 bytes would need to fit into cache to minimize the number of cache misses. In the case of my Intel Core i7, which has an L1 cache size of 64KiB, the block width would have to be about 150 pixels to fully fill the cache. This means that if we block the overall algorithm, we expect a theoretical performance increase when the block width is greater than 150 pixels. However, in practice, this is not the case. Reordering the loops so that the computation iterates over each pixel of the overlap region exactly once immediately slows down the runtime by a factor of 3. Implementing the blocking after reordering the loops did not change the run time at all, regardless of the block size that we gave it.
+
+Questions:
+* Is our analysis of how much memory the overlap regions require correct? I did not include the array of errors, but it feels like I should still see a performance for large block sizes, and that's not the case.
+* Why does reordering the loops cause such a runtime increase across different block sizes?
+* How can we make sure that our blocking implementation actually is doing what we would like it to do? That is, should we manually inline all of the blocking helper function calls? Should the blocking sizes be #defined so they are determined at run time?
+
 ## Questions
 1. We have a lot of integer computations that can be vectorized nicely. For now, we change pixels values to double to 
 calculate the performance using flops, but maybe we will need to choose another metric (calculating int ops too?) for the 
