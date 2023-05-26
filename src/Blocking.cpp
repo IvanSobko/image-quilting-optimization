@@ -167,17 +167,17 @@ void Blocking::BlockingHelperVertical(
         for (int j = jMin; j < jMax; j++) {
             for (int k = 0; k < CHANNEL_NUM; k++) {
                 // Pixel in the destination overlap region
-                double x0 = mData->output_d[dstY + i][CHANNEL_NUM * (overlapXStart + j) + k];
+                int x0 = mData->output_d[dstY + i][CHANNEL_NUM * (overlapXStart + j) + k];
 
                 // Iterate over the pixels of the different blocks of the input region
                 for (int l = 0; l < maxBlockY; l++) {
                     for (int m = 0; m < maxBlockX; m++) {
                         // Pixel in the source overlap region
-                        double x1 = mData->data[l + srcYOffset + i][CHANNEL_NUM * (m + j) + k];
+                        int x1 = mData->data[l + srcYOffset + i][CHANNEL_NUM * (m + j) + k];
 
                         // Contribution to the L2 norm
-                        double norm = x0 - x1;
-                        double norm2 = norm * norm;
+                        int norm = x0 - x1;
+                        int norm2 = norm * norm;
                         int blockIndex = l * maxBlockX + m;
                         blockValues[blockIndex].value += norm2;
                     }
@@ -197,17 +197,17 @@ void Blocking::BlockingHelperHorizontal(
         for (int j = jMin; j < jMax; j++) {
             for (int k = 0; k < CHANNEL_NUM; k++) {
                 // Pixel in the destination overlap region
-                double x0 = mData->output_d[overlapYStart + i][CHANNEL_NUM * (overlapXStart + j) + k];
+                int x0 = mData->output_d[overlapYStart + i][CHANNEL_NUM * (overlapXStart + j) + k];
 
                 // Iterate over the pixels of the different blocks of the input region
                 for (int l = 0; l < maxBlockY; l++) {
                     for (int m = 0; m < maxBlockX; m++) {
                         // Pixel in the source overlap region
-                        double x1 = mData->data[l + i][CHANNEL_NUM * (m + j) + k];
+                        int x1 = mData->data[l + i][CHANNEL_NUM * (m + j) + k];
 
                         // Contribution to the L2 norm
-                        double norm = x0 - x1;
-                        double norm2 = norm * norm;
+                        int norm = x0 - x1;
+                        int norm2 = norm * norm;
                         int blockIndex = l * maxBlockX + m;
                         blockValues[blockIndex].value += norm2;
                     }
