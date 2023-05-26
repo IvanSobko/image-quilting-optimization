@@ -150,7 +150,7 @@ positions. By performing profiling analysis with DTrace tool, we can see that Co
 #### WriteBlockOverlapWithMinCut (Tal, Baptiste)
 We applied index precomputation. We choose to unroll the computation for the error surfaces because the computation for each channel and the computation for each pair of pixels is independant. For computing the error surfaces, we fully unrolled the color channel k loop, and we unrolled the column loop j by 2. We did not choose to unroll the dynamic programming computations because there is no path parallelism.
 
-We found that these three optimizations made no noticiable impact on the runtime of the entire algorithm. This makes sense, since our first flame graph illustrated that calls to the `WriteBlockOverlapWithMinCut` function take up 3% of the algorithm's runtime whereas calls to the `ComputeOverlap` function take up to 85% of the algorithm's runtime. As a sanity check, we timed the individual function on random input data, and we found that TODO
+We found that these three optimizations made no noticeable impact on the runtime of the entire algorithm. This makes sense, since our first flame graph illustrated that calls to the `WriteBlockOverlapWithMinCut` function take up 3% of the algorithm's runtime whereas calls to the `ComputeOverlap` function take up to 85% of the algorithm's runtime. As a sanity check, we timed the individual function on random input data, and we found that we only got around a 1.2 time speedup; we expected it to be more, but we moved on for now since it is not important to the runtime of the overall algorithm.
 
 ### Advanced
 1. Divide functions into 2 types, with and without bound checks. (Svitlana, Ivan).
