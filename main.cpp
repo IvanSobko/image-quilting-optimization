@@ -77,8 +77,8 @@ int main(int argc, char* argv[]) {
     // Benchmarking
     if (runTiming) {
         timing::run_timing(2);
-        // timing::run_timing(4);
-        // timing::run_timing(8);
+        timing::run_timing(4);
+        timing::run_timing(8);
     }
     // Generate output for testing
     else if (generate) {

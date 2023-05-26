@@ -14,7 +14,7 @@ compiler_baptiste = "Compiler: GCC 10.2.1"
 cpu = cpu_baptiste
 compiler = compiler_baptiste
 
-def performance_plot():
+def performance_plot(blockdiv):
     ax = plt.axes()
     ax.set_facecolor('#f0f0f0')
     plt.xlabel(xlabel="Pixel count")
@@ -22,9 +22,9 @@ def performance_plot():
     plt.grid(axis = 'y', color = 'white')
     plt.title(cpu + ', ' + compiler, loc='left', pad=15)
 
-    for filename in ["timing_results_-other_implementation_O3-ffast-math-march=native.txt", "timing_results_-O3-ffast-math-march=native.txt", "timing_results_-O3-fno-tree-vectorize.txt", "timing_results_-O1.txt"]:
+    for filename in ["timing_results_-BASE_O3-ffast-math-march=native.txt", "timing_results_-O3-ffast-math-march=native.txt", "timing_results_-O3-fno-tree-vectorize.txt", "timing_results_-O1.txt"]:
         data = []
-        file = open("./results/" + filename, "r")
+        file = open("./results/blockdiv_" + str(blockdiv) + "/" + filename, "r")
         for line in file:
             x_value = int(line.split('n=')[1].split(',')[0])
             y_value = float(line.split('performance=')[1].split(',')[0])
@@ -37,9 +37,9 @@ def performance_plot():
         label = filename.split('_-')[1].split('.txt')[0]
         plt.plot(*zip(*data), '-o', label=label)
     plt.legend()
-    plt.savefig("./results/performance_plot.png")
+    plt.savefig("./results/blockdiv_" + str(blockdiv) + "/" + "performance_plot.png")
 
-def runtime_plot():
+def runtime_plot(blockdiv):
     ax = plt.axes()
     ax.set_facecolor('#f0f0f0')
     plt.xlabel(xlabel="Pixel count")
@@ -47,9 +47,9 @@ def runtime_plot():
     plt.grid(axis = 'y', color = 'white')
     plt.title(cpu + ', ' + compiler, loc='left', pad=15)
 
-    for filename in ["timing_results_-other_implementation_O3-ffast-math-march=native.txt", "timing_results_-O3-ffast-math-march=native.txt", "timing_results_-O3-fno-tree-vectorize.txt", "timing_results_-O1.txt"]:
+    for filename in ["timing_results_-BASE_O3-ffast-math-march=native.txt", "timing_results_-O3-ffast-math-march=native.txt", "timing_results_-O3-fno-tree-vectorize.txt", "timing_results_-O1.txt"]:
         data = []
-        file = open("./results/" + filename, "r")
+        file = open("./results/blockdiv_" + str(blockdiv) + "/" + filename, "r")
         for line in file:
             x_value = int(line.split('n=')[1].split(',')[0])
             y_value = float(line.split('cycles=')[1])
@@ -63,10 +63,21 @@ def runtime_plot():
         label = filename.split('_-')[1].split('.txt')[0]
         plt.plot(*zip(*data), '-o', label=label)
     plt.legend()
-    plt.savefig("./results/runtime_plot.png")
+    plt.savefig("./results/blockdiv_" + str(blockdiv) + "/" + "runtime_plot.png")
 
 
 if __name__ == "__main__":
-    performance_plot()
+    performance_plot(2)
     plt.clf()
-    runtime_plot()
+    runtime_plot(2)
+    plt.clf()
+
+    performance_plot(4)
+    plt.clf()
+    runtime_plot(4)
+    plt.clf()
+
+    performance_plot(8)
+    plt.clf()
+    runtime_plot(8)
+    plt.clf()

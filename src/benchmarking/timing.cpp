@@ -3,6 +3,7 @@
 #include <dirent.h>
 #include <algorithm>
 #include <cstring>
+#include <string>
 
 #include "PngReader.h"
 #include "tsc_x86.h"
@@ -26,7 +27,7 @@ void timing::run_timing(int inputBlockRatio) {
         filename = std::string("timing_results_") + _CompileFlags + ".txt";
     #endif
     
-    std::string results_path = std::string("results") + '/' + filename;
+    std::string results_path = std::string("results/blockdiv_") + std::to_string(inputBlockRatio) + '/' + filename;
     results_txt = fopen(results_path.c_str(), "w");
 
     for (int i = 0; i < files.size(); i++) {

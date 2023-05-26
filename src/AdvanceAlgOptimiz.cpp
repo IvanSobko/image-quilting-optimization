@@ -4,6 +4,7 @@
 #include <cstdlib>
 #include <iostream>
 #include <random>
+#include <climits>
 
 #include <immintrin.h>
 // IMPORTANT: make sure it's the same for all functions that you compare

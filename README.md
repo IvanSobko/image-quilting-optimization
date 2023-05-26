@@ -112,7 +112,7 @@ We ran performance measurements for different compiler flags: -O3 -ffast-math -m
 
 | Performance Plot [Flops/Cycle]                                        | Runtime Plot [Cycles]                                             |
 |-----------------------------------------------------------------------|-------------------------------------------------------------------|
-| <img align="center" src="./results/performance_plot.png" width="480"> | <img align="center" src="./results/runtime_plot.png" width="480"> |
+| <img align="center" src="./results/blockdiv_2/performance_plot.png" width="480"> | <img align="center" src="./results/blockdiv_2/runtime_plot.png" width="480"> |
 
 ## Benchmark alternatives
 
