@@ -159,6 +159,32 @@ We found that these three optimizations made no noticiable impact on the runtime
 4. In order to compute the horizontal minimum cut, our dynamic programming traverses the overlap region column by column, which means that we don't have spatial locality. (Svitlana, Ivan).
 5. Vectorization of L2 loss function calculation. (Svitlana, Ivan).
 
+## Basic algorithm improvements (ComputeOverlap)
+1. Removed all indices calculation - saved the row start pointer of the overlap region and then just iterate with this pointer
+2. Improved the algorithm - combined the corner calculations with horizontal overlap calculations - improved spatial locality, because we access elements in the right order, made the algorithm easier
+3. Get rid of sqrt computation, in our algorithm, we use it only to determine the set of suitable blocks, and we can simulate the same calculation with the next code:
+
+```
+double upperBound = (1.0 + errorTolerance) * std::sqrt(minVal);
+    upperBound = upperBound * upperBound;
+```
+
+Now we perform sqrt only for the block with a minimum error, and not for all possible source blocks.
+
+The speedup:
+
+<img align="center" src="./docs/BasicCompute.png" width=300>
+
+## Advanced algorithm improvements (ComputeOverlap)
+We divided functions into many individual, specific functions to remove multiple boundary checks, 
+unneeded computations, if clauses and so on.
+After that, we removed function calls and inlined functions, especially in the places, where we call the function in the loop  - 
+when we calculate the L2 loss function for all possible source blocks. This also gave us the opportunity to remove duplication of the computations. 
+
+The speedup:
+
+<img align="center" src="./docs/DivideOverlap.jpg" width=300>
+
 ## Instruction-Level Parallelism
 The most common calculation in this algorithm is the computation of the L2 error function between different overlap regions.
 It repeats all over the algorithm and is the key part of our bottleneck function - ComputeOverlap. As this computation is so
@@ -178,6 +204,9 @@ Because of the dependencies we need more that twice more time per iteration. The
 </p>
 
 Even though this is the best option in theory (with stride=2 runtime is 6.5 cycles per pixel), it's not the best one in practice, probably because we already have too many accumulators. 
+
+## Vectorisation 
+
 
 ## Questions
 1. We have a lot of integer computations that can be vectorized nicely. For now, we change pixels values to double to 
