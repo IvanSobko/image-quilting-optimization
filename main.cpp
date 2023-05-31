@@ -16,7 +16,7 @@ ImgData img_data;
 bool runTiming = false;
 bool generate = false;
 bool test = false;
-bool testCorrectnessAndTiming = true;
+bool testCorrectnessAndTiming = false;
 bool stabilize = false;
 
 void parse_args(int argc, char* argv[]) {
