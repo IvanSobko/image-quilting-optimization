@@ -7,6 +7,7 @@
 #include "src/CompOverlapOptimiz.h"
 #include "src/AdvanceAlgOptimiz.h"
 #include "src/benchmarking/timing.h"
+#include "Blocking.h"
 
 // input parameters
 std::string input_file = "./gallery/input0.png";
@@ -16,7 +17,7 @@ ImgData img_data;
 bool runTiming = false;
 bool generate = false;
 bool test = false;
-bool testCorrectnessAndTiming = false;
+bool testCorrectnessAndTiming = true;
 bool stabilize = false;
 
 void parse_args(int argc, char* argv[]) {
@@ -89,7 +90,6 @@ int main(int argc, char* argv[]) {
     else if (test) {
         Testing testing = Testing(0);
         testing.RegisterTestFunction(Testing::ImageQuiltingFunction, "default");
-        testing.RegisterTestFunction(CompOverlapOptimiz::BasicOpt, "compBasic");
         testing.TestCorrectness();
     }
     // Test the correctness and timing of the variants of our implementation
@@ -140,7 +140,7 @@ int main(int argc, char* argv[]) {
         // Allocate the output data and run the image quilting algorithm
         img_data.AllocateOutput();
         ImageQuilting imageQuilting(&img_data);
-        imageQuilting.Synthesis(0);
+        imageQuilting.Synthesis();
 
         // Write the output file and free the members of img_data
         file::write_png_file(output_file.c_str(), img_data);

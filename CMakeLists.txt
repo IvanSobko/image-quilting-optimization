@@ -20,7 +20,9 @@ add_executable(team19
         src/Testing.h
         src/benchmarking/tsc_x86.h
         src/benchmarking/timing.h
-        src/benchmarking/timing.cpp)
+        src/benchmarking/timing.cpp
+        src/Blocking.h
+        src/Blocking.cpp)
 
 # We can use different compiler flags
 set(CompileFlags "-O3" "-ffast-math" "-march=native")
