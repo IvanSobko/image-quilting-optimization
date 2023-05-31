@@ -1,0 +1,9 @@
+-r
+/home/baptiste/asl_project/team19/roofline/e000/mp000
+--tool=map
+--record-stack-frame
+--sample-size=300000
+--record-mem-allocations
+--app-working-dir=/home/baptiste/asl_project/team19
+--
+/home/baptiste/asl_project/team19/team19

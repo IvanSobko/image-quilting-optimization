@@ -1,0 +1,62 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<!-- <!DOCTYPE IntelParallelAdvisorSummaryCollection SYSTEM  "IntelParallelAdvisorSummaryCollection.dtd"> -->
+
+<IntelParallelAdvisorSummary version="" 
+                             kind="DATAKIND_SURVEY_EX" >
+  <hotspot filename=""
+           line_no="4294967295"
+           routine="ImageQuilting::ComputeOverlap"
+           is_vectorized="1"
+           self_time="1.973972E+01"
+           total_time="0.000000E+00"
+           trip_counts=""
+           func_instance="19"
+           priority="0">
+           <recommendation id="rec_registers_pressure_split_loop_c" title="Split loop into smaller loops" confidence="3" gain="-1"/>
+  </hotspot>
+  <hotspot filename=""
+           line_no="4294967295"
+           routine="CompOverlapOptimiz::ComputeOverlapBase"
+           is_vectorized="1"
+           self_time="5.599120E-01"
+           total_time="0.000000E+00"
+           trip_counts=""
+           func_instance="134"
+           priority="0">
+           <recommendation id="rec_registers_pressure_split_loop_c" title="Split loop into smaller loops" confidence="3" gain="-1"/>
+  </hotspot>
+  <hotspot filename=""
+           line_no="4294967295"
+           routine="CompOverlapOptimiz::ComputeOverlapUnroll"
+           is_vectorized="1"
+           self_time="8.001990E-02"
+           total_time="0.000000E+00"
+           trip_counts=""
+           func_instance="144"
+           priority="0">
+           <recommendation id="rec_registers_pressure_split_loop_c" title="Split loop into smaller loops" confidence="3" gain="-1"/>
+  </hotspot>
+  <hotspot filename=""
+           line_no="4294967295"
+           routine="CompOverlapOptimiz::WriteBlockOverlapWithMinCut"
+           is_vectorized="1"
+           self_time="3.000797E-02"
+           total_time="0.000000E+00"
+           trip_counts=""
+           func_instance="79"
+           priority="0">
+           <recommendation id="rec_registers_pressure_split_loop_c" title="Split loop into smaller loops" confidence="3" gain="-1"/>
+  </hotspot>
+  <hotspot filename=""
+           line_no="4294967295"
+           routine="ImageQuilting::WriteBlockOverlapWithMinCut"
+           is_vectorized="1"
+           self_time="2.001630E-02"
+           total_time="0.000000E+00"
+           trip_counts=""
+           func_instance="27"
+           priority="0">
+           <recommendation id="rec_registers_pressure_split_loop_c" title="Split loop into smaller loops" confidence="3" gain="-1"/>
+  </hotspot>
+</IntelParallelAdvisorSummary >
