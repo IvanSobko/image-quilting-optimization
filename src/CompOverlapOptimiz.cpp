@@ -835,18 +835,6 @@ double CompOverlapOptimiz::ComputeOverlapUnrollMax(int overlapType, int dstY, in
     return std::sqrt(l2norm);
 }
 
-// Calculates the sum of all vector elements. Overflow will wrap around
-// The hadd instruction is inefficient, and may be split into two instructions for faster decoding
-static inline int32_t horizontal_add (__m256i const vec) {
-    __m128i vec_low = _mm256_extracti128_si256(vec,1);//lat 3, tp:1
-    __m128i vec_high = _mm256_castsi256_si128(vec);
-
-    __m128i sum1  = _mm_add_epi32(vec_low, vec_high);//lat 1, tp: 0.3
-    __m128i sum2  = _mm_add_epi32(sum1,_mm_unpackhi_epi64(sum1,sum1)); //lat:1 + 1, tp: 1 + 0.3
-    __m128i sum3  = _mm_add_epi32(sum2,_mm_shuffle_epi32(sum2,1)); //lat:1 + 1, tp: 1 + 0.3
-    return (int32_t)_mm_cvtsi128_si32(sum3); //lat2, tp:1
-}
-
 double CompOverlapOptimiz::ComputeOverlapVectorize(int overlapType, int dstY, int dstX, int srcY, int srcX) {
     // Compute the overlap region that we are working with
     int overlapXStart = overlapType != horizontal ? (dstX - overlapWidth) : dstX;
@@ -888,12 +876,34 @@ double CompOverlapOptimiz::ComputeOverlapVectorize(int overlapType, int dstY, in
                 //cycle 13
                 __m256i norm2 = _mm256_madd_epi16(diff2, diff2);//lat 5, tp: 0.5
 
+                // Start calculation of the sum of all norm elements. Overflow will wrap around
                 // cycle 16
-                int32_t final_sum1 = horizontal_add(norm);
-                // cycle 18
-                int32_t final_sum2 = horizontal_add(norm2);
+                __m128i norm_low = _mm256_extracti128_si256(norm,1);//lat 3, tp:1
+                __m128i norm_high = _mm256_castsi256_si128(norm); //lat 0
 
-                l2norm += final_sum1 + final_sum2;
+                // cycle 18
+                __m128i norm2_low = _mm256_extracti128_si256(norm2,1);//lat 3, tp:1
+                __m128i norm2_high = _mm256_castsi256_si128(norm2);
+
+                //cycle 19
+                __m128i norm_sum1  = _mm_add_epi32(norm_low, norm_high);//lat 1, tp: 0.3
+                //cycle 20
+                __m128i norm_sum2  = _mm_add_epi32(norm_sum1,_mm_unpackhi_epi64(norm_sum1,norm_sum1)); //lat:1 + 1, tp: 1 + 0.3
+                //cycle 21
+                __m128i norm2_sum1  = _mm_add_epi32(norm2_low, norm2_high);//lat 1, tp: 0.3
+                //cycle 22
+                __m128i norm_sum3  = _mm_add_epi32(norm_sum2,_mm_shuffle_epi32(norm_sum2,1)); //lat:1 + 1, tp: 1 + 0.3
+
+                //cycle 23 (maybe 22)
+                __m128i norm2_sum2  = _mm_add_epi32(norm2_sum1,_mm_unpackhi_epi64(norm2_sum1,norm2_sum1)); //lat:1 + 1, tp: 1 + 0.3
+
+                //cycle 25
+                __m128i norm2_sum3  = _mm_add_epi32(norm2_sum2,_mm_shuffle_epi32(norm2_sum2,1)); //lat:1 + 1, tp: 1 + 0.3
+
+                int norm_sum = _mm_cvtsi128_si32(norm_sum3);
+                int norm2_sum = _mm_cvtsi128_si32(norm2_sum3);
+
+                l2norm += norm_sum + norm2_sum;
             }
         }
     }
@@ -929,12 +939,34 @@ double CompOverlapOptimiz::ComputeOverlapVectorize(int overlapType, int dstY, in
                 //cycle 13
                 __m256i norm2 = _mm256_madd_epi16(diff2, diff2);//lat 5, tp: 0.5
 
+                // Start calculation of the sum of all norm elements. Overflow will wrap around
                 // cycle 16
-                int32_t final_sum1 = horizontal_add(norm);
-                // cycle 18
-                int32_t final_sum2 = horizontal_add(norm2);
+                __m128i norm_low = _mm256_extracti128_si256(norm,1);//lat 3, tp:1
+                __m128i norm_high = _mm256_castsi256_si128(norm); //lat 0
 
-                l2norm += final_sum1 + final_sum2;
+                // cycle 18
+                __m128i norm2_low = _mm256_extracti128_si256(norm2,1);//lat 3, tp:1
+                __m128i norm2_high = _mm256_castsi256_si128(norm2);
+
+                //cycle 19
+                __m128i norm_sum1  = _mm_add_epi32(norm_low, norm_high);//lat 1, tp: 0.3
+                //cycle 20
+                __m128i norm_sum2  = _mm_add_epi32(norm_sum1,_mm_unpackhi_epi64(norm_sum1,norm_sum1)); //lat:1 + 1, tp: 1 + 0.3
+                //cycle 21
+                __m128i norm2_sum1  = _mm_add_epi32(norm2_low, norm2_high);//lat 1, tp: 0.3
+                //cycle 22
+                __m128i norm_sum3  = _mm_add_epi32(norm_sum2,_mm_shuffle_epi32(norm_sum2,1)); //lat:1 + 1, tp: 1 + 0.3
+
+                //cycle 23 (maybe 22)
+                __m128i norm2_sum2  = _mm_add_epi32(norm2_sum1,_mm_unpackhi_epi64(norm2_sum1,norm2_sum1)); //lat:1 + 1, tp: 1 + 0.3
+
+                //cycle 25
+                __m128i norm2_sum3  = _mm_add_epi32(norm2_sum2,_mm_shuffle_epi32(norm2_sum2,1)); //lat:1 + 1, tp: 1 + 0.3
+
+                int norm_sum = _mm_cvtsi128_si32(norm_sum3);
+                int norm2_sum = _mm_cvtsi128_si32(norm2_sum3);
+
+                l2norm += norm_sum + norm2_sum;
             }
         }
     }
