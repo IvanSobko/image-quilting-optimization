@@ -50,6 +50,10 @@ class Testing {
     void TestCorrectnessAndTiming(bool stabilize);
     // Test the correctness and timing of all the registered component test functions against the specified input
     void TestComponentsTiming(bool stabilize);
+    // Runs a given collection of functions to be timed by Intel Advisor
+    void ComponentsTimingAdvisor();
+    // Adds a function we wanted tested by Intel Advisor in ComponentsTimingAdvisor()
+    void RegisterTestingComponentAdvisor(const TestFunction & testFunction,const std::string label);
 
    private:
     const std::string inputDirectory = "./testing/input/";
@@ -59,6 +63,7 @@ class Testing {
     std::map<std::string, int> inputLabelsToIndices;
     std::vector<std::pair<TestFunction, std::string>> testFunctions;
     std::vector<std::tuple<TestFunction, TestFunction, std::string>> testComponentFunctions;
+    std::vector<std::pair<TestFunction, std::string>> toTestAdvisor;
     ImgDataFunction parameterFunction;
     int testingInputIndex = 0;
 

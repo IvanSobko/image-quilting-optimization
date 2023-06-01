@@ -17,8 +17,9 @@ ImgData img_data;
 bool runTiming = false;
 bool generate = false;
 bool test = false;
-bool testCorrectnessAndTiming = true;
+bool testCorrectnessAndTiming = false;
 bool stabilize = false;
+bool advisor = false;
 
 void parse_args(int argc, char* argv[]) {
     std::string delimiter = "=";
@@ -48,6 +49,8 @@ void parse_args(int argc, char* argv[]) {
             testCorrectnessAndTiming = true;
         } else if (par == "--stabilize") {
             stabilize = true;
+        } else if (par == "--advisor") {
+            advisor = true;
         }
     }
 }
@@ -131,6 +134,19 @@ int main(int argc, char* argv[]) {
         std::cout << std::endl;
         testing.TestComponentsTiming(stabilize);
     }
+    // Only runs specific functions to give to Intel Advisor
+    else if (advisor) {
+        Testing testing = Testing(0);
+
+        testing.RegisterTestingComponentAdvisor(CompOverlapOptimiz::BaseComponent, "default");
+        testing.RegisterTestingComponentAdvisor(CompOverlapOptimiz::BasicOptComponent, "compBasic");
+        testing.RegisterTestingComponentAdvisor(CompOverlapOptimiz::UnrollOptComponent, "compBasic+AlgImpr+Unroll");
+        testing.RegisterTestingComponentAdvisor(CompOverlapOptimiz::UnrollMaxOptComponent, "compBasic+AlgImpr+UnrollTheoreticalMax");
+        testing.RegisterTestingComponentAdvisor(CompOverlapOptimiz::VectorizeOptComponent, "compBasic+AlgImpr+Unroll+Vectorize");
+
+        testing.ComponentsTimingAdvisor();
+    }
+
     // Main
     else {
         // Read the input data

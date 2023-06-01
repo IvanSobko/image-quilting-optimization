@@ -1,0 +1,210 @@
+<?xml version="1.0" encoding="utf-8"?>
+<log version="1.0" tool="runtool">
+
+<msg id="1" tool="runtool">
+  <type>log-start</type>
+  <arg>2023/06/01 12:46:14</arg>
+</msg>
+<msg id="2" tool="runtool">
+  <type>collector-starts</type>
+</msg>
+<msg id="3" tool="runtool">
+  <type>marker-file</type>
+  <arg>/home/baptiste/asl_project/team19/roofline/roofline_asl/e000/mp000/mp000.advixe</arg>
+</msg>
+<msg id="4" tool="tc">
+  <type>START</type>
+  <severity>INFO</severity>
+  <timestamp>Thu Jun  1 12:46:14 2023</timestamp>
+</msg>
+<msg id="5" tool="tc">
+  <type>EXEC_OF_INTEREST</type>
+  <arg>/home/baptiste/asl_project/team19/team19</arg>
+  <arg>4228</arg>
+  <severity>INFO</severity>
+  <timestamp>Thu Jun  1 12:46:14 2023</timestamp>
+</msg>
+<msg id="6" tool="tc">
+  <type>LOAD_MODULE</type>
+  <arg>/home/baptiste/asl_project/team19/team19</arg>
+  <arg>0x558172b8f000</arg>
+  <arg>0x558172bde507</arg>
+  <arg>1</arg>
+  <severity>INFO</severity>
+  <timestamp>Thu Jun  1 12:46:14 2023</timestamp>
+</msg>
+<msg id="7" tool="tc">
+  <type>LOAD_MODULE</type>
+  <arg>/lib64/ld-linux-x86-64.so.2</arg>
+  <arg>0x7f5935a59000</arg>
+  <arg>0x7f5935a85177</arg>
+  <arg>2</arg>
+  <severity>INFO</severity>
+  <timestamp>Thu Jun  1 12:46:14 2023</timestamp>
+</msg>
+<msg id="8" tool="tc">
+  <type>LOAD_MODULE</type>
+  <arg>[vdso]</arg>
+  <arg>0x7ffde1761000</arg>
+  <arg>0x7ffde1761d7b</arg>
+  <arg>3</arg>
+  <severity>INFO</severity>
+  <timestamp>Thu Jun  1 12:46:14 2023</timestamp>
+</msg>
+<msg id="9" tool="tc">
+  <type>LOAD_MODULE</type>
+  <arg>/lib/x86_64-linux-gnu/libpng16.so.16</arg>
+  <arg>0x7f592012d000</arg>
+  <arg>0x7f592016600f</arg>
+  <arg>4</arg>
+  <severity>INFO</severity>
+  <timestamp>Thu Jun  1 12:46:15 2023</timestamp>
+</msg>
+<msg id="10" tool="tc">
+  <type>LOAD_MODULE</type>
+  <arg>/lib/x86_64-linux-gnu/libstdc++.so.6</arg>
+  <arg>0x7f591fe00000</arg>
+  <arg>0x7f592000a87f</arg>
+  <arg>5</arg>
+  <severity>INFO</severity>
+  <timestamp>Thu Jun  1 12:46:15 2023</timestamp>
+</msg>
+<msg id="11" tool="tc">
+  <type>LOAD_MODULE</type>
+  <arg>/lib/x86_64-linux-gnu/libgcc_s.so.1</arg>
+  <arg>0x7f5920067000</arg>
+  <arg>0x7f5920080427</arg>
+  <arg>6</arg>
+  <severity>INFO</severity>
+  <timestamp>Thu Jun  1 12:46:15 2023</timestamp>
+</msg>
+<msg id="12" tool="tc">
+  <type>LOAD_MODULE</type>
+  <arg>/lib/x86_64-linux-gnu/libc.so.6</arg>
+  <arg>0x7f591fc10000</arg>
+  <arg>0x7f591fde367f</arg>
+  <arg>7</arg>
+  <severity>INFO</severity>
+  <timestamp>Thu Jun  1 12:46:15 2023</timestamp>
+</msg>
+<msg id="13" tool="tc">
+  <type>LOAD_MODULE</type>
+  <arg>/lib/x86_64-linux-gnu/libz.so.1</arg>
+  <arg>0x7f591fbf3000</arg>
+  <arg>0x7f591fc0f18f</arg>
+  <arg>8</arg>
+  <severity>INFO</severity>
+  <timestamp>Thu Jun  1 12:46:15 2023</timestamp>
+</msg>
+<msg id="14" tool="tc">
+  <type>LOAD_MODULE</type>
+  <arg>/lib/x86_64-linux-gnu/libm.so.6</arg>
+  <arg>0x7f591fa8a000</arg>
+  <arg>0x7f591fbcd10f</arg>
+  <arg>9</arg>
+  <severity>INFO</severity>
+  <timestamp>Thu Jun  1 12:46:15 2023</timestamp>
+</msg>
+<msg id="15" tool="tc">
+  <type>UNLOAD_MODULE</type>
+  <arg>/home/baptiste/asl_project/team19/team19</arg>
+  <arg>1</arg>
+  <severity>INFO</severity>
+  <timestamp>Thu Jun  1 12:46:19 2023</timestamp>
+</msg>
+<msg id="16" tool="tc">
+  <type>UNLOAD_MODULE</type>
+  <arg>/lib64/ld-linux-x86-64.so.2</arg>
+  <arg>2</arg>
+  <severity>INFO</severity>
+  <timestamp>Thu Jun  1 12:46:19 2023</timestamp>
+</msg>
+<msg id="17" tool="tc">
+  <type>UNLOAD_MODULE</type>
+  <arg>[vdso]</arg>
+  <arg>3</arg>
+  <severity>INFO</severity>
+  <timestamp>Thu Jun  1 12:46:19 2023</timestamp>
+</msg>
+<msg id="18" tool="tc">
+  <type>UNLOAD_MODULE</type>
+  <arg>/lib/x86_64-linux-gnu/libpng16.so.16</arg>
+  <arg>4</arg>
+  <severity>INFO</severity>
+  <timestamp>Thu Jun  1 12:46:19 2023</timestamp>
+</msg>
+<msg id="19" tool="tc">
+  <type>UNLOAD_MODULE</type>
+  <arg>/lib/x86_64-linux-gnu/libstdc++.so.6</arg>
+  <arg>5</arg>
+  <severity>INFO</severity>
+  <timestamp>Thu Jun  1 12:46:19 2023</timestamp>
+</msg>
+<msg id="20" tool="tc">
+  <type>UNLOAD_MODULE</type>
+  <arg>/lib/x86_64-linux-gnu/libgcc_s.so.1</arg>
+  <arg>6</arg>
+  <severity>INFO</severity>
+  <timestamp>Thu Jun  1 12:46:19 2023</timestamp>
+</msg>
+<msg id="21" tool="tc">
+  <type>UNLOAD_MODULE</type>
+  <arg>/lib/x86_64-linux-gnu/libc.so.6</arg>
+  <arg>7</arg>
+  <severity>INFO</severity>
+  <timestamp>Thu Jun  1 12:46:19 2023</timestamp>
+</msg>
+<msg id="22" tool="tc">
+  <type>UNLOAD_MODULE</type>
+  <arg>/lib/x86_64-linux-gnu/libz.so.1</arg>
+  <arg>8</arg>
+  <severity>INFO</severity>
+  <timestamp>Thu Jun  1 12:46:19 2023</timestamp>
+</msg>
+<msg id="23" tool="tc">
+  <type>UNLOAD_MODULE</type>
+  <arg>/lib/x86_64-linux-gnu/libm.so.6</arg>
+  <arg>9</arg>
+  <severity>INFO</severity>
+  <timestamp>Thu Jun  1 12:46:19 2023</timestamp>
+</msg>
+<msg id="24" tool="tc">
+  <type>PROCESS_TERMINATE</type>
+  <arg>/home/baptiste/asl_project/team19/team19</arg>
+  <arg>4228</arg>
+  <severity>INFO</severity>
+  <timestamp>Thu Jun  1 12:46:19 2023</timestamp>
+</msg>
+<msg id="25" tool="tc">
+  <type>NO_ANNOTATIONS</type>
+  <severity>WARNING</severity>
+  <timestamp>Thu Jun  1 12:46:19 2023</timestamp>
+</msg>
+<msg id="26" tool="tc">
+  <type>ANALYSIS_COMPLETE</type>
+  <severity>INFO</severity>
+  <timestamp>Thu Jun  1 12:46:19 2023</timestamp>
+</msg>
+<msg id="27" tool="tc">
+  <type>STOP</type>
+  <severity>INFO</severity>
+  <timestamp>Thu Jun  1 12:46:19 2023</timestamp>
+</msg>
+<msg id="28" tool="runtool">
+  <type>app-exit-code</type>
+  <arg>0</arg>
+</msg>
+<msg id="29" tool="runtool">
+  <type>marker-file</type>
+  <arg>/home/baptiste/asl_project/team19/roofline/roofline_asl/e000/mp000/mp000.advixe</arg>
+</msg>
+<msg id="30" tool="runtool">
+  <type>collector-done</type>
+</msg>
+<msg id="31" tool="runtool">
+  <type>log-end</type>
+  <arg>2023/06/01 12:46:23</arg>
+</msg>
+
+</log>
+

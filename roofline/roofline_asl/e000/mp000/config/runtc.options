@@ -1,0 +1,16 @@
+-r
+/home/baptiste/asl_project/team19/roofline/roofline_asl/e000/mp000
+--tool=map
+--record-stack-frame
+--sample-size=300000
+--record-mem-allocations
+--enable-cachesim
+--trace-mode=full
+--cachesim-associativity=8
+--cachesim-cacheline-size=64
+--cachesim-sets=4096
+--cachesim-utilization
+--app-working-dir=/home/baptiste/asl_project/team19
+--
+/home/baptiste/asl_project/team19/team19
+--advisor

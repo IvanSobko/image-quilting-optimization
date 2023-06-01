@@ -340,3 +340,41 @@ void Testing::TestComponentsTiming(bool stabilize) {
     imgData.FreeInput();
     imgData.FreeOutput();
 }
+
+// Runs a given collection of functions to be timed by Intel Advisor
+void Testing::ComponentsTimingAdvisor() {
+    // Seed the random number generator with the system time
+    srand(time(nullptr));
+
+    // Generate a random image
+    ImgData imgData;
+    imgData.height = 256;
+    imgData.width = 256;
+    SetImageQuiltingParameters(&imgData);
+    imgData.AllocateInput();
+    imgData.RandomizeInput();
+    imgData.AllocateOutput();
+
+    // Test the timing of all the registered component functions
+    for (const auto & pair : toTestAdvisor) {
+        TestFunction testFunction;
+        std::string label;
+        std::tie(testFunction, label) = pair;
+
+        std::cout << "Running function: " << label << std::endl;
+
+        // Time the given function (just to run it)
+        // TODO add stabilization
+        double cycles = rdtsc(testFunction, &imgData, seed);
+        std::cout << "Number of cycles: " << cycles << std::endl;
+        std::cout << std::endl;
+    }
+
+    imgData.FreeInput();
+    imgData.FreeOutput();
+}
+
+void Testing::RegisterTestingComponentAdvisor(const TestFunction & testFunction,const std::string label) {
+    toTestAdvisor.emplace_back(testFunction, label);
+    std::cout << "Registered Advisor component function: " << label << std::endl;
+}
