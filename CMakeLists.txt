@@ -13,6 +13,8 @@ add_executable(team19
         src/ImageQuilting.h
         src/AdvanceAlgOptimiz.cpp
         src/AdvanceAlgOptimiz.h
+        src/AdvisorHelper.cpp
+        src/AdvisorHelper.h
         src/CompOverlapOptimiz.cpp
         src/CompOverlapOptimiz.h
         src/ImgData.h
@@ -28,11 +30,11 @@ add_executable(team19
 set(CompileFlags "-O3" "-ffast-math" "-march=native")
 add_definitions(-D_CompileFlags="-O3-ffast-math-march=native") # pass variable _CompileFlags to c++ code
 
-#set(CompileFlags "-O3" "-fno-tree-vectorize")
-#add_definitions(-D_CompileFlags="-O3-fno-tree-vectorize")
+# set(CompileFlags "-O3" "-fno-tree-vectorize")
+# add_definitions(-D_CompileFlags="-O3-fno-tree-vectorize")
 
-#set(CompileFlags "-O1")
-#add_definitions(-D_CompileFlags="-O1")
+# set(CompileFlags "-O1")
+# add_definitions(-D_CompileFlags="-O1")
 
 target_compile_options(team19 PRIVATE ${CompileFlags})
 

@@ -2,6 +2,8 @@
 .DS_Store
 *.cmake
 .idea
+.vscode
 /cmake-build*
 output*.png
 /testing/output/
+/config

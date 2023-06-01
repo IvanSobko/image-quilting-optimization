@@ -8,6 +8,7 @@
 #include "src/AdvanceAlgOptimiz.h"
 #include "src/benchmarking/timing.h"
 #include "Blocking.h"
+#include "AdvisorHelper.h"
 
 // input parameters
 std::string input_file = "./gallery/input0.png";
@@ -17,7 +18,8 @@ ImgData img_data;
 bool runTiming = false;
 bool generate = false;
 bool test = false;
-bool testCorrectnessAndTiming = true;
+bool testCorrectnessAndTiming = false;
+bool advisor = true;
 bool stabilize = false;
 
 void parse_args(int argc, char* argv[]) {
@@ -48,7 +50,9 @@ void parse_args(int argc, char* argv[]) {
             testCorrectnessAndTiming = true;
         } else if (par == "--stabilize") {
             stabilize = true;
-        }
+        } else if (par == "--advisor") {
+            advisor = true;
+        } 
     }
 }
 
@@ -130,6 +134,18 @@ int main(int argc, char* argv[]) {
 
         std::cout << std::endl;
         testing.TestComponentsTiming(stabilize);
+    } else if (advisor) {
+        file::read_png_file(input_file.c_str(), img_data);
+        set_default();
+
+        // Allocate the output data and run the image quilting algorithm
+        img_data.AllocateOutput();
+        Advisor::baseline(&img_data, 0);
+        Advisor::unroll(&img_data, 0);
+        Advisor::vectorize(&img_data, 0);
+        Advisor::block(&img_data, 0);
+        img_data.FreeOutput();
+        img_data.FreeInput();
     }
     // Main
     else {
