@@ -41,7 +41,7 @@ private:
     // Struct to sort blocks by their l2 norm
     struct BlockValue {
         int y, x;
-        double value;
+        int value = 0;
     };
 
     // Enum representing the type of overlap between blocks
@@ -51,8 +51,12 @@ private:
     void PlaceEdgeOverlapBlockWithMinCut(int overlapType, int dstY, int dstX, int maxBlockX, int maxBlockY,
                                          double errorTolerance, int bWidth, int bHeight);
 
+    void PlaceEdgeOverlapBlockWithMinCutBlocking(int overlapType, int dstY, int dstX, int maxBlockX, int maxBlockY,
+                                                double errorTolerance, int bWidth, int bHeight);
+
     // Synthesize a new texture by randomly choosing blocks satisfying constraints and applying minimum cuts
     void OverlapConstraintsWithMinCut();
+    void OverlapConstraintsWithMinCutBlocking();
 
     int overlapWidth = 0;
     int overlapHeight = 0;

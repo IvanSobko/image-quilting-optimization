@@ -101,36 +101,37 @@ int main(int argc, char* argv[]) {
         Testing testing = Testing(2);
 
         testing.RegisterTestFunction(Testing::ImageQuiltingFunction, "default");
-        testing.RegisterTestFunction(CompOverlapOptimiz::BasicOpt, "compBasic");
+        // testing.RegisterTestFunction(CompOverlapOptimiz::BasicOpt, "compBasic");
         testing.RegisterTestFunction(CompOverlapOptimiz::AlgOpt, "compBasic+AlgImpr");
-        testing.RegisterTestFunction(CompOverlapOptimiz::UnrollOpt, "compBasic+AlgImpr+Unroll");
+        // testing.RegisterTestFunction(CompOverlapOptimiz::UnrollOpt, "compBasic+AlgImpr+Unroll");
+        testing.RegisterTestFunction(CompOverlapOptimiz::UnrollChnls, "compBasic+AlgImpr+UnrollChnls");
         testing.RegisterTestFunction(AdvanceAlgOptimiz::DividedFuncOpt, "Unroll+DividedFunctions");
-        testing.RegisterTestFunction(CompOverlapOptimiz::UnrollMaxOpt, "compBasic+AlgImpr+UnrollTheoreticalMax");
-        testing.RegisterTestFunction(CompOverlapOptimiz::VectorizeOpt, "compBasic+AlgImpr+Unroll+Vectorize");
+        // testing.RegisterTestFunction(CompOverlapOptimiz::UnrollMaxOpt, "compBasic+AlgImpr+UnrollTheoreticalMax");
+        // testing.RegisterTestFunction(CompOverlapOptimiz::VectorizeOpt, "compBasic+AlgImpr+Unroll+Vectorize");
 
         std::cout << std::endl;
         testing.TestCorrectnessAndTiming(stabilize);
 
-        testing.RegisterComponentTestFunction(CompOverlapOptimiz::BaseComponent,
-                                              CompOverlapOptimiz::BaseComponent, "default");
+        // testing.RegisterComponentTestFunction(CompOverlapOptimiz::BaseComponent,
+        //                                       CompOverlapOptimiz::BaseComponent, "default");
 
-        testing.RegisterComponentTestFunction(CompOverlapOptimiz::BaseComponent,
-                                              CompOverlapOptimiz::BasicOptComponent, "compBasic");
+        // testing.RegisterComponentTestFunction(CompOverlapOptimiz::BaseComponent,
+        //                                       CompOverlapOptimiz::BasicOptComponent, "compBasic");
 
-        testing.RegisterComponentTestFunction(CompOverlapOptimiz::BaseComponent,
-                                              CompOverlapOptimiz::AlgoOptComponent, "compBasic+AlgImpr");
+        // testing.RegisterComponentTestFunction(CompOverlapOptimiz::BaseComponent,
+        //                                       CompOverlapOptimiz::AlgoOptComponent, "compBasic+AlgImpr");
 
-        testing.RegisterComponentTestFunction(CompOverlapOptimiz::BaseComponent,
-                                              CompOverlapOptimiz::UnrollOptComponent,
-                                              "compBasic+AlgImpr+Unroll");
+        // testing.RegisterComponentTestFunction(CompOverlapOptimiz::BaseComponent,
+        //                                       CompOverlapOptimiz::UnrollOptComponent,
+        //                                       "compBasic+AlgImpr+Unroll");
 
-        testing.RegisterComponentTestFunction(CompOverlapOptimiz::BaseComponent,
-                                              CompOverlapOptimiz::UnrollMaxOptComponent,
-                                              "compBasic+AlgImpr+UnrollTheoreticalMax");
+        // testing.RegisterComponentTestFunction(CompOverlapOptimiz::BaseComponent,
+        //                                       CompOverlapOptimiz::UnrollMaxOptComponent,
+        //                                       "compBasic+AlgImpr+UnrollTheoreticalMax");
 
-        testing.RegisterComponentTestFunction(CompOverlapOptimiz::BaseComponent,
-                                              CompOverlapOptimiz::VectorizeOptComponent,
-                                              "compBasic+AlgImpr+Unroll+Vectorize");
+        // testing.RegisterComponentTestFunction(CompOverlapOptimiz::BaseComponent,
+        //                                       CompOverlapOptimiz::VectorizeOptComponent,
+        //                                       "compBasic+AlgImpr+Unroll+Vectorize");
 
         std::cout << std::endl;
         testing.TestComponentsTiming(stabilize);
@@ -141,9 +142,11 @@ int main(int argc, char* argv[]) {
         // Allocate the output data and run the image quilting algorithm
         img_data.AllocateOutput();
         Advisor::baseline(&img_data, 0);
-        Advisor::unroll(&img_data, 0);
-        Advisor::vectorize(&img_data, 0);
-        Advisor::block(&img_data, 0);
+        Advisor::basicOpt(&img_data, 0);
+        Advisor::unrollChnls(&img_data, 0);
+        Advisor::unrollMemory(&img_data, 0);
+        // Advisor::vectorize(&img_data, 0);
+        // Advisor::block(&img_data, 0);
         img_data.FreeOutput();
         img_data.FreeInput();
     }

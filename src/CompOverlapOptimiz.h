@@ -10,6 +10,7 @@ class CompOverlapOptimiz {
         opt_unroll = 2,
         opt_unroll_max = 3,
         opt_vectorize = 4,
+        opt_unroll_chnls = 5,
     };
     const static int numOptTypes = 3;
 
@@ -19,6 +20,7 @@ class CompOverlapOptimiz {
     static void UnrollOpt(ImgData* imgData, int seed);
     static void UnrollMaxOpt(ImgData* imgData, int seed);
     static void VectorizeOpt(ImgData* imgData, int seed);
+    static void UnrollChnls(ImgData* imgData, int seed);
 
     // Component test functions
     static void GetComponentParameters(ImgData* imgData, int& overlapType, int& dstY, int& dstX, int& srcY,
@@ -75,6 +77,7 @@ class CompOverlapOptimiz {
 
     // Added unroll and ILP to ComputeOverlapAlgImpr
     double ComputeOverlapUnroll(int overlapType, int dstY, int dstX, int srcY, int srcX);
+    double ComputeOverlapUnrollChannels(int overlapType, int dstY, int dstX, int srcY, int srcX);
 
     // Forced compiler to parallelize computations
     double ComputeOverlapUnrollMax(int overlapType, int dstY, int dstX, int srcY, int srcX);
