@@ -846,6 +846,9 @@ double CompOverlapOptimiz::ComputeOverlapVectorize(int overlapType, int dstY, in
     // Compute the l2 norm of the overlap between the two blocks
     volatile int l2norm = 0;
 
+
+    int range = horizontalBlockWidthLocal - (horizontalBlockWidthLocal % 4);
+
     // Compute the horizontal overlap (+corner if needed)
     if (overlapType != vertical) {
         int dstXStart = CHANNEL_NUM * overlapXStart;
@@ -853,61 +856,49 @@ double CompOverlapOptimiz::ComputeOverlapVectorize(int overlapType, int dstY, in
         for (int i = 0; i < overlapHeight; i++) {
             unsigned char* outputRow = mData->output_d[overlapYStart + i] + dstXStart;
             unsigned char* srcRow = mData->data[srcY + i] + srcXStart;
-            //TODO: check for edge cases (horizontalBlockWidthLocal is not power of 8)
-            for (int j = 0; j < horizontalBlockWidthLocal; j += 8) {
+            int j;
+            for (j = 0; j < range; j += 4) {
                 // load 16 8-bit integers(chars) and convert it to 16 16-bit integers
                 //cycle 1
                 __m128i dst = _mm_load_si128((__m128i*)(outputRow + j * 4)); // lat:6, tp: 0.5
                 __m128i src = _mm_load_si128((__m128i*)(srcRow + j * 4));   // lat:6, tp: 0.5
-                //cycle 2
-                __m128i dst2 = _mm_load_si128((__m128i*)(outputRow + (j + 4) * 4)); // lat:6, tp: 0.5
-                __m128i src2 = _mm_load_si128((__m128i*)(srcRow + (j + 4) * 4));    // lat:6, tp: 0.5
                 //cycle 6
                 __m256i dst_16bit = _mm256_cvtepu8_epi16(dst); // lat:3, tp: 1
                 __m256i src_16bit = _mm256_cvtepu8_epi16(src); // lat:3, tp: 1
-                __m256i dst2_16bit = _mm256_cvtepu8_epi16(dst2); // lat:3, tp: 1
-                __m256i src2_16bit = _mm256_cvtepu8_epi16(src2); // lat:3, tp: 1
+
                 //cycle 10
                 __m256i diff = _mm256_sub_epi16(dst_16bit, src_16bit); //lat: 1, tp:0.3
+
                 //cycle 11
                 __m256i norm = _mm256_madd_epi16(diff, diff); //lat 5, tp: 0.5
-                //cycle 12
-                __m256i diff2 = _mm256_sub_epi16(dst2_16bit, src2_16bit); //lat: 1, tp:0.3
-                //cycle 13
-                __m256i norm2 = _mm256_madd_epi16(diff2, diff2);//lat 5, tp: 0.5
 
                 // Start calculation of the sum of all norm elements. Overflow will wrap around
                 // cycle 16
                 __m128i norm_low = _mm256_extracti128_si256(norm,1);//lat 3, tp:1
                 __m128i norm_high = _mm256_castsi256_si128(norm); //lat 0
 
-                // cycle 18
-                __m128i norm2_low = _mm256_extracti128_si256(norm2,1);//lat 3, tp:1
-                __m128i norm2_high = _mm256_castsi256_si128(norm2);
-
                 //cycle 19
                 __m128i norm_sum1  = _mm_add_epi32(norm_low, norm_high);//lat 1, tp: 0.3
                 //cycle 20
                 __m128i norm_sum2  = _mm_add_epi32(norm_sum1,_mm_unpackhi_epi64(norm_sum1,norm_sum1)); //lat:1 + 1, tp: 1 + 0.3
-                //cycle 21
-                __m128i norm2_sum1  = _mm_add_epi32(norm2_low, norm2_high);//lat 1, tp: 0.3
                 //cycle 22
                 __m128i norm_sum3  = _mm_add_epi32(norm_sum2,_mm_shuffle_epi32(norm_sum2,1)); //lat:1 + 1, tp: 1 + 0.3
 
-                //cycle 23 (maybe 22)
-                __m128i norm2_sum2  = _mm_add_epi32(norm2_sum1,_mm_unpackhi_epi64(norm2_sum1,norm2_sum1)); //lat:1 + 1, tp: 1 + 0.3
+                l2norm += _mm_cvtsi128_si32(norm_sum3);
+            }
 
-                //cycle 25
-                __m128i norm2_sum3  = _mm_add_epi32(norm2_sum2,_mm_shuffle_epi32(norm2_sum2,1)); //lat:1 + 1, tp: 1 + 0.3
-
-                int norm_sum = _mm_cvtsi128_si32(norm_sum3);
-                int norm2_sum = _mm_cvtsi128_si32(norm2_sum3);
-
-                l2norm += norm_sum + norm2_sum;
+            for (; j < horizontalBlockWidthLocal; j++) {
+                for (int k = 0; k < CHANNEL_NUM; k++) {
+                    int x0 = *(outputRow + 4 * j + k);
+                    int x1 = *(srcRow + 4 * j + k);
+                    int norm = x0 - x1;
+                    l2norm += norm * norm;
+                }
             }
         }
     }
 
+    range = overlapWidth - (overlapWidth % 4);
     // Compute the vertical overlap
     if (overlapType != horizontal) {
         int srcYOffset = overlapType == both ? overlapHeight : 0;
@@ -917,56 +908,44 @@ double CompOverlapOptimiz::ComputeOverlapVectorize(int overlapType, int dstY, in
         for (int i = 0; i < verticalBlockHeightLocal; i++) {
             unsigned char* outputRow = mData->output_d[dstY + i] + dstXStart;
             unsigned char* srcRow = mData->data[srcYStart + i] + srcXStart;
-            for (int j = 0; j < overlapWidth; j += 8) {
+            int j;
+            for (j = 0; j < range; j += 4) {
                 // load 16 8-bit integers(chars) and convert it to 16 16-bit integers
                 //cycle 1
                 __m128i dst = _mm_load_si128((__m128i*)(outputRow + j * 4)); // lat:6, tp: 0.5
                 __m128i src = _mm_load_si128((__m128i*)(srcRow + j * 4));   // lat:6, tp: 0.5
-                //cycle 2
-                __m128i dst2 = _mm_load_si128((__m128i*)(outputRow + (j + 4) * 4)); // lat:6, tp: 0.5
-                __m128i src2 = _mm_load_si128((__m128i*)(srcRow + (j + 4) * 4));    // lat:6, tp: 0.5
                 //cycle 6
                 __m256i dst_16bit = _mm256_cvtepu8_epi16(dst); // lat:3, tp: 1
                 __m256i src_16bit = _mm256_cvtepu8_epi16(src); // lat:3, tp: 1
-                __m256i dst2_16bit = _mm256_cvtepu8_epi16(dst2); // lat:3, tp: 1
-                __m256i src2_16bit = _mm256_cvtepu8_epi16(src2); // lat:3, tp: 1
                 //cycle 10
                 __m256i diff = _mm256_sub_epi16(dst_16bit, src_16bit); //lat: 1, tp:0.3
                 //cycle 11
                 __m256i norm = _mm256_madd_epi16(diff, diff); //lat 5, tp: 0.5
-                //cycle 12
-                __m256i diff2 = _mm256_sub_epi16(dst2_16bit, src2_16bit); //lat: 1, tp:0.3
-                //cycle 13
-                __m256i norm2 = _mm256_madd_epi16(diff2, diff2);//lat 5, tp: 0.5
 
                 // Start calculation of the sum of all norm elements. Overflow will wrap around
                 // cycle 16
                 __m128i norm_low = _mm256_extracti128_si256(norm,1);//lat 3, tp:1
                 __m128i norm_high = _mm256_castsi256_si128(norm); //lat 0
 
-                // cycle 18
-                __m128i norm2_low = _mm256_extracti128_si256(norm2,1);//lat 3, tp:1
-                __m128i norm2_high = _mm256_castsi256_si128(norm2);
-
                 //cycle 19
                 __m128i norm_sum1  = _mm_add_epi32(norm_low, norm_high);//lat 1, tp: 0.3
                 //cycle 20
                 __m128i norm_sum2  = _mm_add_epi32(norm_sum1,_mm_unpackhi_epi64(norm_sum1,norm_sum1)); //lat:1 + 1, tp: 1 + 0.3
-                //cycle 21
-                __m128i norm2_sum1  = _mm_add_epi32(norm2_low, norm2_high);//lat 1, tp: 0.3
                 //cycle 22
                 __m128i norm_sum3  = _mm_add_epi32(norm_sum2,_mm_shuffle_epi32(norm_sum2,1)); //lat:1 + 1, tp: 1 + 0.3
 
-                //cycle 23 (maybe 22)
-                __m128i norm2_sum2  = _mm_add_epi32(norm2_sum1,_mm_unpackhi_epi64(norm2_sum1,norm2_sum1)); //lat:1 + 1, tp: 1 + 0.3
-
-                //cycle 25
-                __m128i norm2_sum3  = _mm_add_epi32(norm2_sum2,_mm_shuffle_epi32(norm2_sum2,1)); //lat:1 + 1, tp: 1 + 0.3
-
                 int norm_sum = _mm_cvtsi128_si32(norm_sum3);
-                int norm2_sum = _mm_cvtsi128_si32(norm2_sum3);
 
-                l2norm += norm_sum + norm2_sum;
+                l2norm += _mm_cvtsi128_si32(norm_sum3);// + norm2_sum;
+            }
+
+            for (; j < overlapWidth; j++) {
+                for (int k = 0; k < CHANNEL_NUM; k++) {
+                    int x0 = *(outputRow + 4 * j + k);
+                    int x1 = *(srcRow+ 4 * j + k);
+                    int norm = x0 - x1;
+                    l2norm += norm * norm;
+                }
             }
         }
     }
