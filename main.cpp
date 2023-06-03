@@ -88,11 +88,13 @@ int main(int argc, char* argv[]) {
     // Generate output for testing
     else if (generate) {
         Testing testing = Testing(2);
+        testing.SetParameterFunction(AdvanceAlgOptimiz::CustomParameters);
         testing.GenerateOutputFiles();
     }
     // Test the correctness of our base implementation
     else if (test) {
         Testing testing = Testing(2);
+        testing.SetParameterFunction(AdvanceAlgOptimiz::CustomParameters);
         //testing.RegisterTestFunction(Testing::ImageQuiltingFunction, "default");
         testing.RegisterTestFunction(AdvanceAlgOptimiz::BlockedFuncOpt, "blocked");
         testing.TestCorrectness();
@@ -100,15 +102,18 @@ int main(int argc, char* argv[]) {
     // Test the correctness and timing of the variants of our implementation
     else if (testCorrectnessAndTiming) {
         Testing testing = Testing(2);
+        testing.SetParameterFunction(AdvanceAlgOptimiz::CustomParameters);
+        testing.SetCorrectnessAndTimingInput("input_256x256.png");
 
         testing.RegisterTestFunction(Testing::ImageQuiltingFunction, "default");
         // testing.RegisterTestFunction(CompOverlapOptimiz::BasicOpt, "compBasic");
-        testing.RegisterTestFunction(CompOverlapOptimiz::AlgOpt, "compBasic+AlgImpr");
+        //testing.RegisterTestFunction(CompOverlapOptimiz::AlgOpt, "compBasic+AlgImpr");
         // testing.RegisterTestFunction(CompOverlapOptimiz::UnrollOpt, "compBasic+AlgImpr+Unroll");
-        testing.RegisterTestFunction(CompOverlapOptimiz::UnrollChnls, "compBasic+AlgImpr+UnrollChnls");
+        //testing.RegisterTestFunction(CompOverlapOptimiz::UnrollChnls, "compBasic+AlgImpr+UnrollChnls");
         testing.RegisterTestFunction(AdvanceAlgOptimiz::DividedFuncOpt, "Unroll+DividedFunctions");
         // testing.RegisterTestFunction(CompOverlapOptimiz::UnrollMaxOpt, "compBasic+AlgImpr+UnrollTheoreticalMax");
         // testing.RegisterTestFunction(CompOverlapOptimiz::VectorizeOpt, "compBasic+AlgImpr+Unroll+Vectorize");
+        testing.RegisterTestFunction(AdvanceAlgOptimiz::BlockedFuncOpt, "blocked");
 
         std::cout << std::endl;
         testing.TestCorrectnessAndTiming(stabilize);

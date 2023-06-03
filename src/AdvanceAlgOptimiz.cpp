@@ -11,6 +11,14 @@
 // Added this because we only need to increase the REP # for individual functions
 #define IND_FUNC_REP 10000
 
+// Custom parameters for testing and tuning
+void AdvanceAlgOptimiz::CustomParameters(ImgData* imgData) {
+    imgData->output_h = 2 * imgData->height;
+    imgData->output_w = 2 * imgData->width;
+    imgData->block_h = imgData->height / 2;
+    imgData->block_w = imgData->width / 2;
+}
+
 void AdvanceAlgOptimiz::DividedFuncOpt(ImgData* imgData, int seed) {
     AdvanceAlgOptimiz imageQuilting(imgData);
     imageQuilting.Synthesis(seed);
@@ -676,7 +684,7 @@ void AdvanceAlgOptimiz::PlaceEdgeOverlapBlockWithMinCutBlocking1(int overlapType
     }
 
     // Blocking parameters
-    const int blockSize = 32;
+    const int blockSize = 64;
 
     if (overlapType == both) {
         for (int i = 0; i < overlapHeight; i++) {

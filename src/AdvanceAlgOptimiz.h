@@ -30,6 +30,9 @@ public:
 
     int64_t getFlopCount() const;
 
+    static void CustomParameters(ImgData* imgData);
+
+
 private:
     // Keep a pointer to the input image data
     ImgData* mData;
