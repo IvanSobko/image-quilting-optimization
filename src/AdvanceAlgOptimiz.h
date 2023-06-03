@@ -14,6 +14,8 @@ public:
         overlapWidth = mData->block_w / 6;
     }
 
+    static void BlockedFuncOpt(ImgData* imgData, int seed);
+
     // Synthesize a new texture
     void Synthesis();
     // Synthesize a new texture with the given seed
@@ -53,6 +55,11 @@ private:
 
     void PlaceEdgeOverlapBlockWithMinCutBlocking(int overlapType, int dstY, int dstX, int maxBlockX, int maxBlockY,
                                                 double errorTolerance, int bWidth, int bHeight);
+
+    void PlaceEdgeOverlapBlockWithMinCutBlocking1(int overlapType, int dstY, int dstX, int maxBlockX, int maxBlockY,
+                                                  double errorTolerance, int bWidth, int bHeight);
+
+    void OverlapConstraintsWithMinCutBlocking1();
 
     // Synthesize a new texture by randomly choosing blocks satisfying constraints and applying minimum cuts
     void OverlapConstraintsWithMinCut();

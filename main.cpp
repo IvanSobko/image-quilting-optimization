@@ -92,8 +92,9 @@ int main(int argc, char* argv[]) {
     }
     // Test the correctness of our base implementation
     else if (test) {
-        Testing testing = Testing(0);
-        testing.RegisterTestFunction(Testing::ImageQuiltingFunction, "default");
+        Testing testing = Testing(2);
+        //testing.RegisterTestFunction(Testing::ImageQuiltingFunction, "default");
+        testing.RegisterTestFunction(AdvanceAlgOptimiz::BlockedFuncOpt, "blocked");
         testing.TestCorrectness();
     }
     // Test the correctness and timing of the variants of our implementation
