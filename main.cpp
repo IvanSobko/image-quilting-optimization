@@ -8,7 +8,6 @@
 #include "src/AdvanceAlgOptimiz.h"
 #include "src/benchmarking/timing.h"
 #include "Blocking.h"
-#include "AdvisorHelper.h"
 
 // input parameters
 std::string input_file = "./gallery/input0.png";
@@ -96,7 +95,12 @@ int main(int argc, char* argv[]) {
         Testing testing = Testing(2);
         testing.SetParameterFunction(AdvanceAlgOptimiz::CustomParameters);
         //testing.RegisterTestFunction(Testing::ImageQuiltingFunction, "default");
-        testing.RegisterTestFunction(AdvanceAlgOptimiz::BlockedFuncOpt, "blocked");
+        //testing.RegisterTestFunction(AdvanceAlgOptimiz::StdC_KUnroll_BoundsRefactor, "refactor");
+        //testing.RegisterTestFunction(AdvanceAlgOptimiz::StdC_KUnroll_BoundsRefactor_LoopReorder, "loop reorder");
+        testing.RegisterTestFunction(AdvanceAlgOptimiz::StdC_KUnroll_BoundsRefactor_LoopReorder_Blocking32, "blocking 32x32");
+        testing.RegisterTestFunction(AdvanceAlgOptimiz::StdC_KUnroll_BoundsRefactor_LoopReorder_Blocking48, "blocking 48x48");
+        testing.RegisterTestFunction(AdvanceAlgOptimiz::StdC_KUnroll_BoundsRefactor_LoopReorder_Blocking56, "blocking 56x56");
+        testing.RegisterTestFunction(AdvanceAlgOptimiz::StdC_KUnroll_BoundsRefactor_LoopReorder_Blocking64, "blocking 64x64");
         testing.TestCorrectness();
     }
     // Test the correctness and timing of the variants of our implementation
@@ -106,53 +110,44 @@ int main(int argc, char* argv[]) {
         testing.SetCorrectnessAndTimingInput("input_256x256.png");
 
         testing.RegisterTestFunction(Testing::ImageQuiltingFunction, "default");
-        // testing.RegisterTestFunction(CompOverlapOptimiz::BasicOpt, "compBasic");
-        //testing.RegisterTestFunction(CompOverlapOptimiz::AlgOpt, "compBasic+AlgImpr");
-        // testing.RegisterTestFunction(CompOverlapOptimiz::UnrollOpt, "compBasic+AlgImpr+Unroll");
-        //testing.RegisterTestFunction(CompOverlapOptimiz::UnrollChnls, "compBasic+AlgImpr+UnrollChnls");
-        testing.RegisterTestFunction(AdvanceAlgOptimiz::DividedFuncOpt, "Unroll+DividedFunctions");
-        // testing.RegisterTestFunction(CompOverlapOptimiz::UnrollMaxOpt, "compBasic+AlgImpr+UnrollTheoreticalMax");
-        // testing.RegisterTestFunction(CompOverlapOptimiz::VectorizeOpt, "compBasic+AlgImpr+Unroll+Vectorize");
-        testing.RegisterTestFunction(AdvanceAlgOptimiz::BlockedFuncOpt, "blocked");
+        testing.RegisterTestFunction(AdvanceAlgOptimiz::StdC_KUnroll_BoundsRefactor_LoopReorder_Blocking32, "blocking 32x32");
+        testing.RegisterTestFunction(AdvanceAlgOptimiz::StdC_KUnroll_BoundsRefactor_LoopReorder_Blocking48, "blocking 48x48");
+        testing.RegisterTestFunction(AdvanceAlgOptimiz::StdC_KUnroll_BoundsRefactor_LoopReorder_Blocking56, "blocking 56x56");
+        testing.RegisterTestFunction(AdvanceAlgOptimiz::StdC_KUnroll_BoundsRefactor_LoopReorder_Blocking64, "blocking 64x64");
 
         std::cout << std::endl;
         testing.TestCorrectnessAndTiming(stabilize);
-
-        // testing.RegisterComponentTestFunction(CompOverlapOptimiz::BaseComponent,
-        //                                       CompOverlapOptimiz::BaseComponent, "default");
-
-        // testing.RegisterComponentTestFunction(CompOverlapOptimiz::BaseComponent,
-        //                                       CompOverlapOptimiz::BasicOptComponent, "compBasic");
-
-        // testing.RegisterComponentTestFunction(CompOverlapOptimiz::BaseComponent,
-        //                                       CompOverlapOptimiz::AlgoOptComponent, "compBasic+AlgImpr");
-
-        // testing.RegisterComponentTestFunction(CompOverlapOptimiz::BaseComponent,
-        //                                       CompOverlapOptimiz::UnrollOptComponent,
-        //                                       "compBasic+AlgImpr+Unroll");
-
-        // testing.RegisterComponentTestFunction(CompOverlapOptimiz::BaseComponent,
-        //                                       CompOverlapOptimiz::UnrollMaxOptComponent,
-        //                                       "compBasic+AlgImpr+UnrollTheoreticalMax");
-
-        // testing.RegisterComponentTestFunction(CompOverlapOptimiz::BaseComponent,
-        //                                       CompOverlapOptimiz::VectorizeOptComponent,
-        //                                       "compBasic+AlgImpr+Unroll+Vectorize");
-
-        std::cout << std::endl;
-        testing.TestComponentsTiming(stabilize);
-    } else if (advisor) {
+    }
+    else if (advisor) {
+        // Read the input and allocate output
         file::read_png_file(input_file.c_str(), img_data);
         set_default();
-
-        // Allocate the output data and run the image quilting algorithm
         img_data.AllocateOutput();
-        Advisor::baseline(&img_data, 0);
-        Advisor::basicOpt(&img_data, 0);
-        Advisor::unrollChnls(&img_data, 0);
-        Advisor::unrollMemory(&img_data, 0);
-        // Advisor::vectorize(&img_data, 0);
-        // Advisor::block(&img_data, 0);
+
+        int seed = 2;
+
+        // Default image quilting algorithm
+        Testing::ImageQuiltingFunction(&img_data, seed);
+
+        // Std c, k unroll, and bounds refactor optimizations
+        AdvanceAlgOptimiz::StdC_KUnroll_BoundsRefactor(&img_data, seed);
+
+        // Std c, k unroll, bounds refactor, and loop reorder optimizations
+        AdvanceAlgOptimiz::StdC_KUnroll_BoundsRefactor_LoopReorder(&img_data, seed);
+
+        // Std c, k unroll, bounds refactor, loop reorder, and blocking 32x23 optimizations
+        AdvanceAlgOptimiz::StdC_KUnroll_BoundsRefactor_LoopReorder_Blocking32(&img_data, seed);
+
+        // Std c, k unroll, bounds refactor, loop reorder, and blocking 48x48 optimizations
+        AdvanceAlgOptimiz::StdC_KUnroll_BoundsRefactor_LoopReorder_Blocking48(&img_data, seed);
+
+        // Std c, k unroll, bounds refactor, loop reorder, and blocking 56x56 optimizations
+        AdvanceAlgOptimiz::StdC_KUnroll_BoundsRefactor_LoopReorder_Blocking56(&img_data, seed);
+
+        // Std c, k unroll, bounds refactor, loop reorder, and blocking 64x64 optimizations
+        AdvanceAlgOptimiz::StdC_KUnroll_BoundsRefactor_LoopReorder_Blocking64(&img_data, seed);
+
+        // Clean up
         img_data.FreeOutput();
         img_data.FreeInput();
     }

@@ -13,8 +13,6 @@ add_executable(team19
         src/ImageQuilting.h
         src/AdvanceAlgOptimiz.cpp
         src/AdvanceAlgOptimiz.h
-        src/AdvisorHelper.cpp
-        src/AdvisorHelper.h
         src/CompOverlapOptimiz.cpp
         src/CompOverlapOptimiz.h
         src/ImgData.h

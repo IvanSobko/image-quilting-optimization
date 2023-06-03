@@ -4,22 +4,12 @@
 
 class AdvanceAlgOptimiz {
 public:
-    // Algorithm test functions
-    static void DividedFuncOpt(ImgData* imgData, int seed);
-
     AdvanceAlgOptimiz() = delete;
     AdvanceAlgOptimiz(ImgData* data) {
         mData = data;
         overlapHeight = mData->block_h / 6;
         overlapWidth = mData->block_w / 6;
     }
-
-    static void BlockedFuncOpt(ImgData* imgData, int seed);
-
-    // Synthesize a new texture
-    void Synthesis();
-    // Synthesize a new texture with the given seed
-    void Synthesis(int seed);
 
     // Seed the random number generator with the system time
     static void SeedRandomNumberGenerator();
@@ -28,14 +18,19 @@ public:
     // Generate a random number in the range [min, max]
     static int GetRandomInt(int min, int max);
 
-    int64_t getFlopCount() const;
-
     static void CustomParameters(ImgData* imgData);
-
+    static void StdC_KUnroll_BoundsRefactor(ImgData * imgData, int seed);
+    static void StdC_KUnroll_BoundsRefactor_LoopReorder(ImgData * imgData, int seed);
+    static void StdC_KUnroll_BoundsRefactor_LoopReorder_Blocking32(ImgData * imgData, int seed);
+    static void StdC_KUnroll_BoundsRefactor_LoopReorder_Blocking48(ImgData * imgData, int seed);
+    static void StdC_KUnroll_BoundsRefactor_LoopReorder_Blocking56(ImgData * imgData, int seed);
+    static void StdC_KUnroll_BoundsRefactor_LoopReorder_Blocking64(ImgData * imgData, int seed);
 
 private:
     // Keep a pointer to the input image data
     ImgData* mData;
+    int overlapWidth = 0;
+    int overlapHeight = 0;
 
     // Write a block from the source data to the output data given their upper-left corners
     void WriteBlock(int dstY, int dstX, int srcY, int srcX);
@@ -52,25 +47,33 @@ private:
     // Enum representing the type of overlap between blocks
     enum OverlapType { vertical = 0, horizontal = 1, both = 2 };
 
-    // Place an edge overlap block with respect to the given block of the output image
-    void PlaceEdgeOverlapBlockWithMinCut(int overlapType, int dstY, int dstX, int maxBlockX, int maxBlockY,
+    // Std C, K unroll, and bounds refactoring optimizations
+    void PlaceEdgeOverlapBlockWithMinCut_StdC_KUnroll_BoundsRefactor(int overlapType, int dstY, int dstX, int maxBlockX, int maxBlockY,
                                          double errorTolerance, int bWidth, int bHeight);
+    void OverlapConstraintsWithMinCut_StdC_KUnroll_BoundsRefactor();
 
-    void PlaceEdgeOverlapBlockWithMinCutBlocking(int overlapType, int dstY, int dstX, int maxBlockX, int maxBlockY,
+    // Std C, K unroll, bounds refactoring, and loop reorder optimizations
+    void PlaceEdgeOverlapBlockWithMinCutBlocking_StdC_KUnroll_BoundsRefactor_LoopReorder(int overlapType, int dstY, int dstX, int maxBlockX, int maxBlockY,
                                                 double errorTolerance, int bWidth, int bHeight);
+    void OverlapConstraintsWithMinCut_StdC_KUnroll_BoundsRefactor_LoopReorder();
 
-    void PlaceEdgeOverlapBlockWithMinCutBlocking1(int overlapType, int dstY, int dstX, int maxBlockX, int maxBlockY,
+    // Std C, K unroll, bounds refactoring, loop reorder optimizations, and blocking with 64x64 blocks
+    void PlaceEdgeOverlapBlockWithMinCutBlocking_StdC_KUnroll_BoundsRefactor_LoopReorder_Blocking64(int overlapType, int dstY, int dstX, int maxBlockX, int maxBlockY,
                                                   double errorTolerance, int bWidth, int bHeight);
+    void OverlapConstraintsWithMinCut_StdC_KUnroll_BoundsRefactor_LoopReorder_Blocking64();
 
-    void OverlapConstraintsWithMinCutBlocking1();
+    // Std C, K unroll, bounds refactoring, loop reorder optimizations, and blocking with 56x56 blocks
+    void PlaceEdgeOverlapBlockWithMinCutBlocking_StdC_KUnroll_BoundsRefactor_LoopReorder_Blocking56(int overlapType, int dstY, int dstX, int maxBlockX, int maxBlockY,
+                                                                                                    double errorTolerance, int bWidth, int bHeight);
+    void OverlapConstraintsWithMinCut_StdC_KUnroll_BoundsRefactor_LoopReorder_Blocking56();
 
-    // Synthesize a new texture by randomly choosing blocks satisfying constraints and applying minimum cuts
-    void OverlapConstraintsWithMinCut();
-    void OverlapConstraintsWithMinCutBlocking();
+    // Std C, K unroll, bounds refactoring, loop reorder optimizations, and blocking with 48x48 blocks
+    void PlaceEdgeOverlapBlockWithMinCutBlocking_StdC_KUnroll_BoundsRefactor_LoopReorder_Blocking48(int overlapType, int dstY, int dstX, int maxBlockX, int maxBlockY,
+                                                                                                    double errorTolerance, int bWidth, int bHeight);
+    void OverlapConstraintsWithMinCut_StdC_KUnroll_BoundsRefactor_LoopReorder_Blocking48();
 
-    int overlapWidth = 0;
-    int overlapHeight = 0;
-
-    int64_t flopCount = 0;
-    int opt_type = 0;
+    // Std C, K unroll, bounds refactoring, loop reorder optimizations, and blocking with 32x32 blocks
+    void PlaceEdgeOverlapBlockWithMinCutBlocking_StdC_KUnroll_BoundsRefactor_LoopReorder_Blocking32(int overlapType, int dstY, int dstX, int maxBlockX, int maxBlockY,
+                                                                                                    double errorTolerance, int bWidth, int bHeight);
+    void OverlapConstraintsWithMinCut_StdC_KUnroll_BoundsRefactor_LoopReorder_Blocking32();
 };
