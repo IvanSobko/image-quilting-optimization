@@ -28,8 +28,8 @@ add_executable(team19
 # set(CompileFlags "-O3" "-ffast-math" "-march=native")
 # add_definitions(-D_CompileFlags="-O3-ffast-math-march=native") # pass variable _CompileFlags to c++ code
 
-set(CompileFlags "-g" "-O3" "-fno-tree-vectorize" "-ffast-math" "-march=native")
-add_definitions(-D_CompileFlags="-g -O3 -fno-tree-vectorize -ffast-math -march=native")
+set(CompileFlags "-g" "-O3" "-fno-tree-vectorize")
+add_definitions(-D_CompileFlags="-g -O3 -fno-tree-vectorize")
 
 # set(CompileFlags "-O1")
 # add_definitions(-D_CompileFlags="-O1")
