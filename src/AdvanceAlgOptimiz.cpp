@@ -675,6 +675,9 @@ void AdvanceAlgOptimiz::PlaceEdgeOverlapBlockWithMinCutBlocking1(int overlapType
         }
     }
 
+    // Blocking parameters
+    const int blockSize = 32;
+
     if (overlapType == both) {
         for (int i = 0; i < overlapHeight; i++) {
             unsigned char* outputRow = mData->output_d[overlapYStart + i] + dstXStart;
@@ -786,35 +789,37 @@ void AdvanceAlgOptimiz::PlaceEdgeOverlapBlockWithMinCutBlocking1(int overlapType
     } else if (overlapType == horizontal) {
         for (int i = 0; i < overlapHeight; i++) {
             unsigned char* outputRow = mData->output_d[overlapYStart + i] + dstXStart;
-            for (int j = 0; j < mData->block_w; j++) {
-                int rDst = outputRow[j*4];
-                int gDst = outputRow[j*4+1];
-                int bDst = outputRow[j*4+2];
-                int aDst = outputRow[j*4+3];
+            for (int blockYStart = 0; blockYStart < maxBlockY + blockSize; blockYStart += blockSize) {
+                for (int j = 0; j < mData->block_w; j++) {
+                    int rDst = outputRow[j * 4];
+                    int gDst = outputRow[j * 4 + 1];
+                    int bDst = outputRow[j * 4 + 2];
+                    int aDst = outputRow[j * 4 + 3];
 
-                for (int srcY = 0; srcY < maxBlockY; srcY++) {
-                    unsigned char* srcRow = mData->data[srcY+ i];
-                    for (int srcX = 0; srcX < maxBlockX; srcX++) {
-                        int rSrc = srcRow[j*4];
-                        int gSrc = srcRow[j*4+1];
-                        int bSrc = srcRow[j*4+2];
-                        int aSrc = srcRow[j*4+3];
+                    for (int srcY = blockYStart; srcY < std::min(blockYStart + blockSize, maxBlockY); srcY++) {
+                        unsigned char* srcRow = mData->data[srcY + i];
+                        for (int srcX = 0; srcX < maxBlockX; srcX++) {
+                            int rSrc = srcRow[j * 4];
+                            int gSrc = srcRow[j * 4 + 1];
+                            int bSrc = srcRow[j * 4 + 2];
+                            int aSrc = srcRow[j * 4 + 3];
 
-                        int rDiff = rDst - rSrc;
-                        int gDiff = gDst - gSrc;
-                        int bDiff = bDst - bSrc;
-                        int aDiff = aDst - aSrc;
+                            int rDiff = rDst - rSrc;
+                            int gDiff = gDst - gSrc;
+                            int bDiff = bDst - bSrc;
+                            int aDiff = aDst - aSrc;
 
-                        int norm1 = rDiff * rDiff;
-                        int norm2 = gDiff * gDiff;
-                        int norm3 = bDiff * bDiff;
-                        int norm4 = aDiff * aDiff;
+                            int norm1 = rDiff * rDiff;
+                            int norm2 = gDiff * gDiff;
+                            int norm3 = bDiff * bDiff;
+                            int norm4 = aDiff * aDiff;
 
-                        int sum1 = norm1 + norm2;
-                        int sum2 = norm3 + norm4;
+                            int sum1 = norm1 + norm2;
+                            int sum2 = norm3 + norm4;
 
-                        blocks[srcY * maxBlockX + srcX].value += sum1 + sum2;
-                        srcRow+=4;
+                            blocks[srcY * maxBlockX + srcX].value += sum1 + sum2;
+                            srcRow += 4;
+                        }
                     }
                 }
             }
