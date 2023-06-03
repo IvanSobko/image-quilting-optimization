@@ -23,8 +23,9 @@ public:
     static void StdC_KUnroll_BoundsRefactor_LoopReorder(ImgData * imgData, int seed);
     static void StdC_KUnroll_BoundsRefactor_LoopReorder_Blocking32(ImgData * imgData, int seed);
     static void StdC_KUnroll_BoundsRefactor_LoopReorder_Blocking48(ImgData * imgData, int seed);
-    static void StdC_KUnroll_BoundsRefactor_LoopReorder_Blocking56(ImgData * imgData, int seed);
     static void StdC_KUnroll_BoundsRefactor_LoopReorder_Blocking64(ImgData * imgData, int seed);
+    static void StdC_KUnroll_BoundsRefactor_LoopReorder_Blocking96(ImgData * imgData, int seed);
+    static void StdC_KUnroll_BoundsRefactor_LoopReorder_Blocking128(ImgData * imgData, int seed);
 
 private:
     // Keep a pointer to the input image data
@@ -57,23 +58,28 @@ private:
                                                 double errorTolerance, int bWidth, int bHeight);
     void OverlapConstraintsWithMinCut_StdC_KUnroll_BoundsRefactor_LoopReorder();
 
-    // Std C, K unroll, bounds refactoring, loop reorder optimizations, and blocking with 64x64 blocks
-    void PlaceEdgeOverlapBlockWithMinCutBlocking_StdC_KUnroll_BoundsRefactor_LoopReorder_Blocking64(int overlapType, int dstY, int dstX, int maxBlockX, int maxBlockY,
-                                                  double errorTolerance, int bWidth, int bHeight);
-    void OverlapConstraintsWithMinCut_StdC_KUnroll_BoundsRefactor_LoopReorder_Blocking64();
-
-    // Std C, K unroll, bounds refactoring, loop reorder optimizations, and blocking with 56x56 blocks
-    void PlaceEdgeOverlapBlockWithMinCutBlocking_StdC_KUnroll_BoundsRefactor_LoopReorder_Blocking56(int overlapType, int dstY, int dstX, int maxBlockX, int maxBlockY,
+    // Std C, K unroll, bounds refactoring, loop reorder optimizations, and blocking with 32x32 blocks
+    void PlaceEdgeOverlapBlockWithMinCutBlocking_StdC_KUnroll_BoundsRefactor_LoopReorder_Blocking32(int overlapType, int dstY, int dstX, int maxBlockX, int maxBlockY,
                                                                                                     double errorTolerance, int bWidth, int bHeight);
-    void OverlapConstraintsWithMinCut_StdC_KUnroll_BoundsRefactor_LoopReorder_Blocking56();
+    void OverlapConstraintsWithMinCut_StdC_KUnroll_BoundsRefactor_LoopReorder_Blocking32();
 
     // Std C, K unroll, bounds refactoring, loop reorder optimizations, and blocking with 48x48 blocks
     void PlaceEdgeOverlapBlockWithMinCutBlocking_StdC_KUnroll_BoundsRefactor_LoopReorder_Blocking48(int overlapType, int dstY, int dstX, int maxBlockX, int maxBlockY,
                                                                                                     double errorTolerance, int bWidth, int bHeight);
     void OverlapConstraintsWithMinCut_StdC_KUnroll_BoundsRefactor_LoopReorder_Blocking48();
 
-    // Std C, K unroll, bounds refactoring, loop reorder optimizations, and blocking with 32x32 blocks
-    void PlaceEdgeOverlapBlockWithMinCutBlocking_StdC_KUnroll_BoundsRefactor_LoopReorder_Blocking32(int overlapType, int dstY, int dstX, int maxBlockX, int maxBlockY,
+    // Std C, K unroll, bounds refactoring, loop reorder optimizations, and blocking with 64x64 blocks
+    void PlaceEdgeOverlapBlockWithMinCutBlocking_StdC_KUnroll_BoundsRefactor_LoopReorder_Blocking64(int overlapType, int dstY, int dstX, int maxBlockX, int maxBlockY,
                                                                                                     double errorTolerance, int bWidth, int bHeight);
-    void OverlapConstraintsWithMinCut_StdC_KUnroll_BoundsRefactor_LoopReorder_Blocking32();
+    void OverlapConstraintsWithMinCut_StdC_KUnroll_BoundsRefactor_LoopReorder_Blocking64();
+
+    // Std C, K unroll, bounds refactoring, loop reorder optimizations, and blocking with 96x96 blocks
+    void PlaceEdgeOverlapBlockWithMinCutBlocking_StdC_KUnroll_BoundsRefactor_LoopReorder_Blocking96(int overlapType, int dstY, int dstX, int maxBlockX, int maxBlockY,
+                                                                                                    double errorTolerance, int bWidth, int bHeight);
+    void OverlapConstraintsWithMinCut_StdC_KUnroll_BoundsRefactor_LoopReorder_Blocking96();
+
+    // Std C, K unroll, bounds refactoring, loop reorder optimizations, and blocking with 128x128 blocks
+    void PlaceEdgeOverlapBlockWithMinCutBlocking_StdC_KUnroll_BoundsRefactor_LoopReorder_Blocking128(int overlapType, int dstY, int dstX, int maxBlockX, int maxBlockY,
+                                                                                                    double errorTolerance, int bWidth, int bHeight);
+    void OverlapConstraintsWithMinCut_StdC_KUnroll_BoundsRefactor_LoopReorder_Blocking128();
 };

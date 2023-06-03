@@ -97,10 +97,12 @@ int main(int argc, char* argv[]) {
         //testing.RegisterTestFunction(Testing::ImageQuiltingFunction, "default");
         //testing.RegisterTestFunction(AdvanceAlgOptimiz::StdC_KUnroll_BoundsRefactor, "refactor");
         //testing.RegisterTestFunction(AdvanceAlgOptimiz::StdC_KUnroll_BoundsRefactor_LoopReorder, "loop reorder");
+        testing.RegisterTestFunction(Testing::ImageQuiltingFunction, "default");
         testing.RegisterTestFunction(AdvanceAlgOptimiz::StdC_KUnroll_BoundsRefactor_LoopReorder_Blocking32, "blocking 32x32");
         testing.RegisterTestFunction(AdvanceAlgOptimiz::StdC_KUnroll_BoundsRefactor_LoopReorder_Blocking48, "blocking 48x48");
-        testing.RegisterTestFunction(AdvanceAlgOptimiz::StdC_KUnroll_BoundsRefactor_LoopReorder_Blocking56, "blocking 56x56");
         testing.RegisterTestFunction(AdvanceAlgOptimiz::StdC_KUnroll_BoundsRefactor_LoopReorder_Blocking64, "blocking 64x64");
+        testing.RegisterTestFunction(AdvanceAlgOptimiz::StdC_KUnroll_BoundsRefactor_LoopReorder_Blocking96, "blocking 96x96");
+        testing.RegisterTestFunction(AdvanceAlgOptimiz::StdC_KUnroll_BoundsRefactor_LoopReorder_Blocking128, "blocking 128x128");
         testing.TestCorrectness();
     }
     // Test the correctness and timing of the variants of our implementation
@@ -112,8 +114,9 @@ int main(int argc, char* argv[]) {
         testing.RegisterTestFunction(Testing::ImageQuiltingFunction, "default");
         testing.RegisterTestFunction(AdvanceAlgOptimiz::StdC_KUnroll_BoundsRefactor_LoopReorder_Blocking32, "blocking 32x32");
         testing.RegisterTestFunction(AdvanceAlgOptimiz::StdC_KUnroll_BoundsRefactor_LoopReorder_Blocking48, "blocking 48x48");
-        testing.RegisterTestFunction(AdvanceAlgOptimiz::StdC_KUnroll_BoundsRefactor_LoopReorder_Blocking56, "blocking 56x56");
         testing.RegisterTestFunction(AdvanceAlgOptimiz::StdC_KUnroll_BoundsRefactor_LoopReorder_Blocking64, "blocking 64x64");
+        testing.RegisterTestFunction(AdvanceAlgOptimiz::StdC_KUnroll_BoundsRefactor_LoopReorder_Blocking96, "blocking 96x96");
+        testing.RegisterTestFunction(AdvanceAlgOptimiz::StdC_KUnroll_BoundsRefactor_LoopReorder_Blocking128, "blocking 128x128");
 
         std::cout << std::endl;
         testing.TestCorrectnessAndTiming(stabilize);
@@ -141,11 +144,14 @@ int main(int argc, char* argv[]) {
         // Std c, k unroll, bounds refactor, loop reorder, and blocking 48x48 optimizations
         AdvanceAlgOptimiz::StdC_KUnroll_BoundsRefactor_LoopReorder_Blocking48(&img_data, seed);
 
-        // Std c, k unroll, bounds refactor, loop reorder, and blocking 56x56 optimizations
-        AdvanceAlgOptimiz::StdC_KUnroll_BoundsRefactor_LoopReorder_Blocking56(&img_data, seed);
-
         // Std c, k unroll, bounds refactor, loop reorder, and blocking 64x64 optimizations
         AdvanceAlgOptimiz::StdC_KUnroll_BoundsRefactor_LoopReorder_Blocking64(&img_data, seed);
+
+        // Std c, k unroll, bounds refactor, loop reorder, and blocking 96x96 optimizations
+        AdvanceAlgOptimiz::StdC_KUnroll_BoundsRefactor_LoopReorder_Blocking96(&img_data, seed);
+
+        // Std c, k unroll, bounds refactor, loop reorder, and blocking 128x128 optimizations
+        AdvanceAlgOptimiz::StdC_KUnroll_BoundsRefactor_LoopReorder_Blocking128(&img_data, seed);
 
         // Clean up
         img_data.FreeOutput();
