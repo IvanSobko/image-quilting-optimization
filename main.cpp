@@ -124,8 +124,8 @@ int main(int argc, char* argv[]) {
     }
     else if (advisor) {
         // Read the input and allocate output
-        file::read_png_file(input_file.c_str(), img_data);
-        set_default();
+        file::read_png_file("./testing/input/input_256x256.png", img_data);
+        AdvanceAlgOptimiz::CustomParameters(&img_data);
         img_data.AllocateOutput();
 
         int seed = 2;
