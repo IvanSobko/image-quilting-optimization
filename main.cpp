@@ -17,7 +17,7 @@ ImgData img_data;
 bool runTiming = false;
 bool generate = false;
 bool test = false;
-bool testCorrectnessAndTiming = false;
+bool testCorrectnessAndTiming = true;
 bool advisor = true;
 bool stabilize = false;
 
@@ -110,14 +110,19 @@ int main(int argc, char* argv[]) {
         testing.SetParameterFunction(AdvanceAlgOptimiz::CustomParameters);
         testing.SetCorrectnessAndTimingInput("input_256x256.png");
 
-        testing.RegisterTestFunction(Testing::ImageQuiltingFunction, "default");
-        testing.RegisterTestFunction(AdvanceAlgOptimiz::StdC_KUnroll_BoundsRefactor, "refactor");
-        testing.RegisterTestFunction(AdvanceAlgOptimiz::StdC_KUnroll_BoundsRefactor_LoopReorder, "loop reorder");
-        testing.RegisterTestFunction(AdvanceAlgOptimiz::StdC_KUnroll_BoundsRefactor_LoopReorder_Blocking32, "blocking 32x32");
-        testing.RegisterTestFunction(AdvanceAlgOptimiz::StdC_KUnroll_BoundsRefactor_LoopReorder_Blocking48, "blocking 48x48");
-        testing.RegisterTestFunction(AdvanceAlgOptimiz::StdC_KUnroll_BoundsRefactor_LoopReorder_Blocking64, "blocking 64x64");
-        testing.RegisterTestFunction(AdvanceAlgOptimiz::StdC_KUnroll_BoundsRefactor_LoopReorder_Blocking96, "blocking 96x96");
-        testing.RegisterTestFunction(AdvanceAlgOptimiz::StdC_KUnroll_BoundsRefactor_LoopReorder_Blocking128, "blocking 128x128");
+//        testing.RegisterTestFunction(Testing::ImageQuiltingFunction, "default");
+//        testing.RegisterTestFunction(AdvanceAlgOptimiz::StdC_KUnroll_BoundsRefactor, "refactor");
+//        testing.RegisterTestFunction(AdvanceAlgOptimiz::StdC_KUnroll_BoundsRefactor_LoopReorder, "loop reorder");
+//        testing.RegisterTestFunction(AdvanceAlgOptimiz::StdC_KUnroll_BoundsRefactor_LoopReorder_Blocking32, "blocking 32x32");
+        testing.RegisterTestFunction(CompOverlapOptimiz::UnrollOpt, "basic unrolling");
+        testing.RegisterTestFunction(AdvanceAlgOptimiz::StdC_KSrc2Unroll_BoundsRefactor_LoopReorder_Blocking32,
+                                     "blocking & unroll by 2");
+        testing.RegisterTestFunction(AdvanceAlgOptimiz::StdC_KSrc4Unroll_BoundsRefactor_LoopReorder_Blocking32,
+                                     "blocking & unroll by 4");
+//        testing.RegisterTestFunction(AdvanceAlgOptimiz::StdC_KUnroll_BoundsRefactor_LoopReorder_Blocking48, "blocking 48x48");
+//        testing.RegisterTestFunction(AdvanceAlgOptimiz::StdC_KUnroll_BoundsRefactor_LoopReorder_Blocking64, "blocking 64x64");
+//        testing.RegisterTestFunction(AdvanceAlgOptimiz::StdC_KUnroll_BoundsRefactor_LoopReorder_Blocking96, "blocking 96x96");
+//        testing.RegisterTestFunction(AdvanceAlgOptimiz::StdC_KUnroll_BoundsRefactor_LoopReorder_Blocking128, "blocking 128x128");
 
         std::cout << std::endl;
         testing.TestCorrectnessAndTiming(stabilize);
