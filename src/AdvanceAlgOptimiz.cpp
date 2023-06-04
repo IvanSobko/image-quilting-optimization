@@ -2,6 +2,7 @@
 #include <cstdlib>
 #include <random>
 #include <climits>
+#include <ctime>
 
 #include "AdvanceAlgOptimiz.h"
 
