@@ -19,32 +19,35 @@ class AdvanceAlgOptimiz {
     static int GetRandomInt(int min, int max);
 
     static void CustomParameters(ImgData* imgData);
-    static void StdC_KUnroll_BoundsRefactor(ImgData* imgData, int seed);
-    static void StdC_KUnroll_BoundsRefactor_LoopReorder(ImgData* imgData, int seed);
-    static void StdC_KUnroll_BoundsRefactor_LoopReorder_Blocking32(ImgData* imgData, int seed);
-    static void StdC_KUnroll_BoundsRefactor_LoopReorder_Blocking48(ImgData* imgData, int seed);
-    static void StdC_KUnroll_BoundsRefactor_LoopReorder_Blocking64(ImgData* imgData, int seed);
-    static void StdC_KUnroll_BoundsRefactor_LoopReorder_Blocking96(ImgData* imgData, int seed);
-    static void StdC_KUnroll_BoundsRefactor_LoopReorder_Blocking128(ImgData* imgData, int seed);
+    static double StdC_KUnroll_BoundsRefactor(ImgData* imgData, int seed);
+    static double StdC_KUnroll_BoundsRefactor_LoopReorder(ImgData* imgData, int seed);
+    static double StdC_KUnroll_BoundsRefactor_LoopReorder_Blocking32(ImgData* imgData, int seed);
+    static double StdC_KUnroll_BoundsRefactor_LoopReorder_Blocking48(ImgData* imgData, int seed);
+    static double StdC_KUnroll_BoundsRefactor_LoopReorder_Blocking64(ImgData* imgData, int seed);
+    static double StdC_KUnroll_BoundsRefactor_LoopReorder_Blocking96(ImgData* imgData, int seed);
+    static double StdC_KUnroll_BoundsRefactor_LoopReorder_Blocking128(ImgData* imgData, int seed);
 
     // Std C, bounds refactoring, loop reorder, blocking 32x32, and unrolling channels loop and srcX by 2
-    static void StdC_KSrc2Unroll_BoundsRefactor_LoopReorder_Blocking32(ImgData* imgData, int seed);
+    static double StdC_KSrc2Unroll_BoundsRefactor_LoopReorder_Blocking32(ImgData* imgData, int seed);
 
     // Std C, bounds refactoring, loop reorder, blocking 32x32, and unrolling channels loop, srcX by 4
-    static void StdC_KSrc4Unroll_BoundsRefactor_LoopReorder_Blocking32(ImgData* imgData, int seed);
+    static double StdC_KSrc4Unroll_BoundsRefactor_LoopReorder_Blocking32(ImgData* imgData, int seed);
 
 #ifdef __AVX2__
     // Vectorization of KUnroll_BoundsRefactor_LoopReorder_Blocking32 with unroll of 2,4,8
-    static void StdC_KSrc2Unroll_Vector_BoundsRefactor_LoopReorder_Blocking32(ImgData* imgData, int seed);
-    static void StdC_KSrc4Unroll_Vector_BoundsRefactor_LoopReorder_Blocking32(ImgData* imgData, int seed);
-    static void StdC_KSrc8Unroll_Vector_BoundsRefactor_LoopReorder_Blocking32(ImgData* imgData, int seed);
+    static double StdC_KSrc2Unroll_Vector_BoundsRefactor_LoopReorder_Blocking32(ImgData* imgData, int seed);
+    static double StdC_KSrc4Unroll_Vector_BoundsRefactor_LoopReorder_Blocking32(ImgData* imgData, int seed);
+    static double StdC_KSrc8Unroll_Vector_BoundsRefactor_LoopReorder_Blocking32(ImgData* imgData, int seed);
 #endif
+
+    int64_t calcFlops();
 
    private:
     // Keep a pointer to the input image data
     ImgData* mData;
     int overlapWidth = 0;
     int overlapHeight = 0;
+    int64_t flopCount = 0;
 
     // Write a block from the source data to the output data given their upper-left corners
     void WriteBlock(int dstY, int dstX, int srcY, int srcX);

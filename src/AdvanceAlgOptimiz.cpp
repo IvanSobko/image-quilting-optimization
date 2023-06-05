@@ -15,84 +15,126 @@ void AdvanceAlgOptimiz::CustomParameters(ImgData* imgData) {
     imgData->block_w = imgData->width / 2;
 }
 
-void AdvanceAlgOptimiz::StdC_KUnroll_BoundsRefactor(ImgData* imgData, int seed) {
+int64_t AdvanceAlgOptimiz::calcFlops() {
+    //Note: rough calculations, many loop ranges are approximated
+    const int hStep = mData->block_h - overlapHeight;
+    const int wStep = mData->block_w - overlapWidth;
+    const int maxBlockY = mData->height - mData->block_h;
+    const int maxBlockX = mData->width - mData->block_w;
+    const int regBlockW = mData->block_w;
+    const int regBlockH = mData->block_h - overlapHeight;
+
+    const int numBlocks = maxBlockX * maxBlockY;
+    const int64_t verticalFlops = (numBlocks * 3 * CHANNEL_NUM * overlapWidth * mData->block_h) +
+                                  (3 * CHANNEL_NUM * mData->block_w * mData->block_h) + (2 * numBlocks + 3);
+
+    const int64_t horizontalFlops = (numBlocks * 3 * CHANNEL_NUM * overlapHeight * mData->block_w) +
+                                    (3 * CHANNEL_NUM * mData->block_w * mData->block_h) + (2 * numBlocks + 3);
+
+    const int64_t bothFlops =
+        (numBlocks * 3 * CHANNEL_NUM * (overlapHeight * regBlockW + overlapWidth * regBlockH)) +
+        (3 * CHANNEL_NUM * mData->block_w * mData->block_h +
+         3 * CHANNEL_NUM * mData->block_w * mData->block_h) +
+        (2 * numBlocks + 3);
+
+    flopCount += ((mData->output_w - mData->block_w) / wStep) * verticalFlops;
+    flopCount += ((mData->output_h - hStep - mData->block_h) / hStep)
+                 * (horizontalFlops + bothFlops + ((mData->output_w - mData->block_w) / wStep * bothFlops));
+    flopCount += horizontalFlops;
+    flopCount += bothFlops;
+    flopCount += (mData->output_w - mData->block_w) / wStep * bothFlops;
+    return flopCount;
+}
+
+double AdvanceAlgOptimiz::StdC_KUnroll_BoundsRefactor(ImgData* imgData, int seed) {
     AdvanceAlgOptimiz imageQuilting(imgData);
     SeedRandomNumberGenerator(seed);
     imageQuilting.OverlapConstraintsWithMinCut_StdC_KUnroll_BoundsRefactor();
+    return static_cast<double>(imageQuilting.calcFlops());
 }
 
-void AdvanceAlgOptimiz::StdC_KUnroll_BoundsRefactor_LoopReorder(ImgData* imgData, int seed) {
+double AdvanceAlgOptimiz::StdC_KUnroll_BoundsRefactor_LoopReorder(ImgData* imgData, int seed) {
     AdvanceAlgOptimiz imageQuilting(imgData);
     SeedRandomNumberGenerator(seed);
     imageQuilting.OverlapConstraintsWithMinCut_StdC_KUnroll_BoundsRefactor_LoopReorder();
+    return static_cast<double>(imageQuilting.calcFlops());
 }
 
-void AdvanceAlgOptimiz::StdC_KUnroll_BoundsRefactor_LoopReorder_Blocking32(ImgData* imgData, int seed) {
+double AdvanceAlgOptimiz::StdC_KUnroll_BoundsRefactor_LoopReorder_Blocking32(ImgData* imgData, int seed) {
     AdvanceAlgOptimiz imageQuilting(imgData);
     SeedRandomNumberGenerator(seed);
     imageQuilting.OverlapConstraintsWithMinCut_StdC_KUnroll_BoundsRefactor_LoopReorder_Blocking32();
+    return static_cast<double>(imageQuilting.calcFlops());
 }
 
-void AdvanceAlgOptimiz::StdC_KUnroll_BoundsRefactor_LoopReorder_Blocking48(ImgData* imgData, int seed) {
+double AdvanceAlgOptimiz::StdC_KUnroll_BoundsRefactor_LoopReorder_Blocking48(ImgData* imgData, int seed) {
     AdvanceAlgOptimiz imageQuilting(imgData);
     SeedRandomNumberGenerator(seed);
     imageQuilting.OverlapConstraintsWithMinCut_StdC_KUnroll_BoundsRefactor_LoopReorder_Blocking48();
+    return static_cast<double>(imageQuilting.calcFlops());
 }
 
-void AdvanceAlgOptimiz::StdC_KUnroll_BoundsRefactor_LoopReorder_Blocking64(ImgData* imgData, int seed) {
+double AdvanceAlgOptimiz::StdC_KUnroll_BoundsRefactor_LoopReorder_Blocking64(ImgData* imgData, int seed) {
     AdvanceAlgOptimiz imageQuilting(imgData);
     SeedRandomNumberGenerator(seed);
     imageQuilting.OverlapConstraintsWithMinCut_StdC_KUnroll_BoundsRefactor_LoopReorder_Blocking64();
+    return static_cast<double>(imageQuilting.calcFlops());
 }
 
-void AdvanceAlgOptimiz::StdC_KUnroll_BoundsRefactor_LoopReorder_Blocking96(ImgData* imgData, int seed) {
+double AdvanceAlgOptimiz::StdC_KUnroll_BoundsRefactor_LoopReorder_Blocking96(ImgData* imgData, int seed) {
     AdvanceAlgOptimiz imageQuilting(imgData);
     SeedRandomNumberGenerator(seed);
     imageQuilting.OverlapConstraintsWithMinCut_StdC_KUnroll_BoundsRefactor_LoopReorder_Blocking96();
+    return static_cast<double>(imageQuilting.calcFlops());
 }
 
-void AdvanceAlgOptimiz::StdC_KUnroll_BoundsRefactor_LoopReorder_Blocking128(ImgData* imgData, int seed) {
+double AdvanceAlgOptimiz::StdC_KUnroll_BoundsRefactor_LoopReorder_Blocking128(ImgData* imgData, int seed) {
     AdvanceAlgOptimiz imageQuilting(imgData);
     SeedRandomNumberGenerator(seed);
     imageQuilting.OverlapConstraintsWithMinCut_StdC_KUnroll_BoundsRefactor_LoopReorder_Blocking128();
+    return static_cast<double>(imageQuilting.calcFlops());
 }
 
-void AdvanceAlgOptimiz::StdC_KSrc2Unroll_BoundsRefactor_LoopReorder_Blocking32(ImgData* imgData, int seed) {
+double AdvanceAlgOptimiz::StdC_KSrc2Unroll_BoundsRefactor_LoopReorder_Blocking32(ImgData* imgData, int seed) {
     AdvanceAlgOptimiz imageQuilting(imgData);
     SeedRandomNumberGenerator(seed);
     imageQuilting.OverlapConstraintsWithMinCut_StdC_KSrc2Unroll_BoundsRefactor_LoopReorder_Blocking32();
+    return static_cast<double>(imageQuilting.calcFlops());
 }
 
-
-void AdvanceAlgOptimiz::StdC_KSrc4Unroll_BoundsRefactor_LoopReorder_Blocking32(ImgData* imgData, int seed) {
+double AdvanceAlgOptimiz::StdC_KSrc4Unroll_BoundsRefactor_LoopReorder_Blocking32(ImgData* imgData, int seed) {
     AdvanceAlgOptimiz imageQuilting(imgData);
     SeedRandomNumberGenerator(seed);
     imageQuilting.OverlapConstraintsWithMinCut_StdC_KSrc4Unroll_BoundsRefactor_LoopReorder_Blocking32();
+    return static_cast<double>(imageQuilting.calcFlops());
 }
 
 #ifdef __AVX2__
-void AdvanceAlgOptimiz::StdC_KSrc2Unroll_Vector_BoundsRefactor_LoopReorder_Blocking32(ImgData* imgData,
+double AdvanceAlgOptimiz::StdC_KSrc2Unroll_Vector_BoundsRefactor_LoopReorder_Blocking32(ImgData* imgData,
                                                                                       int seed) {
     AdvanceAlgOptimiz imageQuilting(imgData);
     SeedRandomNumberGenerator(seed);
     imageQuilting
         .OverlapConstraintsWithMinCut_StdC_KSrc2Unroll_Vector_BoundsRefactor_LoopReorder_Blocking32();
+    return static_cast<double>(imageQuilting.calcFlops());
 }
 
-void AdvanceAlgOptimiz::StdC_KSrc4Unroll_Vector_BoundsRefactor_LoopReorder_Blocking32(ImgData* imgData,
+double AdvanceAlgOptimiz::StdC_KSrc4Unroll_Vector_BoundsRefactor_LoopReorder_Blocking32(ImgData* imgData,
                                                                                       int seed) {
     AdvanceAlgOptimiz imageQuilting(imgData);
     SeedRandomNumberGenerator(seed);
     imageQuilting
         .OverlapConstraintsWithMinCut_StdC_KSrc4Unroll_Vector_BoundsRefactor_LoopReorder_Blocking32();
+    return static_cast<double>(imageQuilting.calcFlops());
 }
 
-void AdvanceAlgOptimiz::StdC_KSrc8Unroll_Vector_BoundsRefactor_LoopReorder_Blocking32(ImgData* imgData,
+double AdvanceAlgOptimiz::StdC_KSrc8Unroll_Vector_BoundsRefactor_LoopReorder_Blocking32(ImgData* imgData,
                                                                                       int seed) {
     AdvanceAlgOptimiz imageQuilting(imgData);
     SeedRandomNumberGenerator(seed);
     imageQuilting
         .OverlapConstraintsWithMinCut_StdC_KSrc8Unroll_Vector_BoundsRefactor_LoopReorder_Blocking32();
+    return static_cast<double>(imageQuilting.calcFlops());
 }
 #endif
 
@@ -182,10 +224,12 @@ void AdvanceAlgOptimiz::WriteBlockOverlapWithMinCut(const int overlapType, const
                 double minError = dpTable[(i - 1) * overlapWidthLocal + j];
                 // Get the value to the left
                 if (j > 0) {
+                    flopCount++;
                     minError = std::min(minError, dpTable[(i - 1) * overlapWidthLocal + (j - 1)]);
                 }
                 // Get the value to the right
                 if (j < overlapWidthLocal - 1) {
+                    flopCount++;
                     minError = std::min(minError, dpTable[(i - 1) * overlapWidthLocal + (j + 1)]);
                 }
                 dpTable[i * overlapWidthLocal + j] = errorSurface[i * overlapWidthLocal + j] + minError;
@@ -197,6 +241,7 @@ void AdvanceAlgOptimiz::WriteBlockOverlapWithMinCut(const int overlapType, const
         verticalPath[overlapHeightLocal - 1] = 0;
         for (int j = 1; j < overlapWidthLocal; j++) {
             double error = dpTable[(overlapHeightLocal - 1) * overlapWidthLocal + j];
+            flopCount++;
             if (error < minError) {
                 minError = error;
                 verticalPath[overlapHeightLocal - 1] = j;
@@ -213,16 +258,20 @@ void AdvanceAlgOptimiz::WriteBlockOverlapWithMinCut(const int overlapType, const
             // Get the value to the left
             if (j > 0) {
                 double leftError = dpTable[i * overlapWidthLocal + j - 1];
+                flopCount++;
                 if (leftError < localError) {
                     localError = leftError;
+                    flopCount++;
                     verticalPath[i] = j - 1;
                 }
             }
             // Get the value to the right
             if (j < overlapWidthLocal - 1) {
                 double rightError = dpTable[i * overlapWidthLocal + j + 1];
+                flopCount++;
                 if (rightError < localError) {
                     localError = rightError;
+                    flopCount++;
                     verticalPath[i] = j + 1;
                 }
             }
@@ -261,10 +310,12 @@ void AdvanceAlgOptimiz::WriteBlockOverlapWithMinCut(const int overlapType, const
                 double minError = dpTable[i * overlapWidthLocal + j - 1];
                 // Get the value to the left and up
                 if (i > 0) {
+                    flopCount++;
                     minError = std::min(minError, dpTable[(i - 1) * overlapWidthLocal + (j - 1)]);
                 }
                 // Get the value to the left and below
                 if (i < overlapHeightLocal - 1) {
+                    flopCount++;
                     minError = std::min(minError, dpTable[(i + 1) * overlapWidthLocal + (j - 1)]);
                 }
                 dpTable[i * overlapWidthLocal + j] = errorSurface[i * overlapWidthLocal + j] + minError;
@@ -276,6 +327,7 @@ void AdvanceAlgOptimiz::WriteBlockOverlapWithMinCut(const int overlapType, const
         horizontalPath[overlapWidthLocal - 1] = 0;
         for (int i = 1; i < overlapHeightLocal; i++) {
             double error = dpTable[(i + 1) * overlapWidthLocal - 1];
+            flopCount++;
             if (error < minError) {
                 minError = error;
                 horizontalPath[overlapWidthLocal - 1] = i;
@@ -292,6 +344,7 @@ void AdvanceAlgOptimiz::WriteBlockOverlapWithMinCut(const int overlapType, const
             // Get the value to the left and above
             if (i > 0) {
                 double leftError = dpTable[(i - 1) * overlapWidthLocal + j];
+                flopCount++;
                 if (leftError < localError) {
                     localError = leftError;
                     horizontalPath[j] = i - 1;
@@ -300,6 +353,7 @@ void AdvanceAlgOptimiz::WriteBlockOverlapWithMinCut(const int overlapType, const
             // Get the value to the left and below
             if (i < overlapHeightLocal - 1) {
                 double rightError = dpTable[(i + 1) * overlapWidthLocal + j];
+                flopCount++;
                 if (rightError < localError) {
                     localError = rightError;
                     horizontalPath[j] = i + 1;
@@ -362,7 +416,6 @@ void AdvanceAlgOptimiz::PlaceEdgeOverlapBlockWithMinCut_StdC_KUnroll_BoundsRefac
             int srcXStart = CHANNEL_NUM * srcX;
 
             if (overlapType == both) {
-
                 for (int i = 0; i < overlapHeight; i++) {
                     unsigned char* outputRow = mData->output_d[overlapYStart + i] + dstXStart;
                     unsigned char* srcRow = mData->data[srcY + i] + srcXStart;
@@ -519,14 +572,14 @@ void AdvanceAlgOptimiz::PlaceEdgeOverlapBlockWithMinCut_StdC_KUnroll_BoundsRefac
 void AdvanceAlgOptimiz::OverlapConstraintsWithMinCut_StdC_KUnroll_BoundsRefactor() {
 
     // Compute block parameters
-    int hStep = mData->block_h - overlapHeight;
-    int wStep = mData->block_w - overlapWidth;
+    const int hStep = mData->block_h - overlapHeight;
+    const int wStep = mData->block_w - overlapWidth;
 
-    int maxBlockY = mData->height - mData->block_h;
-    int maxBlockX = mData->width - mData->block_w;
+    const int maxBlockY = mData->height - mData->block_h;
+    const int maxBlockX = mData->width - mData->block_w;
 
-    int regBlockW = mData->block_w;
-    int regBlockH = mData->block_h - overlapHeight;
+    const int regBlockW = mData->block_w;
+    const int regBlockH = mData->block_h - overlapHeight;
 
     // Randomly choose the upper-left corner of a block
     int srcY = GetRandomInt(0, maxBlockY - 1);
@@ -555,7 +608,6 @@ void AdvanceAlgOptimiz::OverlapConstraintsWithMinCut_StdC_KUnroll_BoundsRefactor
             PlaceEdgeOverlapBlockWithMinCut_StdC_KUnroll_BoundsRefactor(both, dstY, dstX, maxBlockX,
                                                                         maxBlockY, 0.1, regBlockW, regBlockH);
         }
-
         // fill last column
         PlaceEdgeOverlapBlockWithMinCut_StdC_KUnroll_BoundsRefactor(both, dstY, dstX, maxBlockX, maxBlockY,
                                                                     0.1, blockWidth, regBlockH);
@@ -565,6 +617,7 @@ void AdvanceAlgOptimiz::OverlapConstraintsWithMinCut_StdC_KUnroll_BoundsRefactor
     int blockHeight = mData->output_h - dstY;
     PlaceEdgeOverlapBlockWithMinCut_StdC_KUnroll_BoundsRefactor(horizontal, dstY, 0, maxBlockX, maxBlockY,
                                                                 0.1, regBlockW, regBlockH);
+
     dstX = mData->block_w;
     for (; dstX < mData->output_w - wStep; dstX += wStep) {
         PlaceEdgeOverlapBlockWithMinCut_StdC_KUnroll_BoundsRefactor(both, dstY, dstX, maxBlockX, maxBlockY,
@@ -2639,7 +2692,6 @@ void AdvanceAlgOptimiz::
     free(suitableBlocks);
 }
 
-
 void AdvanceAlgOptimiz::
     OverlapConstraintsWithMinCut_StdC_KSrc2Unroll_BoundsRefactor_LoopReorder_Blocking32() {
     // Compute block parameters
@@ -2698,7 +2750,6 @@ void AdvanceAlgOptimiz::
     PlaceEdgeOverlapBlockWithMinCutBlocking_StdC_KSrc2Unroll_BoundsRefactor_LoopReorder_Blocking32(
         both, dstY, lastDstX, maxBlockX, maxBlockY, 0.1, blockWidth, blockHeight);
 }
-
 
 // Std C, bounds refactoring, loop reorder, blocking 32x32, and unrolling channels loop and srcX by 2
 void AdvanceAlgOptimiz::
