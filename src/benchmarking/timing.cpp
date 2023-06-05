@@ -13,6 +13,7 @@
 #define RDTSC_LATENCY 26
 #define REP 2
 
+// Original timing
 void timing::run_timing(int inputBlockRatio) {
     std::vector<std::string> files = read_files("./gallery", "input0_");
     if (files.empty()) {
@@ -116,4 +117,110 @@ std::vector<std::string> timing::read_files(const std::string& directory,
     }
     closedir(folder);
     return result;
+}
+
+
+// Call the image quilting variant on the specified input and return the number of cycles and flops
+timing::TimingData timing::rdtsc_functional(const ImageQuiltingFunction & imageQuiltingFunction, ImgData* imgData, int seed)
+{
+    double cycles = 0;
+    int num_runs = 1;
+    double multiplier = 1;
+    myInt64 start, end;
+
+    // Warm-up phase: we determine a number of executions that allows
+    // the code to be executed for at least CYCLES_REQUIRED cycles.
+    // This helps excluding timing overhead when measuring small runtimes.
+    printf("Doing warmup phase...");
+    do {
+        num_runs = num_runs * multiplier;
+        start = start_tsc();
+        for (size_t i = 0; i < num_runs; i++) {
+            imageQuiltingFunction(imgData, seed);
+        }
+        end = stop_tsc(start);
+
+        cycles = (double)end;
+        multiplier = (CYCLES_REQUIRED) / (cycles);
+
+    } while (multiplier > 2);
+
+    // Actual performance measurements repeated REP times.
+    // We simply store all results and compute medians during post-processing.
+    printf("actually measuring performance (%i times).\n", num_runs * REP);
+    double total_cycles = 0;
+    double total_flops = 0;
+    for (size_t j = 0; j < REP; j++) {
+        start = start_tsc();
+        for (size_t i = 0; i < num_runs; ++i) {
+            total_flops += imageQuiltingFunction(imgData, seed);
+        }
+        end = stop_tsc(start) - RDTSC_LATENCY;
+
+        cycles = (double)end / (double)num_runs;
+        total_cycles += cycles;
+        total_flops = (total_flops - num_runs) / num_runs;
+    }
+    total_cycles /= REP;
+    total_flops /= REP;
+    return TimingData(total_cycles, total_flops);
+}
+
+// Get the current date and time as a string
+// From ChatGPT
+std::string getCurrentDateTime() {
+    auto now = std::chrono::system_clock::now();
+    std::time_t currentTime = std::chrono::system_clock::to_time_t(now);
+
+    char buffer[100];
+    std::strftime(buffer, sizeof(buffer), "%Y-%m-%d_%H-%M-%S", std::localtime(&currentTime));
+
+    return std::string(buffer);
+}
+
+// Empty image quilting function for debugging purposes
+double timing::EmptyImageQuiltingFunction(ImgData* imgData, int seed)
+{
+    return -1;
+}
+
+// Get the relative paths of files from a specified directory starting with the given filter
+// From ChatGPT
+std::vector<std::string> getRelativePaths(const std::string & directory, const std::string & filter)
+{
+    std::vector<std::string> relativePaths;
+    for (const auto& entry : std::filesystem::directory_iterator(directory)) {
+        if (std::filesystem::is_regular_file(entry.path())) {
+            std::string filename = entry.path().filename().string();
+            if (filename.compare(0, filter.length(), filter) == 0) {
+                relativePaths.push_back(entry.path().relative_path().string());
+            }
+        }
+    }
+    return relativePaths;
+}
+
+// Run the timing for the image quilting variant and write the results to a file with the given label (and current date and time)
+void timing::run_timing_functional(
+    const std::string & label,
+    const std::string & inputDirectory, const std::string & filenameFilter, const std::string & outputDirectory,
+    const ImageQuiltingFunction & imageQuiltingFunction)
+{
+    // Intro
+    std::cout << "Running functional timing for:" << std::endl << "\t" << label << std::endl;
+
+    // Read the input files
+    std::vector<std::string> inputFiles = getRelativePaths(inputDirectory, filenameFilter);
+    std::cout << "Input files: " << std::endl;
+    for (const auto & inputFile : inputFiles) std::cout << "\t" << inputFile << std::endl;
+
+    // WARNING: _CompileFlags must be defined!
+    std::string outputFile =
+        outputDirectory + "/" + label + "_"
+        + std::string(_CompileFlags) + "_"
+        + getCurrentDateTime() + ".txt";
+    std::cout << "Writing results to: " << std::endl << "\t" << outputFile << std::endl;
+
+    // Outro
+    std::cout << "Done!" << std::endl << std::endl;
 }

@@ -20,6 +20,7 @@ bool test = false;
 bool testCorrectnessAndTiming = false;
 bool stabilize = false;
 bool advisor = false;
+bool timingFunctional = false;
 
 void parse_args(int argc, char* argv[]) {
     std::string delimiter = "=";
@@ -51,6 +52,8 @@ void parse_args(int argc, char* argv[]) {
             stabilize = true;
         } else if (par == "--advisor") {
             advisor = true;
+        } else if (par == "--timingFunctional") {
+            timingFunctional = true;
         }
     }
 }
@@ -150,7 +153,13 @@ int main(int argc, char* argv[]) {
 #endif
         testing.ComponentsTimingAdvisor();
     }
-
+    // Run the functional timing code
+    else if (timingFunctional) {
+        int inputBlockRatio = 4;
+        timing::run_timing_functional(
+            "default", "./timing/input", "input0", "./timing/results",
+            timing::EmptyImageQuiltingFunction);
+    }
     // Main
     else {
         // Read the input data
