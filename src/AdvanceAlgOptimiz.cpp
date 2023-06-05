@@ -1,9 +1,9 @@
-#include <algorithm>
-#include <cstdlib>
-#include <random>
-#include <climits>
-#include <ctime>
 #include <immintrin.h>
+#include <algorithm>
+#include <climits>
+#include <cstdlib>
+#include <ctime>
+#include <random>
 
 #include "AdvanceAlgOptimiz.h"
 
@@ -57,29 +57,28 @@ void AdvanceAlgOptimiz::StdC_KUnroll_BoundsRefactor_LoopReorder_Blocking128(ImgD
     imageQuilting.OverlapConstraintsWithMinCut_StdC_KUnroll_BoundsRefactor_LoopReorder_Blocking128();
 }
 
-void AdvanceAlgOptimiz::StdC_KSrc2Unroll_BoundsRefactor_LoopReorder_Blocking32(ImgData * imgData, int seed) {
+void AdvanceAlgOptimiz::StdC_KSrc2Unroll_BoundsRefactor_LoopReorder_Blocking32(ImgData* imgData, int seed) {
     AdvanceAlgOptimiz imageQuilting(imgData);
     SeedRandomNumberGenerator(seed);
     imageQuilting.OverlapConstraintsWithMinCut_StdC_KSrc2Unroll_BoundsRefactor_LoopReorder_Blocking32();
 }
 
 void AdvanceAlgOptimiz::StdC_KSrc2Unroll_Vector_BoundsRefactor_LoopReorder_Blocking32(ImgData* imgData,
-                                                                                      int seed)
-{
+                                                                                      int seed) {
     AdvanceAlgOptimiz imageQuilting(imgData);
     SeedRandomNumberGenerator(seed);
     imageQuilting
         .OverlapConstraintsWithMinCut_StdC_KSrc2Unroll_Vector_BoundsRefactor_LoopReorder_Blocking32();
 }
 
-void AdvanceAlgOptimiz::StdC_KSrc4Unroll_BoundsRefactor_LoopReorder_Blocking32(ImgData * imgData, int seed) {
+void AdvanceAlgOptimiz::StdC_KSrc4Unroll_BoundsRefactor_LoopReorder_Blocking32(ImgData* imgData, int seed) {
     AdvanceAlgOptimiz imageQuilting(imgData);
     SeedRandomNumberGenerator(seed);
     imageQuilting.OverlapConstraintsWithMinCut_StdC_KSrc4Unroll_BoundsRefactor_LoopReorder_Blocking32();
 }
 
 void AdvanceAlgOptimiz::StdC_KSrc4Unroll_Vector_BoundsRefactor_LoopReorder_Blocking32(ImgData* imgData,
-                                                                                      int seed){
+                                                                                      int seed) {
     AdvanceAlgOptimiz imageQuilting(imgData);
     SeedRandomNumberGenerator(seed);
     imageQuilting
@@ -87,13 +86,12 @@ void AdvanceAlgOptimiz::StdC_KSrc4Unroll_Vector_BoundsRefactor_LoopReorder_Block
 }
 
 void AdvanceAlgOptimiz::StdC_KSrc8Unroll_Vector_BoundsRefactor_LoopReorder_Blocking32(ImgData* imgData,
-                                                                                      int seed){
+                                                                                      int seed) {
     AdvanceAlgOptimiz imageQuilting(imgData);
     SeedRandomNumberGenerator(seed);
     imageQuilting
         .OverlapConstraintsWithMinCut_StdC_KSrc8Unroll_Vector_BoundsRefactor_LoopReorder_Blocking32();
 }
-
 
 // Seed the random number generator with the system time
 void AdvanceAlgOptimiz::SeedRandomNumberGenerator() {
@@ -124,7 +122,7 @@ void AdvanceAlgOptimiz::WriteBlock(const int dstY, const int dstX, const int src
         for (int j = 0; j < width; j++) {
             for (int k = 0; k < CHANNEL_NUM; k++) {
                 mData->output_d[dstY + i][CHANNEL_NUM * (dstX + j) + k] =
-                        mData->data[srcY + i][CHANNEL_NUM * (srcX + j) + k];
+                    mData->data[srcY + i][CHANNEL_NUM * (srcX + j) + k];
             }
         }
     }
@@ -132,7 +130,7 @@ void AdvanceAlgOptimiz::WriteBlock(const int dstY, const int dstX, const int src
 
 // Same as WriteBlockOverlap, but uses a minimum cut to write the new block
 void AdvanceAlgOptimiz::WriteBlockOverlapWithMinCut(const int overlapType, const int dstY, const int dstX,
-                                                     const int srcY, const int srcX) {
+                                                    const int srcY, const int srcX) {
     // Compute the overlap region that we are working with
     int overlapYStart = overlapType != vertical ? dstY - overlapHeight : dstY;
     int overlapXStart = overlapType != horizontal ? dstX - overlapWidth : dstX;
@@ -320,10 +318,10 @@ void AdvanceAlgOptimiz::WriteBlockOverlapWithMinCut(const int overlapType, const
             // Vertical overlap: write the source block if we are to the right of the path
             if (overlapType == vertical)
                 write = j > verticalPath[i];
-                // Horizontal overlap: write the source block if we are above the path
+            // Horizontal overlap: write the source block if we are above the path
             else if (overlapType == horizontal)
                 write = i > horizontalPath[j];
-                // Corner overlap: write the source block if we are to the right and above the two paths
+            // Corner overlap: write the source block if we are to the right and above the two paths
             else if (overlapType == both)
                 write = j > verticalPath[i] && i > horizontalPath[j];
 
@@ -331,19 +329,17 @@ void AdvanceAlgOptimiz::WriteBlockOverlapWithMinCut(const int overlapType, const
             if (write) {
                 for (int k = 0; k < CHANNEL_NUM; k++) {
                     mData->output_d[overlapYStart + i][CHANNEL_NUM * (overlapXStart + j) + k] =
-                            mData->data[srcY + i][CHANNEL_NUM * (srcX + j) + k];
+                        mData->data[srcY + i][CHANNEL_NUM * (srcX + j) + k];
                 }
             }
         }
     }
 }
 
-
 // Std C, K unroll, and bounds refactoring optimizations
-void AdvanceAlgOptimiz::PlaceEdgeOverlapBlockWithMinCut_StdC_KUnroll_BoundsRefactor(int overlapType, const int dstY, const int dstX,
-                                                         const int maxBlockX, const int maxBlockY,
-                                                         double errorTolerance, int bWidth, int bHeight)
-{
+void AdvanceAlgOptimiz::PlaceEdgeOverlapBlockWithMinCut_StdC_KUnroll_BoundsRefactor(
+    int overlapType, const int dstY, const int dstX, const int maxBlockX, const int maxBlockY,
+    double errorTolerance, int bWidth, int bHeight) {
     int overlapXStart = (overlapType == horizontal) ? dstX : dstX - overlapWidth;
     int overlapYStart = (overlapType == vertical) ? dstY : dstY - overlapHeight;
 
@@ -368,14 +364,14 @@ void AdvanceAlgOptimiz::PlaceEdgeOverlapBlockWithMinCut_StdC_KUnroll_BoundsRefac
                     unsigned char* outputRow = mData->output_d[overlapYStart + i] + dstXStart;
                     unsigned char* srcRow = mData->data[srcY + i] + srcXStart;
                     for (int j = 0; j < bWidth; j++) {
-                        int rDst = outputRow[j*4];
-                        int gDst = outputRow[j*4+1];
-                        int bDst = outputRow[j*4+2];
-                        int aDst = outputRow[j*4+3];
-                        int rSrc = srcRow[j*4];
-                        int gSrc = srcRow[j*4+1];
-                        int bSrc = srcRow[j*4+2];
-                        int aSrc = srcRow[j*4+3];
+                        int rDst = outputRow[j * 4];
+                        int gDst = outputRow[j * 4 + 1];
+                        int bDst = outputRow[j * 4 + 2];
+                        int aDst = outputRow[j * 4 + 3];
+                        int rSrc = srcRow[j * 4];
+                        int gSrc = srcRow[j * 4 + 1];
+                        int bSrc = srcRow[j * 4 + 2];
+                        int aSrc = srcRow[j * 4 + 3];
 
                         int rDiff = rDst - rSrc;
                         int gDiff = gDst - gSrc;
@@ -399,14 +395,14 @@ void AdvanceAlgOptimiz::PlaceEdgeOverlapBlockWithMinCut_StdC_KUnroll_BoundsRefac
                     unsigned char* outputRow = mData->output_d[dstY + i] + dstXStart;
                     unsigned char* srcRow = mData->data[srcYStart + i] + srcXStart;
                     for (int j = 0; j < overlapWidth; j++) {
-                        int rDst = outputRow[j*4];
-                        int gDst = outputRow[j*4+1];
-                        int bDst = outputRow[j*4+2];
-                        int aDst = outputRow[j*4+3];
-                        int rSrc = srcRow[j*4];
-                        int gSrc = srcRow[j*4+1];
-                        int bSrc = srcRow[j*4+2];
-                        int aSrc = srcRow[j*4+3];
+                        int rDst = outputRow[j * 4];
+                        int gDst = outputRow[j * 4 + 1];
+                        int bDst = outputRow[j * 4 + 2];
+                        int aDst = outputRow[j * 4 + 3];
+                        int rSrc = srcRow[j * 4];
+                        int gSrc = srcRow[j * 4 + 1];
+                        int bSrc = srcRow[j * 4 + 2];
+                        int aSrc = srcRow[j * 4 + 3];
 
                         int rDiff = rDst - rSrc;
                         int gDiff = gDst - gSrc;
@@ -431,14 +427,14 @@ void AdvanceAlgOptimiz::PlaceEdgeOverlapBlockWithMinCut_StdC_KUnroll_BoundsRefac
                     unsigned char* outputRow = mData->output_d[dstY + i] + dstXStart;
                     unsigned char* srcRow = mData->data[srcY + i] + srcXStart;
                     for (int j = 0; j < overlapWidth; j++) {
-                        int rDst = outputRow[j*4];
-                        int gDst = outputRow[j*4+1];
-                        int bDst = outputRow[j*4+2];
-                        int aDst = outputRow[j*4+3];
-                        int rSrc = srcRow[j*4];
-                        int gSrc = srcRow[j*4+1];
-                        int bSrc = srcRow[j*4+2];
-                        int aSrc = srcRow[j*4+3];
+                        int rDst = outputRow[j * 4];
+                        int gDst = outputRow[j * 4 + 1];
+                        int bDst = outputRow[j * 4 + 2];
+                        int aDst = outputRow[j * 4 + 3];
+                        int rSrc = srcRow[j * 4];
+                        int gSrc = srcRow[j * 4 + 1];
+                        int bSrc = srcRow[j * 4 + 2];
+                        int aSrc = srcRow[j * 4 + 3];
 
                         int rDiff = rDst - rSrc;
                         int gDiff = gDst - gSrc;
@@ -463,14 +459,14 @@ void AdvanceAlgOptimiz::PlaceEdgeOverlapBlockWithMinCut_StdC_KUnroll_BoundsRefac
                     unsigned char* outputRow = mData->output_d[overlapYStart + i] + dstXStart;
                     unsigned char* srcRow = mData->data[srcY + i] + srcXStart;
                     for (int j = 0; j < mData->block_w; j++) {
-                        int rDst = outputRow[j*4];
-                        int gDst = outputRow[j*4+1];
-                        int bDst = outputRow[j*4+2];
-                        int aDst = outputRow[j*4+3];
-                        int rSrc = srcRow[j*4];
-                        int gSrc = srcRow[j*4+1];
-                        int bSrc = srcRow[j*4+2];
-                        int aSrc = srcRow[j*4+3];
+                        int rDst = outputRow[j * 4];
+                        int gDst = outputRow[j * 4 + 1];
+                        int bDst = outputRow[j * 4 + 2];
+                        int aDst = outputRow[j * 4 + 3];
+                        int rSrc = srcRow[j * 4];
+                        int gSrc = srcRow[j * 4 + 1];
+                        int bSrc = srcRow[j * 4 + 2];
+                        int aSrc = srcRow[j * 4 + 3];
 
                         int rDiff = rDst - rSrc;
                         int gDiff = gDst - gSrc;
@@ -488,7 +484,6 @@ void AdvanceAlgOptimiz::PlaceEdgeOverlapBlockWithMinCut_StdC_KUnroll_BoundsRefac
                         l2norm += sum1 + sum2;
                     }
                 }
-
             }
             blocks[blockIndex].value = l2norm;
             if (l2norm < minVal) {
@@ -548,12 +543,12 @@ void AdvanceAlgOptimiz::OverlapConstraintsWithMinCut_StdC_KUnroll_BoundsRefactor
     int blockWidth = mData->output_w - (lastDstX - overlapWidth);
 
     // fill all corner cases except borders
-    for (; dstY < mData->output_h-hStep; dstY += hStep) {
+    for (; dstY < mData->output_h - hStep; dstY += hStep) {
         // fill first column
         PlaceEdgeOverlapBlockWithMinCut_StdC_KUnroll_BoundsRefactor(horizontal, dstY, 0, maxBlockX, maxBlockY,
                                                                     0.1, regBlockW, regBlockH);
         dstX = mData->block_w;
-        for (; dstX < mData->output_w-wStep; dstX += wStep) {
+        for (; dstX < mData->output_w - wStep; dstX += wStep) {
             PlaceEdgeOverlapBlockWithMinCut_StdC_KUnroll_BoundsRefactor(both, dstY, dstX, maxBlockX,
                                                                         maxBlockY, 0.1, regBlockW, regBlockH);
         }
@@ -568,21 +563,19 @@ void AdvanceAlgOptimiz::OverlapConstraintsWithMinCut_StdC_KUnroll_BoundsRefactor
     PlaceEdgeOverlapBlockWithMinCut_StdC_KUnroll_BoundsRefactor(horizontal, dstY, 0, maxBlockX, maxBlockY,
                                                                 0.1, regBlockW, regBlockH);
     dstX = mData->block_w;
-    for (; dstX < mData->output_w-wStep; dstX += wStep) {
+    for (; dstX < mData->output_w - wStep; dstX += wStep) {
         PlaceEdgeOverlapBlockWithMinCut_StdC_KUnroll_BoundsRefactor(both, dstY, dstX, maxBlockX, maxBlockY,
                                                                     0.1, mData->block_w, blockHeight);
-
     }
     // bottom-right corner
     PlaceEdgeOverlapBlockWithMinCut_StdC_KUnroll_BoundsRefactor(both, dstY, lastDstX, maxBlockX, maxBlockY,
                                                                 0.1, blockWidth, blockHeight);
-
 }
 
 // Std C, K unroll, bounds refactoring, and loop reorder optimizations
-void AdvanceAlgOptimiz::PlaceEdgeOverlapBlockWithMinCutBlocking_StdC_KUnroll_BoundsRefactor_LoopReorder(int overlapType, int dstY, int dstX, int maxBlockX,
-                                                            int maxBlockY, double errorTolerance, int bWidth, int bHeight) 
-{
+void AdvanceAlgOptimiz::PlaceEdgeOverlapBlockWithMinCutBlocking_StdC_KUnroll_BoundsRefactor_LoopReorder(
+    int overlapType, int dstY, int dstX, int maxBlockX, int maxBlockY, double errorTolerance, int bWidth,
+    int bHeight) {
     int overlapXStart = (overlapType == horizontal) ? dstX : dstX - overlapWidth;
     int overlapYStart = (overlapType == vertical) ? dstY : dstY - overlapHeight;
 
@@ -606,18 +599,18 @@ void AdvanceAlgOptimiz::PlaceEdgeOverlapBlockWithMinCutBlocking_StdC_KUnroll_Bou
         for (int i = 0; i < overlapHeight; i++) {
             unsigned char* outputRow = mData->output_d[overlapYStart + i] + dstXStart;
             for (int j = 0; j < bWidth; j++) {
-                int rDst = outputRow[j*4];
-                int gDst = outputRow[j*4+1];
-                int bDst = outputRow[j*4+2];
-                int aDst = outputRow[j*4+3];
+                int rDst = outputRow[j * 4];
+                int gDst = outputRow[j * 4 + 1];
+                int bDst = outputRow[j * 4 + 2];
+                int aDst = outputRow[j * 4 + 3];
 
                 for (int srcY = 0; srcY < maxBlockY; srcY++) {
                     unsigned char* srcRow = mData->data[srcY + i];
                     for (int srcX = 0; srcX < maxBlockX; srcX++) {
-                        int rSrc = srcRow[j*4];
-                        int gSrc = srcRow[j*4+1];
-                        int bSrc = srcRow[j*4+2];
-                        int aSrc = srcRow[j*4+3];
+                        int rSrc = srcRow[j * 4];
+                        int gSrc = srcRow[j * 4 + 1];
+                        int bSrc = srcRow[j * 4 + 2];
+                        int aSrc = srcRow[j * 4 + 3];
 
                         int rDiff = rDst - rSrc;
                         int gDiff = gDst - gSrc;
@@ -633,7 +626,7 @@ void AdvanceAlgOptimiz::PlaceEdgeOverlapBlockWithMinCutBlocking_StdC_KUnroll_Bou
                         int sum2 = norm3 + norm4;
 
                         blocks[srcY * maxBlockX + srcX].value += sum1 + sum2;
-                        srcRow+=4;
+                        srcRow += 4;
                     }
                 }
             }
@@ -642,18 +635,18 @@ void AdvanceAlgOptimiz::PlaceEdgeOverlapBlockWithMinCutBlocking_StdC_KUnroll_Bou
         for (int i = 0; i < bHeight; i++) {
             unsigned char* outputRow = mData->output_d[dstY + i] + dstXStart;
             for (int j = 0; j < overlapWidth; j++) {
-                int rDst = outputRow[j*4];
-                int gDst = outputRow[j*4+1];
-                int bDst = outputRow[j*4+2];
-                int aDst = outputRow[j*4+3];
+                int rDst = outputRow[j * 4];
+                int gDst = outputRow[j * 4 + 1];
+                int bDst = outputRow[j * 4 + 2];
+                int aDst = outputRow[j * 4 + 3];
                 for (int srcY = 0; srcY < maxBlockY; srcY++) {
                     int srcYStart = srcY + overlapHeight;
                     unsigned char* srcRow = mData->data[srcYStart + i];
                     for (int srcX = 0; srcX < maxBlockX; srcX++) {
-                        int rSrc = srcRow[j*4];
-                        int gSrc = srcRow[j*4+1];
-                        int bSrc = srcRow[j*4+2];
-                        int aSrc = srcRow[j*4+3];
+                        int rSrc = srcRow[j * 4];
+                        int gSrc = srcRow[j * 4 + 1];
+                        int bSrc = srcRow[j * 4 + 2];
+                        int aSrc = srcRow[j * 4 + 3];
 
                         int rDiff = rDst - rSrc;
                         int gDiff = gDst - gSrc;
@@ -669,7 +662,7 @@ void AdvanceAlgOptimiz::PlaceEdgeOverlapBlockWithMinCutBlocking_StdC_KUnroll_Bou
                         int sum2 = norm3 + norm4;
 
                         blocks[srcY * maxBlockX + srcX].value += sum1 + sum2;
-                        srcRow+=4;
+                        srcRow += 4;
                     }
                 }
             }
@@ -679,17 +672,17 @@ void AdvanceAlgOptimiz::PlaceEdgeOverlapBlockWithMinCutBlocking_StdC_KUnroll_Bou
             unsigned char* outputRow = mData->output_d[dstY + i] + dstXStart;
 
             for (int j = 0; j < overlapWidth; j++) {
-                int rDst = outputRow[j*4];
-                int gDst = outputRow[j*4+1];
-                int bDst = outputRow[j*4+2];
-                int aDst = outputRow[j*4+3];
+                int rDst = outputRow[j * 4];
+                int gDst = outputRow[j * 4 + 1];
+                int bDst = outputRow[j * 4 + 2];
+                int aDst = outputRow[j * 4 + 3];
                 for (int srcY = 0; srcY < maxBlockY; srcY++) {
-                    unsigned char* srcRow = mData->data[srcY+ i];
+                    unsigned char* srcRow = mData->data[srcY + i];
                     for (int srcX = 0; srcX < maxBlockX; srcX++) {
-                        int rSrc = srcRow[j*4];
-                        int gSrc = srcRow[j*4+1];
-                        int bSrc = srcRow[j*4+2];
-                        int aSrc = srcRow[j*4+3];
+                        int rSrc = srcRow[j * 4];
+                        int gSrc = srcRow[j * 4 + 1];
+                        int bSrc = srcRow[j * 4 + 2];
+                        int aSrc = srcRow[j * 4 + 3];
 
                         int rDiff = rDst - rSrc;
                         int gDiff = gDst - gSrc;
@@ -705,7 +698,7 @@ void AdvanceAlgOptimiz::PlaceEdgeOverlapBlockWithMinCutBlocking_StdC_KUnroll_Bou
                         int sum2 = norm3 + norm4;
 
                         blocks[srcY * maxBlockX + srcX].value += sum1 + sum2;
-                        srcRow+=4;
+                        srcRow += 4;
                     }
                 }
             }
@@ -714,18 +707,18 @@ void AdvanceAlgOptimiz::PlaceEdgeOverlapBlockWithMinCutBlocking_StdC_KUnroll_Bou
         for (int i = 0; i < overlapHeight; i++) {
             unsigned char* outputRow = mData->output_d[overlapYStart + i] + dstXStart;
             for (int j = 0; j < mData->block_w; j++) {
-                int rDst = outputRow[j*4];
-                int gDst = outputRow[j*4+1];
-                int bDst = outputRow[j*4+2];
-                int aDst = outputRow[j*4+3];
+                int rDst = outputRow[j * 4];
+                int gDst = outputRow[j * 4 + 1];
+                int bDst = outputRow[j * 4 + 2];
+                int aDst = outputRow[j * 4 + 3];
 
                 for (int srcY = 0; srcY < maxBlockY; srcY++) {
-                    unsigned char* srcRow = mData->data[srcY+ i];
+                    unsigned char* srcRow = mData->data[srcY + i];
                     for (int srcX = 0; srcX < maxBlockX; srcX++) {
-                        int rSrc = srcRow[j*4];
-                        int gSrc = srcRow[j*4+1];
-                        int bSrc = srcRow[j*4+2];
-                        int aSrc = srcRow[j*4+3];
+                        int rSrc = srcRow[j * 4];
+                        int gSrc = srcRow[j * 4 + 1];
+                        int bSrc = srcRow[j * 4 + 2];
+                        int aSrc = srcRow[j * 4 + 3];
 
                         int rDiff = rDst - rSrc;
                         int gDiff = gDst - gSrc;
@@ -741,7 +734,7 @@ void AdvanceAlgOptimiz::PlaceEdgeOverlapBlockWithMinCutBlocking_StdC_KUnroll_Bou
                         int sum2 = norm3 + norm4;
 
                         blocks[srcY * maxBlockX + srcX].value += sum1 + sum2;
-                        srcRow+=4;
+                        srcRow += 4;
                     }
                 }
             }
@@ -803,12 +796,12 @@ void AdvanceAlgOptimiz::OverlapConstraintsWithMinCut_StdC_KUnroll_BoundsRefactor
     int blockWidth = mData->output_w - (lastDstX - overlapWidth);
 
     // fill all corner cases except borders
-    for (; dstY < mData->output_h-hStep; dstY += hStep) {
+    for (; dstY < mData->output_h - hStep; dstY += hStep) {
         // fill first column
         PlaceEdgeOverlapBlockWithMinCutBlocking_StdC_KUnroll_BoundsRefactor_LoopReorder(
             horizontal, dstY, 0, maxBlockX, maxBlockY, 0.1, regBlockW, regBlockH);
         dstX = mData->block_w;
-        for (; dstX < mData->output_w-wStep; dstX += wStep) {
+        for (; dstX < mData->output_w - wStep; dstX += wStep) {
             PlaceEdgeOverlapBlockWithMinCutBlocking_StdC_KUnroll_BoundsRefactor_LoopReorder(
                 both, dstY, dstX, maxBlockX, maxBlockY, 0.1, regBlockW, regBlockH);
         }
@@ -823,10 +816,9 @@ void AdvanceAlgOptimiz::OverlapConstraintsWithMinCut_StdC_KUnroll_BoundsRefactor
     PlaceEdgeOverlapBlockWithMinCutBlocking_StdC_KUnroll_BoundsRefactor_LoopReorder(
         horizontal, dstY, 0, maxBlockX, maxBlockY, 0.1, regBlockW, regBlockH);
     dstX = mData->block_w;
-    for (; dstX < mData->output_w-wStep; dstX += wStep) {
+    for (; dstX < mData->output_w - wStep; dstX += wStep) {
         PlaceEdgeOverlapBlockWithMinCutBlocking_StdC_KUnroll_BoundsRefactor_LoopReorder(
             both, dstY, dstX, maxBlockX, maxBlockY, 0.1, mData->block_w, blockHeight);
-
     }
     // bottom-right corner
     PlaceEdgeOverlapBlockWithMinCutBlocking_StdC_KUnroll_BoundsRefactor_LoopReorder(
@@ -835,9 +827,9 @@ void AdvanceAlgOptimiz::OverlapConstraintsWithMinCut_StdC_KUnroll_BoundsRefactor
 
 // Std C, K unroll, bounds refactoring, loop reorder optimizations, and blocking with 32x32 blocks
 void AdvanceAlgOptimiz::
-    PlaceEdgeOverlapBlockWithMinCutBlocking_StdC_KUnroll_BoundsRefactor_LoopReorder_Blocking32(int overlapType, int dstY, int dstX, int maxBlockX,
-                                                                                               int maxBlockY, double errorTolerance, int bWidth, int bHeight)
-{
+    PlaceEdgeOverlapBlockWithMinCutBlocking_StdC_KUnroll_BoundsRefactor_LoopReorder_Blocking32(
+        int overlapType, int dstY, int dstX, int maxBlockX, int maxBlockY, double errorTolerance, int bWidth,
+        int bHeight) {
     int overlapXStart = (overlapType == horizontal) ? dstX : dstX - overlapWidth;
     int overlapYStart = (overlapType == vertical) ? dstY : dstY - overlapHeight;
 
@@ -874,7 +866,8 @@ void AdvanceAlgOptimiz::
                         for (int srcY = blockYStart; srcY < std::min(blockYStart + blockSize, maxBlockY);
                              srcY++) {
                             unsigned char* srcRow = mData->data[srcY + i] + CHANNEL_NUM * blockXStart;
-                            for (int srcX = blockXStart; srcX < std::min(blockXStart + blockSize, maxBlockX); srcX++) {
+                            for (int srcX = blockXStart; srcX < std::min(blockXStart + blockSize, maxBlockX);
+                                 srcX++) {
                                 int rSrc = srcRow[j * 4];
                                 int gSrc = srcRow[j * 4 + 1];
                                 int bSrc = srcRow[j * 4 + 2];
@@ -915,7 +908,8 @@ void AdvanceAlgOptimiz::
                              srcY++) {
                             int srcYStart = srcY + overlapHeight;
                             unsigned char* srcRow = mData->data[srcYStart + i] + CHANNEL_NUM * blockXStart;
-                            for (int srcX = blockXStart; srcX < std::min(blockXStart + blockSize, maxBlockX); srcX++) {
+                            for (int srcX = blockXStart; srcX < std::min(blockXStart + blockSize, maxBlockX);
+                                 srcX++) {
                                 int rSrc = srcRow[j * 4];
                                 int gSrc = srcRow[j * 4 + 1];
                                 int bSrc = srcRow[j * 4 + 2];
@@ -955,7 +949,8 @@ void AdvanceAlgOptimiz::
                         for (int srcY = blockYStart; srcY < std::min(blockYStart + blockSize, maxBlockY);
                              srcY++) {
                             unsigned char* srcRow = mData->data[srcY + i] + CHANNEL_NUM * blockXStart;
-                            for (int srcX = blockXStart; srcX < std::min(blockXStart + blockSize, maxBlockX); srcX++) {
+                            for (int srcX = blockXStart; srcX < std::min(blockXStart + blockSize, maxBlockX);
+                                 srcX++) {
                                 int rSrc = srcRow[j * 4];
                                 int gSrc = srcRow[j * 4 + 1];
                                 int bSrc = srcRow[j * 4 + 2];
@@ -996,7 +991,8 @@ void AdvanceAlgOptimiz::
                         for (int srcY = blockYStart; srcY < std::min(blockYStart + blockSize, maxBlockY);
                              srcY++) {
                             unsigned char* srcRow = mData->data[srcY + i] + CHANNEL_NUM * blockXStart;
-                            for (int srcX = blockXStart; srcX < std::min(blockXStart + blockSize, maxBlockX); srcX++) {
+                            for (int srcX = blockXStart; srcX < std::min(blockXStart + blockSize, maxBlockX);
+                                 srcX++) {
                                 int rSrc = srcRow[j * 4];
                                 int gSrc = srcRow[j * 4 + 1];
                                 int bSrc = srcRow[j * 4 + 2];
@@ -1080,12 +1076,12 @@ void AdvanceAlgOptimiz::OverlapConstraintsWithMinCut_StdC_KUnroll_BoundsRefactor
     int blockWidth = mData->output_w - (lastDstX - overlapWidth);
 
     // fill all corner cases except borders
-    for (; dstY < mData->output_h-hStep; dstY += hStep) {
+    for (; dstY < mData->output_h - hStep; dstY += hStep) {
         // fill first column
         PlaceEdgeOverlapBlockWithMinCutBlocking_StdC_KUnroll_BoundsRefactor_LoopReorder_Blocking32(
             horizontal, dstY, 0, maxBlockX, maxBlockY, 0.1, regBlockW, regBlockH);
         dstX = mData->block_w;
-        for (; dstX < mData->output_w-wStep; dstX += wStep) {
+        for (; dstX < mData->output_w - wStep; dstX += wStep) {
             PlaceEdgeOverlapBlockWithMinCutBlocking_StdC_KUnroll_BoundsRefactor_LoopReorder_Blocking32(
                 both, dstY, dstX, maxBlockX, maxBlockY, 0.1, regBlockW, regBlockH);
         }
@@ -1100,10 +1096,9 @@ void AdvanceAlgOptimiz::OverlapConstraintsWithMinCut_StdC_KUnroll_BoundsRefactor
     PlaceEdgeOverlapBlockWithMinCutBlocking_StdC_KUnroll_BoundsRefactor_LoopReorder_Blocking32(
         horizontal, dstY, 0, maxBlockX, maxBlockY, 0.1, regBlockW, regBlockH);
     dstX = mData->block_w;
-    for (; dstX < mData->output_w-wStep; dstX += wStep) {
+    for (; dstX < mData->output_w - wStep; dstX += wStep) {
         PlaceEdgeOverlapBlockWithMinCutBlocking_StdC_KUnroll_BoundsRefactor_LoopReorder_Blocking32(
             both, dstY, dstX, maxBlockX, maxBlockY, 0.1, mData->block_w, blockHeight);
-
     }
     // bottom-right corner
     PlaceEdgeOverlapBlockWithMinCutBlocking_StdC_KUnroll_BoundsRefactor_LoopReorder_Blocking32(
@@ -1112,9 +1107,9 @@ void AdvanceAlgOptimiz::OverlapConstraintsWithMinCut_StdC_KUnroll_BoundsRefactor
 
 // Std C, K unroll, bounds refactoring, loop reorder optimizations, and blocking with 48x48 blocks
 void AdvanceAlgOptimiz::
-    PlaceEdgeOverlapBlockWithMinCutBlocking_StdC_KUnroll_BoundsRefactor_LoopReorder_Blocking48(int overlapType, int dstY, int dstX, int maxBlockX,
-                                                                                               int maxBlockY, double errorTolerance, int bWidth, int bHeight)
-{
+    PlaceEdgeOverlapBlockWithMinCutBlocking_StdC_KUnroll_BoundsRefactor_LoopReorder_Blocking48(
+        int overlapType, int dstY, int dstX, int maxBlockX, int maxBlockY, double errorTolerance, int bWidth,
+        int bHeight) {
     int overlapXStart = (overlapType == horizontal) ? dstX : dstX - overlapWidth;
     int overlapYStart = (overlapType == vertical) ? dstY : dstY - overlapHeight;
 
@@ -1151,7 +1146,8 @@ void AdvanceAlgOptimiz::
                         for (int srcY = blockYStart; srcY < std::min(blockYStart + blockSize, maxBlockY);
                              srcY++) {
                             unsigned char* srcRow = mData->data[srcY + i] + CHANNEL_NUM * blockXStart;
-                            for (int srcX = blockXStart; srcX < std::min(blockXStart + blockSize, maxBlockX); srcX++) {
+                            for (int srcX = blockXStart; srcX < std::min(blockXStart + blockSize, maxBlockX);
+                                 srcX++) {
                                 int rSrc = srcRow[j * 4];
                                 int gSrc = srcRow[j * 4 + 1];
                                 int bSrc = srcRow[j * 4 + 2];
@@ -1192,7 +1188,8 @@ void AdvanceAlgOptimiz::
                              srcY++) {
                             int srcYStart = srcY + overlapHeight;
                             unsigned char* srcRow = mData->data[srcYStart + i] + CHANNEL_NUM * blockXStart;
-                            for (int srcX = blockXStart; srcX < std::min(blockXStart + blockSize, maxBlockX); srcX++) {
+                            for (int srcX = blockXStart; srcX < std::min(blockXStart + blockSize, maxBlockX);
+                                 srcX++) {
                                 int rSrc = srcRow[j * 4];
                                 int gSrc = srcRow[j * 4 + 1];
                                 int bSrc = srcRow[j * 4 + 2];
@@ -1232,7 +1229,8 @@ void AdvanceAlgOptimiz::
                         for (int srcY = blockYStart; srcY < std::min(blockYStart + blockSize, maxBlockY);
                              srcY++) {
                             unsigned char* srcRow = mData->data[srcY + i] + CHANNEL_NUM * blockXStart;
-                            for (int srcX = blockXStart; srcX < std::min(blockXStart + blockSize, maxBlockX); srcX++) {
+                            for (int srcX = blockXStart; srcX < std::min(blockXStart + blockSize, maxBlockX);
+                                 srcX++) {
                                 int rSrc = srcRow[j * 4];
                                 int gSrc = srcRow[j * 4 + 1];
                                 int bSrc = srcRow[j * 4 + 2];
@@ -1273,7 +1271,8 @@ void AdvanceAlgOptimiz::
                         for (int srcY = blockYStart; srcY < std::min(blockYStart + blockSize, maxBlockY);
                              srcY++) {
                             unsigned char* srcRow = mData->data[srcY + i] + CHANNEL_NUM * blockXStart;
-                            for (int srcX = blockXStart; srcX < std::min(blockXStart + blockSize, maxBlockX); srcX++) {
+                            for (int srcX = blockXStart; srcX < std::min(blockXStart + blockSize, maxBlockX);
+                                 srcX++) {
                                 int rSrc = srcRow[j * 4];
                                 int gSrc = srcRow[j * 4 + 1];
                                 int bSrc = srcRow[j * 4 + 2];
@@ -1357,12 +1356,12 @@ void AdvanceAlgOptimiz::OverlapConstraintsWithMinCut_StdC_KUnroll_BoundsRefactor
     int blockWidth = mData->output_w - (lastDstX - overlapWidth);
 
     // fill all corner cases except borders
-    for (; dstY < mData->output_h-hStep; dstY += hStep) {
+    for (; dstY < mData->output_h - hStep; dstY += hStep) {
         // fill first column
         PlaceEdgeOverlapBlockWithMinCutBlocking_StdC_KUnroll_BoundsRefactor_LoopReorder_Blocking48(
             horizontal, dstY, 0, maxBlockX, maxBlockY, 0.1, regBlockW, regBlockH);
         dstX = mData->block_w;
-        for (; dstX < mData->output_w-wStep; dstX += wStep) {
+        for (; dstX < mData->output_w - wStep; dstX += wStep) {
             PlaceEdgeOverlapBlockWithMinCutBlocking_StdC_KUnroll_BoundsRefactor_LoopReorder_Blocking48(
                 both, dstY, dstX, maxBlockX, maxBlockY, 0.1, regBlockW, regBlockH);
         }
@@ -1377,10 +1376,9 @@ void AdvanceAlgOptimiz::OverlapConstraintsWithMinCut_StdC_KUnroll_BoundsRefactor
     PlaceEdgeOverlapBlockWithMinCutBlocking_StdC_KUnroll_BoundsRefactor_LoopReorder_Blocking48(
         horizontal, dstY, 0, maxBlockX, maxBlockY, 0.1, regBlockW, regBlockH);
     dstX = mData->block_w;
-    for (; dstX < mData->output_w-wStep; dstX += wStep) {
+    for (; dstX < mData->output_w - wStep; dstX += wStep) {
         PlaceEdgeOverlapBlockWithMinCutBlocking_StdC_KUnroll_BoundsRefactor_LoopReorder_Blocking48(
             both, dstY, dstX, maxBlockX, maxBlockY, 0.1, mData->block_w, blockHeight);
-
     }
     // bottom-right corner
     PlaceEdgeOverlapBlockWithMinCutBlocking_StdC_KUnroll_BoundsRefactor_LoopReorder_Blocking48(
@@ -1389,9 +1387,9 @@ void AdvanceAlgOptimiz::OverlapConstraintsWithMinCut_StdC_KUnroll_BoundsRefactor
 
 // Std C, K unroll, bounds refactoring, loop reorder optimizations, and blocking with 64x64 blocks
 void AdvanceAlgOptimiz::
-    PlaceEdgeOverlapBlockWithMinCutBlocking_StdC_KUnroll_BoundsRefactor_LoopReorder_Blocking64(int overlapType, int dstY, int dstX, int maxBlockX,
-                                                                int maxBlockY, double errorTolerance, int bWidth, int bHeight)
-{
+    PlaceEdgeOverlapBlockWithMinCutBlocking_StdC_KUnroll_BoundsRefactor_LoopReorder_Blocking64(
+        int overlapType, int dstY, int dstX, int maxBlockX, int maxBlockY, double errorTolerance, int bWidth,
+        int bHeight) {
     int overlapXStart = (overlapType == horizontal) ? dstX : dstX - overlapWidth;
     int overlapYStart = (overlapType == vertical) ? dstY : dstY - overlapHeight;
 
@@ -1428,7 +1426,8 @@ void AdvanceAlgOptimiz::
                         for (int srcY = blockYStart; srcY < std::min(blockYStart + blockSize, maxBlockY);
                              srcY++) {
                             unsigned char* srcRow = mData->data[srcY + i] + CHANNEL_NUM * blockXStart;
-                            for (int srcX = blockXStart; srcX < std::min(blockXStart + blockSize, maxBlockX); srcX++) {
+                            for (int srcX = blockXStart; srcX < std::min(blockXStart + blockSize, maxBlockX);
+                                 srcX++) {
                                 int rSrc = srcRow[j * 4];
                                 int gSrc = srcRow[j * 4 + 1];
                                 int bSrc = srcRow[j * 4 + 2];
@@ -1469,7 +1468,8 @@ void AdvanceAlgOptimiz::
                              srcY++) {
                             int srcYStart = srcY + overlapHeight;
                             unsigned char* srcRow = mData->data[srcYStart + i] + CHANNEL_NUM * blockXStart;
-                            for (int srcX = blockXStart; srcX < std::min(blockXStart + blockSize, maxBlockX); srcX++) {
+                            for (int srcX = blockXStart; srcX < std::min(blockXStart + blockSize, maxBlockX);
+                                 srcX++) {
                                 int rSrc = srcRow[j * 4];
                                 int gSrc = srcRow[j * 4 + 1];
                                 int bSrc = srcRow[j * 4 + 2];
@@ -1509,7 +1509,8 @@ void AdvanceAlgOptimiz::
                         for (int srcY = blockYStart; srcY < std::min(blockYStart + blockSize, maxBlockY);
                              srcY++) {
                             unsigned char* srcRow = mData->data[srcY + i] + CHANNEL_NUM * blockXStart;
-                            for (int srcX = blockXStart; srcX < std::min(blockXStart + blockSize, maxBlockX); srcX++) {
+                            for (int srcX = blockXStart; srcX < std::min(blockXStart + blockSize, maxBlockX);
+                                 srcX++) {
                                 int rSrc = srcRow[j * 4];
                                 int gSrc = srcRow[j * 4 + 1];
                                 int bSrc = srcRow[j * 4 + 2];
@@ -1550,7 +1551,8 @@ void AdvanceAlgOptimiz::
                         for (int srcY = blockYStart; srcY < std::min(blockYStart + blockSize, maxBlockY);
                              srcY++) {
                             unsigned char* srcRow = mData->data[srcY + i] + CHANNEL_NUM * blockXStart;
-                            for (int srcX = blockXStart; srcX < std::min(blockXStart + blockSize, maxBlockX); srcX++) {
+                            for (int srcX = blockXStart; srcX < std::min(blockXStart + blockSize, maxBlockX);
+                                 srcX++) {
                                 int rSrc = srcRow[j * 4];
                                 int gSrc = srcRow[j * 4 + 1];
                                 int bSrc = srcRow[j * 4 + 2];
@@ -1634,12 +1636,12 @@ void AdvanceAlgOptimiz::OverlapConstraintsWithMinCut_StdC_KUnroll_BoundsRefactor
     int blockWidth = mData->output_w - (lastDstX - overlapWidth);
 
     // fill all corner cases except borders
-    for (; dstY < mData->output_h-hStep; dstY += hStep) {
+    for (; dstY < mData->output_h - hStep; dstY += hStep) {
         // fill first column
         PlaceEdgeOverlapBlockWithMinCutBlocking_StdC_KUnroll_BoundsRefactor_LoopReorder_Blocking64(
             horizontal, dstY, 0, maxBlockX, maxBlockY, 0.1, regBlockW, regBlockH);
         dstX = mData->block_w;
-        for (; dstX < mData->output_w-wStep; dstX += wStep) {
+        for (; dstX < mData->output_w - wStep; dstX += wStep) {
             PlaceEdgeOverlapBlockWithMinCutBlocking_StdC_KUnroll_BoundsRefactor_LoopReorder_Blocking64(
                 both, dstY, dstX, maxBlockX, maxBlockY, 0.1, regBlockW, regBlockH);
         }
@@ -1654,10 +1656,9 @@ void AdvanceAlgOptimiz::OverlapConstraintsWithMinCut_StdC_KUnroll_BoundsRefactor
     PlaceEdgeOverlapBlockWithMinCutBlocking_StdC_KUnroll_BoundsRefactor_LoopReorder_Blocking64(
         horizontal, dstY, 0, maxBlockX, maxBlockY, 0.1, regBlockW, regBlockH);
     dstX = mData->block_w;
-    for (; dstX < mData->output_w-wStep; dstX += wStep) {
+    for (; dstX < mData->output_w - wStep; dstX += wStep) {
         PlaceEdgeOverlapBlockWithMinCutBlocking_StdC_KUnroll_BoundsRefactor_LoopReorder_Blocking64(
             both, dstY, dstX, maxBlockX, maxBlockY, 0.1, mData->block_w, blockHeight);
-
     }
     // bottom-right corner
     PlaceEdgeOverlapBlockWithMinCutBlocking_StdC_KUnroll_BoundsRefactor_LoopReorder_Blocking64(
@@ -1666,9 +1667,9 @@ void AdvanceAlgOptimiz::OverlapConstraintsWithMinCut_StdC_KUnroll_BoundsRefactor
 
 // Std C, K unroll, bounds refactoring, loop reorder optimizations, and blocking with 96x96 blocks
 void AdvanceAlgOptimiz::
-    PlaceEdgeOverlapBlockWithMinCutBlocking_StdC_KUnroll_BoundsRefactor_LoopReorder_Blocking96(int overlapType, int dstY, int dstX, int maxBlockX,
-                                                                                               int maxBlockY, double errorTolerance, int bWidth, int bHeight)
-{
+    PlaceEdgeOverlapBlockWithMinCutBlocking_StdC_KUnroll_BoundsRefactor_LoopReorder_Blocking96(
+        int overlapType, int dstY, int dstX, int maxBlockX, int maxBlockY, double errorTolerance, int bWidth,
+        int bHeight) {
     int overlapXStart = (overlapType == horizontal) ? dstX : dstX - overlapWidth;
     int overlapYStart = (overlapType == vertical) ? dstY : dstY - overlapHeight;
 
@@ -1705,7 +1706,8 @@ void AdvanceAlgOptimiz::
                         for (int srcY = blockYStart; srcY < std::min(blockYStart + blockSize, maxBlockY);
                              srcY++) {
                             unsigned char* srcRow = mData->data[srcY + i] + CHANNEL_NUM * blockXStart;
-                            for (int srcX = blockXStart; srcX < std::min(blockXStart + blockSize, maxBlockX); srcX++) {
+                            for (int srcX = blockXStart; srcX < std::min(blockXStart + blockSize, maxBlockX);
+                                 srcX++) {
                                 int rSrc = srcRow[j * 4];
                                 int gSrc = srcRow[j * 4 + 1];
                                 int bSrc = srcRow[j * 4 + 2];
@@ -1746,7 +1748,8 @@ void AdvanceAlgOptimiz::
                              srcY++) {
                             int srcYStart = srcY + overlapHeight;
                             unsigned char* srcRow = mData->data[srcYStart + i] + CHANNEL_NUM * blockXStart;
-                            for (int srcX = blockXStart; srcX < std::min(blockXStart + blockSize, maxBlockX); srcX++) {
+                            for (int srcX = blockXStart; srcX < std::min(blockXStart + blockSize, maxBlockX);
+                                 srcX++) {
                                 int rSrc = srcRow[j * 4];
                                 int gSrc = srcRow[j * 4 + 1];
                                 int bSrc = srcRow[j * 4 + 2];
@@ -1786,7 +1789,8 @@ void AdvanceAlgOptimiz::
                         for (int srcY = blockYStart; srcY < std::min(blockYStart + blockSize, maxBlockY);
                              srcY++) {
                             unsigned char* srcRow = mData->data[srcY + i] + CHANNEL_NUM * blockXStart;
-                            for (int srcX = blockXStart; srcX < std::min(blockXStart + blockSize, maxBlockX); srcX++) {
+                            for (int srcX = blockXStart; srcX < std::min(blockXStart + blockSize, maxBlockX);
+                                 srcX++) {
                                 int rSrc = srcRow[j * 4];
                                 int gSrc = srcRow[j * 4 + 1];
                                 int bSrc = srcRow[j * 4 + 2];
@@ -1827,7 +1831,8 @@ void AdvanceAlgOptimiz::
                         for (int srcY = blockYStart; srcY < std::min(blockYStart + blockSize, maxBlockY);
                              srcY++) {
                             unsigned char* srcRow = mData->data[srcY + i] + CHANNEL_NUM * blockXStart;
-                            for (int srcX = blockXStart; srcX < std::min(blockXStart + blockSize, maxBlockX); srcX++) {
+                            for (int srcX = blockXStart; srcX < std::min(blockXStart + blockSize, maxBlockX);
+                                 srcX++) {
                                 int rSrc = srcRow[j * 4];
                                 int gSrc = srcRow[j * 4 + 1];
                                 int bSrc = srcRow[j * 4 + 2];
@@ -1911,12 +1916,12 @@ void AdvanceAlgOptimiz::OverlapConstraintsWithMinCut_StdC_KUnroll_BoundsRefactor
     int blockWidth = mData->output_w - (lastDstX - overlapWidth);
 
     // fill all corner cases except borders
-    for (; dstY < mData->output_h-hStep; dstY += hStep) {
+    for (; dstY < mData->output_h - hStep; dstY += hStep) {
         // fill first column
         PlaceEdgeOverlapBlockWithMinCutBlocking_StdC_KUnroll_BoundsRefactor_LoopReorder_Blocking96(
             horizontal, dstY, 0, maxBlockX, maxBlockY, 0.1, regBlockW, regBlockH);
         dstX = mData->block_w;
-        for (; dstX < mData->output_w-wStep; dstX += wStep) {
+        for (; dstX < mData->output_w - wStep; dstX += wStep) {
             PlaceEdgeOverlapBlockWithMinCutBlocking_StdC_KUnroll_BoundsRefactor_LoopReorder_Blocking96(
                 both, dstY, dstX, maxBlockX, maxBlockY, 0.1, regBlockW, regBlockH);
         }
@@ -1931,10 +1936,9 @@ void AdvanceAlgOptimiz::OverlapConstraintsWithMinCut_StdC_KUnroll_BoundsRefactor
     PlaceEdgeOverlapBlockWithMinCutBlocking_StdC_KUnroll_BoundsRefactor_LoopReorder_Blocking96(
         horizontal, dstY, 0, maxBlockX, maxBlockY, 0.1, regBlockW, regBlockH);
     dstX = mData->block_w;
-    for (; dstX < mData->output_w-wStep; dstX += wStep) {
+    for (; dstX < mData->output_w - wStep; dstX += wStep) {
         PlaceEdgeOverlapBlockWithMinCutBlocking_StdC_KUnroll_BoundsRefactor_LoopReorder_Blocking96(
             both, dstY, dstX, maxBlockX, maxBlockY, 0.1, mData->block_w, blockHeight);
-
     }
     // bottom-right corner
     PlaceEdgeOverlapBlockWithMinCutBlocking_StdC_KUnroll_BoundsRefactor_LoopReorder_Blocking96(
@@ -1943,9 +1947,9 @@ void AdvanceAlgOptimiz::OverlapConstraintsWithMinCut_StdC_KUnroll_BoundsRefactor
 
 // Std C, K unroll, bounds refactoring, loop reorder optimizations, and blocking with 128x128 blocks
 void AdvanceAlgOptimiz::
-    PlaceEdgeOverlapBlockWithMinCutBlocking_StdC_KUnroll_BoundsRefactor_LoopReorder_Blocking128(int overlapType, int dstY, int dstX, int maxBlockX,
-                                                                                               int maxBlockY, double errorTolerance, int bWidth, int bHeight)
-{
+    PlaceEdgeOverlapBlockWithMinCutBlocking_StdC_KUnroll_BoundsRefactor_LoopReorder_Blocking128(
+        int overlapType, int dstY, int dstX, int maxBlockX, int maxBlockY, double errorTolerance, int bWidth,
+        int bHeight) {
     int overlapXStart = (overlapType == horizontal) ? dstX : dstX - overlapWidth;
     int overlapYStart = (overlapType == vertical) ? dstY : dstY - overlapHeight;
 
@@ -1982,7 +1986,8 @@ void AdvanceAlgOptimiz::
                         for (int srcY = blockYStart; srcY < std::min(blockYStart + blockSize, maxBlockY);
                              srcY++) {
                             unsigned char* srcRow = mData->data[srcY + i] + CHANNEL_NUM * blockXStart;
-                            for (int srcX = blockXStart; srcX < std::min(blockXStart + blockSize, maxBlockX); srcX++) {
+                            for (int srcX = blockXStart; srcX < std::min(blockXStart + blockSize, maxBlockX);
+                                 srcX++) {
                                 int rSrc = srcRow[j * 4];
                                 int gSrc = srcRow[j * 4 + 1];
                                 int bSrc = srcRow[j * 4 + 2];
@@ -2023,7 +2028,8 @@ void AdvanceAlgOptimiz::
                              srcY++) {
                             int srcYStart = srcY + overlapHeight;
                             unsigned char* srcRow = mData->data[srcYStart + i] + CHANNEL_NUM * blockXStart;
-                            for (int srcX = blockXStart; srcX < std::min(blockXStart + blockSize, maxBlockX); srcX++) {
+                            for (int srcX = blockXStart; srcX < std::min(blockXStart + blockSize, maxBlockX);
+                                 srcX++) {
                                 int rSrc = srcRow[j * 4];
                                 int gSrc = srcRow[j * 4 + 1];
                                 int bSrc = srcRow[j * 4 + 2];
@@ -2063,7 +2069,8 @@ void AdvanceAlgOptimiz::
                         for (int srcY = blockYStart; srcY < std::min(blockYStart + blockSize, maxBlockY);
                              srcY++) {
                             unsigned char* srcRow = mData->data[srcY + i] + CHANNEL_NUM * blockXStart;
-                            for (int srcX = blockXStart; srcX < std::min(blockXStart + blockSize, maxBlockX); srcX++) {
+                            for (int srcX = blockXStart; srcX < std::min(blockXStart + blockSize, maxBlockX);
+                                 srcX++) {
                                 int rSrc = srcRow[j * 4];
                                 int gSrc = srcRow[j * 4 + 1];
                                 int bSrc = srcRow[j * 4 + 2];
@@ -2104,7 +2111,8 @@ void AdvanceAlgOptimiz::
                         for (int srcY = blockYStart; srcY < std::min(blockYStart + blockSize, maxBlockY);
                              srcY++) {
                             unsigned char* srcRow = mData->data[srcY + i] + CHANNEL_NUM * blockXStart;
-                            for (int srcX = blockXStart; srcX < std::min(blockXStart + blockSize, maxBlockX); srcX++) {
+                            for (int srcX = blockXStart; srcX < std::min(blockXStart + blockSize, maxBlockX);
+                                 srcX++) {
                                 int rSrc = srcRow[j * 4];
                                 int gSrc = srcRow[j * 4 + 1];
                                 int bSrc = srcRow[j * 4 + 2];
@@ -2188,12 +2196,12 @@ void AdvanceAlgOptimiz::OverlapConstraintsWithMinCut_StdC_KUnroll_BoundsRefactor
     int blockWidth = mData->output_w - (lastDstX - overlapWidth);
 
     // fill all corner cases except borders
-    for (; dstY < mData->output_h-hStep; dstY += hStep) {
+    for (; dstY < mData->output_h - hStep; dstY += hStep) {
         // fill first column
         PlaceEdgeOverlapBlockWithMinCutBlocking_StdC_KUnroll_BoundsRefactor_LoopReorder_Blocking128(
             horizontal, dstY, 0, maxBlockX, maxBlockY, 0.1, regBlockW, regBlockH);
         dstX = mData->block_w;
-        for (; dstX < mData->output_w-wStep; dstX += wStep) {
+        for (; dstX < mData->output_w - wStep; dstX += wStep) {
             PlaceEdgeOverlapBlockWithMinCutBlocking_StdC_KUnroll_BoundsRefactor_LoopReorder_Blocking128(
                 both, dstY, dstX, maxBlockX, maxBlockY, 0.1, regBlockW, regBlockH);
         }
@@ -2208,10 +2216,9 @@ void AdvanceAlgOptimiz::OverlapConstraintsWithMinCut_StdC_KUnroll_BoundsRefactor
     PlaceEdgeOverlapBlockWithMinCutBlocking_StdC_KUnroll_BoundsRefactor_LoopReorder_Blocking128(
         horizontal, dstY, 0, maxBlockX, maxBlockY, 0.1, regBlockW, regBlockH);
     dstX = mData->block_w;
-    for (; dstX < mData->output_w-wStep; dstX += wStep) {
+    for (; dstX < mData->output_w - wStep; dstX += wStep) {
         PlaceEdgeOverlapBlockWithMinCutBlocking_StdC_KUnroll_BoundsRefactor_LoopReorder_Blocking128(
             both, dstY, dstX, maxBlockX, maxBlockY, 0.1, mData->block_w, blockHeight);
-
     }
     // bottom-right corner
     PlaceEdgeOverlapBlockWithMinCutBlocking_StdC_KUnroll_BoundsRefactor_LoopReorder_Blocking128(
@@ -2219,8 +2226,8 @@ void AdvanceAlgOptimiz::OverlapConstraintsWithMinCut_StdC_KUnroll_BoundsRefactor
 }
 
 #include <iostream>
-template<class T> inline void print_mm256(const __m256i & value)
-{
+template <class T>
+inline void print_mm256(const __m256i& value) {
     const size_t n = sizeof(__m256i) / sizeof(T);
     T buffer[n];
     _mm256_storeu_si256((__m256i*)buffer, value);
@@ -2230,8 +2237,8 @@ template<class T> inline void print_mm256(const __m256i & value)
     std::cout << std::endl;
 }
 
-template<class T> inline void print_mm128(const __m128i & value)
-{
+template <class T>
+inline void print_mm128(const __m128i& value) {
     const size_t n = sizeof(__m128i) / sizeof(T);
     T buffer[n];
     _mm_storeu_si128((__m128i*)buffer, value);
@@ -2243,9 +2250,9 @@ template<class T> inline void print_mm128(const __m128i & value)
 
 // Std C, bounds refactoring, loop reorder, blocking 32x32, and unrolling channels loop and srcX by 2
 void AdvanceAlgOptimiz::
-    PlaceEdgeOverlapBlockWithMinCutBlocking_StdC_KSrc2Unroll_BoundsRefactor_LoopReorder_Blocking32(int overlapType, int dstY, int dstX, int maxBlockX,
-                                                                                                   int maxBlockY, double errorTolerance, int bWidth, int bHeight)
-{
+    PlaceEdgeOverlapBlockWithMinCutBlocking_StdC_KSrc2Unroll_BoundsRefactor_LoopReorder_Blocking32(
+        int overlapType, int dstY, int dstX, int maxBlockX, int maxBlockY, double errorTolerance, int bWidth,
+        int bHeight) {
     int overlapXStart = (overlapType == horizontal) ? dstX : dstX - overlapWidth;
     int overlapYStart = (overlapType == vertical) ? dstY : dstY - overlapHeight;
 
@@ -2285,7 +2292,7 @@ void AdvanceAlgOptimiz::
                             int srcX = blockXStart;
                             int endX = std::min(blockXStart + blockSize, maxBlockX);
                             int blockIndex = srcY * maxBlockX + srcX;
-                            for (; srcX < endX-1; srcX+=2) {
+                            for (; srcX < endX - 1; srcX += 2) {
                                 int rSrc1 = srcRow[j * 4];
                                 int gSrc1 = srcRow[j * 4 + 1];
                                 int bSrc1 = srcRow[j * 4 + 2];
@@ -2369,7 +2376,7 @@ void AdvanceAlgOptimiz::
                             int srcX = blockXStart;
                             int endX = std::min(blockXStart + blockSize, maxBlockX);
                             int blockIndex = srcY * maxBlockX + srcX;
-                            for (; srcX < endX-1; srcX+=2) {
+                            for (; srcX < endX - 1; srcX += 2) {
                                 int rSrc1 = srcRow[j * 4];
                                 int gSrc1 = srcRow[j * 4 + 1];
                                 int bSrc1 = srcRow[j * 4 + 2];
@@ -2451,7 +2458,7 @@ void AdvanceAlgOptimiz::
                             int srcX = blockXStart;
                             int endX = std::min(blockXStart + blockSize, maxBlockX);
                             int blockIndex = srcY * maxBlockX + srcX;
-                            for (; srcX < endX-1; srcX+=2) {
+                            for (; srcX < endX - 1; srcX += 2) {
                                 int rSrc1 = srcRow[j * 4];
                                 int gSrc1 = srcRow[j * 4 + 1];
                                 int bSrc1 = srcRow[j * 4 + 2];
@@ -2534,7 +2541,7 @@ void AdvanceAlgOptimiz::
                             int srcX = blockXStart;
                             int endX = std::min(blockXStart + blockSize, maxBlockX);
                             int blockIndex = srcY * maxBlockX + srcX;
-                            for (; srcX < endX-1; srcX+=2) {
+                            for (; srcX < endX - 1; srcX += 2) {
                                 int rSrc1 = srcRow[j * 4];
                                 int gSrc1 = srcRow[j * 4 + 1];
                                 int bSrc1 = srcRow[j * 4 + 2];
@@ -2629,9 +2636,10 @@ void AdvanceAlgOptimiz::
     free(suitableBlocks);
 }
 
-
-void AdvanceAlgOptimiz::PlaceEdgeOverlapBlockWithMinCutBlocking_StdC_KSrc2Unroll_Vector_BoundsRefactor_LoopReorder_Blocking32(int
-                                                                                                                                  overlapType, int dstY, int dstX, int maxBlockX, int maxBlockY, double errorTolerance, int bWidth, int bHeight){
+void AdvanceAlgOptimiz::
+    PlaceEdgeOverlapBlockWithMinCutBlocking_StdC_KSrc2Unroll_Vector_BoundsRefactor_LoopReorder_Blocking32(
+        int overlapType, int dstY, int dstX, int maxBlockX, int maxBlockY, double errorTolerance, int bWidth,
+        int bHeight) {
     int overlapXStart = (overlapType == horizontal) ? dstX : dstX - overlapWidth;
     int overlapYStart = (overlapType == vertical) ? dstY : dstY - overlapHeight;
 
@@ -2672,7 +2680,7 @@ void AdvanceAlgOptimiz::PlaceEdgeOverlapBlockWithMinCutBlocking_StdC_KSrc2Unroll
                             int srcX = blockXStart;
                             int endX = std::min(blockXStart + blockSize, maxBlockX);
                             int blockIndex = srcY * maxBlockX + srcX;
-                            for (; srcX < endX-1; srcX+=2) {
+                            for (; srcX < endX - 1; srcX += 2) {
                                 __m128i src = _mm_cvtepu8_epi16(_mm_loadu_si64(srcRow + j * 4));
                                 __m128i diff = _mm_sub_epi16(dst_extended, src);
                                 __m128i norm = _mm_madd_epi16(diff, diff);
@@ -2685,7 +2693,8 @@ void AdvanceAlgOptimiz::PlaceEdgeOverlapBlockWithMinCutBlocking_StdC_KSrc2Unroll
                                 __m128i src = _mm_cvtepu8_epi16(_mm_loadu_si32(srcRow + j * 4));
                                 __m128i diff = _mm_sub_epi16(dst, src);
                                 __m128i norm = _mm_madd_epi16(diff, diff);
-                                blocks[blockIndex++].value += _mm_extract_epi32(norm, 0) + _mm_extract_epi32(norm, 1);
+                                blocks[blockIndex++].value +=
+                                    _mm_extract_epi32(norm, 0) + _mm_extract_epi32(norm, 1);
                                 srcRow += 4;
                             }
                         }
@@ -2706,13 +2715,13 @@ void AdvanceAlgOptimiz::PlaceEdgeOverlapBlockWithMinCutBlocking_StdC_KSrc2Unroll
                         // previous vector
                         __m128i dst_extended = _mm_or_si128(dst, _mm_slli_si128(dst, 8));
                         int endY = std::min(blockYStart + blockSize, maxBlockY);
-                        for (int srcY = blockYStart; srcY < endY;srcY++) {
+                        for (int srcY = blockYStart; srcY < endY; srcY++) {
                             int srcYStart = srcY + overlapHeight;
                             unsigned char* srcRow = mData->data[srcYStart + i] + CHANNEL_NUM * blockXStart;
                             int srcX = blockXStart;
                             int endX = std::min(blockXStart + blockSize, maxBlockX);
                             int blockIndex = srcY * maxBlockX + srcX;
-                            for (; srcX < endX-1; srcX+=2) {
+                            for (; srcX < endX - 1; srcX += 2) {
                                 __m128i src = _mm_cvtepu8_epi16(_mm_loadu_si64(srcRow + j * 4));
                                 __m128i diff = _mm_sub_epi16(dst_extended, src);
                                 __m128i norm = _mm_madd_epi16(diff, diff);
@@ -2725,7 +2734,8 @@ void AdvanceAlgOptimiz::PlaceEdgeOverlapBlockWithMinCutBlocking_StdC_KSrc2Unroll
                                 __m128i src = _mm_cvtepu8_epi16(_mm_loadu_si32(srcRow + j * 4));
                                 __m128i diff = _mm_sub_epi16(dst, src);
                                 __m128i norm = _mm_madd_epi16(diff, diff);
-                                blocks[blockIndex++].value += _mm_extract_epi32(norm, 0) + _mm_extract_epi32(norm, 1);
+                                blocks[blockIndex++].value +=
+                                    _mm_extract_epi32(norm, 0) + _mm_extract_epi32(norm, 1);
                                 srcRow += 4;
                             }
                         }
@@ -2750,7 +2760,7 @@ void AdvanceAlgOptimiz::PlaceEdgeOverlapBlockWithMinCutBlocking_StdC_KSrc2Unroll
                             int srcX = blockXStart;
                             int endX = std::min(blockXStart + blockSize, maxBlockX);
                             int blockIndex = srcY * maxBlockX + srcX;
-                            for (; srcX < endX-1; srcX+=2) {
+                            for (; srcX < endX - 1; srcX += 2) {
                                 __m128i src = _mm_cvtepu8_epi16(_mm_loadu_si64(srcRow + j * 4));
                                 __m128i diff = _mm_sub_epi16(dst_extended, src);
                                 __m128i norm = _mm_madd_epi16(diff, diff);
@@ -2763,7 +2773,8 @@ void AdvanceAlgOptimiz::PlaceEdgeOverlapBlockWithMinCutBlocking_StdC_KSrc2Unroll
                                 __m128i src = _mm_cvtepu8_epi16(_mm_loadu_si32(srcRow + j * 4));
                                 __m128i diff = _mm_sub_epi16(dst, src);
                                 __m128i norm = _mm_madd_epi16(diff, diff);
-                                blocks[blockIndex++].value += _mm_extract_epi32(norm, 0) + _mm_extract_epi32(norm, 1);
+                                blocks[blockIndex++].value +=
+                                    _mm_extract_epi32(norm, 0) + _mm_extract_epi32(norm, 1);
                                 srcRow += 4;
                             }
                         }
@@ -2788,7 +2799,7 @@ void AdvanceAlgOptimiz::PlaceEdgeOverlapBlockWithMinCutBlocking_StdC_KSrc2Unroll
                             int srcX = blockXStart;
                             int endX = std::min(blockXStart + blockSize, maxBlockX);
                             int blockIndex = srcY * maxBlockX + srcX;
-                            for (; srcX < endX-1; srcX+=2) {
+                            for (; srcX < endX - 1; srcX += 2) {
                                 __m128i src = _mm_cvtepu8_epi16(_mm_loadu_si64(srcRow + j * 4));
                                 __m128i diff = _mm_sub_epi16(dst_extended, src);
                                 __m128i norm = _mm_madd_epi16(diff, diff);
@@ -2801,7 +2812,8 @@ void AdvanceAlgOptimiz::PlaceEdgeOverlapBlockWithMinCutBlocking_StdC_KSrc2Unroll
                                 __m128i src = _mm_cvtepu8_epi16(_mm_loadu_si32(srcRow + j * 4));
                                 __m128i diff = _mm_sub_epi16(dst, src);
                                 __m128i norm = _mm_madd_epi16(diff, diff);
-                                blocks[blockIndex++].value += _mm_extract_epi32(norm, 0) + _mm_extract_epi32(norm, 1);
+                                blocks[blockIndex++].value +=
+                                    _mm_extract_epi32(norm, 0) + _mm_extract_epi32(norm, 1);
                                 srcRow += 4;
                             }
                         }
@@ -2838,7 +2850,8 @@ void AdvanceAlgOptimiz::PlaceEdgeOverlapBlockWithMinCutBlocking_StdC_KSrc2Unroll
     free(suitableBlocks);
 }
 
-void AdvanceAlgOptimiz::OverlapConstraintsWithMinCut_StdC_KSrc2Unroll_BoundsRefactor_LoopReorder_Blocking32() {
+void AdvanceAlgOptimiz::
+    OverlapConstraintsWithMinCut_StdC_KSrc2Unroll_BoundsRefactor_LoopReorder_Blocking32() {
     // Compute block parameters
     int hStep = mData->block_h - overlapHeight;
     int wStep = mData->block_w - overlapWidth;
@@ -2861,44 +2874,43 @@ void AdvanceAlgOptimiz::OverlapConstraintsWithMinCut_StdC_KSrc2Unroll_BoundsRefa
     int dstY = mData->block_h;
     for (; dstX < mData->output_w; dstX += wStep) {
         PlaceEdgeOverlapBlockWithMinCutBlocking_StdC_KSrc2Unroll_BoundsRefactor_LoopReorder_Blocking32(
-                vertical, 0, dstX, maxBlockX, maxBlockY, 0.1, regBlockW, regBlockH);
+            vertical, 0, dstX, maxBlockX, maxBlockY, 0.1, regBlockW, regBlockH);
     }
     int lastDstX = dstX - wStep;
     int blockWidth = mData->output_w - (lastDstX - overlapWidth);
 
     // fill all corner cases except borders
-    for (; dstY < mData->output_h-hStep; dstY += hStep) {
+    for (; dstY < mData->output_h - hStep; dstY += hStep) {
         // fill first column
         PlaceEdgeOverlapBlockWithMinCutBlocking_StdC_KSrc2Unroll_BoundsRefactor_LoopReorder_Blocking32(
-                horizontal, dstY, 0, maxBlockX, maxBlockY, 0.1, regBlockW, regBlockH);
+            horizontal, dstY, 0, maxBlockX, maxBlockY, 0.1, regBlockW, regBlockH);
         dstX = mData->block_w;
-        for (; dstX < mData->output_w-wStep; dstX += wStep) {
+        for (; dstX < mData->output_w - wStep; dstX += wStep) {
             PlaceEdgeOverlapBlockWithMinCutBlocking_StdC_KSrc2Unroll_BoundsRefactor_LoopReorder_Blocking32(
-                    both, dstY, dstX, maxBlockX, maxBlockY, 0.1, regBlockW, regBlockH);
+                both, dstY, dstX, maxBlockX, maxBlockY, 0.1, regBlockW, regBlockH);
         }
 
         // fill last column
         PlaceEdgeOverlapBlockWithMinCutBlocking_StdC_KSrc2Unroll_BoundsRefactor_LoopReorder_Blocking32(
-                both, dstY, dstX, maxBlockX, maxBlockY, 0.1, blockWidth, regBlockH);
+            both, dstY, dstX, maxBlockX, maxBlockY, 0.1, blockWidth, regBlockH);
     }
 
     // fill last row
     int blockHeight = mData->output_h - dstY;
     PlaceEdgeOverlapBlockWithMinCutBlocking_StdC_KSrc2Unroll_BoundsRefactor_LoopReorder_Blocking32(
-            horizontal, dstY, 0, maxBlockX, maxBlockY, 0.1, regBlockW, regBlockH);
+        horizontal, dstY, 0, maxBlockX, maxBlockY, 0.1, regBlockW, regBlockH);
     dstX = mData->block_w;
-    for (; dstX < mData->output_w-wStep; dstX += wStep) {
+    for (; dstX < mData->output_w - wStep; dstX += wStep) {
         PlaceEdgeOverlapBlockWithMinCutBlocking_StdC_KSrc2Unroll_BoundsRefactor_LoopReorder_Blocking32(
-                both, dstY, dstX, maxBlockX, maxBlockY, 0.1, mData->block_w, blockHeight);
-
+            both, dstY, dstX, maxBlockX, maxBlockY, 0.1, mData->block_w, blockHeight);
     }
     // bottom-right corner
     PlaceEdgeOverlapBlockWithMinCutBlocking_StdC_KSrc2Unroll_BoundsRefactor_LoopReorder_Blocking32(
-            both, dstY, lastDstX, maxBlockX, maxBlockY, 0.1, blockWidth, blockHeight);
+        both, dstY, lastDstX, maxBlockX, maxBlockY, 0.1, blockWidth, blockHeight);
 }
 
-
-void AdvanceAlgOptimiz::OverlapConstraintsWithMinCut_StdC_KSrc2Unroll_Vector_BoundsRefactor_LoopReorder_Blocking32() {
+void AdvanceAlgOptimiz::
+    OverlapConstraintsWithMinCut_StdC_KSrc2Unroll_Vector_BoundsRefactor_LoopReorder_Blocking32() {
     // Compute block parameters
     int hStep = mData->block_h - overlapHeight;
     int wStep = mData->block_w - overlapWidth;
@@ -2927,12 +2939,12 @@ void AdvanceAlgOptimiz::OverlapConstraintsWithMinCut_StdC_KSrc2Unroll_Vector_Bou
     int blockWidth = mData->output_w - (lastDstX - overlapWidth);
 
     // fill all corner cases except borders
-    for (; dstY < mData->output_h-hStep; dstY += hStep) {
+    for (; dstY < mData->output_h - hStep; dstY += hStep) {
         // fill first column
         PlaceEdgeOverlapBlockWithMinCutBlocking_StdC_KSrc2Unroll_Vector_BoundsRefactor_LoopReorder_Blocking32(
             horizontal, dstY, 0, maxBlockX, maxBlockY, 0.1, regBlockW, regBlockH);
         dstX = mData->block_w;
-        for (; dstX < mData->output_w-wStep; dstX += wStep) {
+        for (; dstX < mData->output_w - wStep; dstX += wStep) {
             PlaceEdgeOverlapBlockWithMinCutBlocking_StdC_KSrc2Unroll_Vector_BoundsRefactor_LoopReorder_Blocking32(
                 both, dstY, dstX, maxBlockX, maxBlockY, 0.1, regBlockW, regBlockH);
         }
@@ -2947,10 +2959,9 @@ void AdvanceAlgOptimiz::OverlapConstraintsWithMinCut_StdC_KSrc2Unroll_Vector_Bou
     PlaceEdgeOverlapBlockWithMinCutBlocking_StdC_KSrc2Unroll_Vector_BoundsRefactor_LoopReorder_Blocking32(
         horizontal, dstY, 0, maxBlockX, maxBlockY, 0.1, regBlockW, regBlockH);
     dstX = mData->block_w;
-    for (; dstX < mData->output_w-wStep; dstX += wStep) {
+    for (; dstX < mData->output_w - wStep; dstX += wStep) {
         PlaceEdgeOverlapBlockWithMinCutBlocking_StdC_KSrc2Unroll_Vector_BoundsRefactor_LoopReorder_Blocking32(
             both, dstY, dstX, maxBlockX, maxBlockY, 0.1, mData->block_w, blockHeight);
-
     }
     // bottom-right corner
     PlaceEdgeOverlapBlockWithMinCutBlocking_StdC_KSrc2Unroll_Vector_BoundsRefactor_LoopReorder_Blocking32(
@@ -2959,9 +2970,9 @@ void AdvanceAlgOptimiz::OverlapConstraintsWithMinCut_StdC_KSrc2Unroll_Vector_Bou
 
 // Std C, bounds refactoring, loop reorder, blocking 32x32, and unrolling channels loop and srcX by 2
 void AdvanceAlgOptimiz::
-PlaceEdgeOverlapBlockWithMinCutBlocking_StdC_KSrc4Unroll_BoundsRefactor_LoopReorder_Blocking32(int overlapType, int dstY, int dstX, int maxBlockX,
-                                                                                               int maxBlockY, double errorTolerance, int bWidth, int bHeight)
-{
+    PlaceEdgeOverlapBlockWithMinCutBlocking_StdC_KSrc4Unroll_BoundsRefactor_LoopReorder_Blocking32(
+        int overlapType, int dstY, int dstX, int maxBlockX, int maxBlockY, double errorTolerance, int bWidth,
+        int bHeight) {
     int overlapXStart = (overlapType == horizontal) ? dstX : dstX - overlapWidth;
     int overlapYStart = (overlapType == vertical) ? dstY : dstY - overlapHeight;
 
@@ -3002,7 +3013,7 @@ PlaceEdgeOverlapBlockWithMinCutBlocking_StdC_KSrc4Unroll_BoundsRefactor_LoopReor
                             int srcX = blockXStart;
                             int endX = std::min(blockXStart + blockSize, maxBlockX);
                             int blockIndex = srcY * maxBlockX + srcX;
-                            for (; srcX < endX-3; srcX+=4) {
+                            for (; srcX < endX - 3; srcX += 4) {
                                 int rSrc1 = srcRow[j4];
                                 int gSrc1 = srcRow[j4 + 1];
                                 int bSrc1 = srcRow[j4 + 2];
@@ -3121,7 +3132,7 @@ PlaceEdgeOverlapBlockWithMinCutBlocking_StdC_KSrc4Unroll_BoundsRefactor_LoopReor
                             int srcX = blockXStart;
                             int endX = std::min(blockXStart + blockSize, maxBlockX);
                             int blockIndex = srcY * maxBlockX + srcX;
-                            for (; srcX < endX-3; srcX+=4) {
+                            for (; srcX < endX - 3; srcX += 4) {
                                 int rSrc1 = srcRow[j4];
                                 int gSrc1 = srcRow[j4 + 1];
                                 int bSrc1 = srcRow[j4 + 2];
@@ -3238,7 +3249,7 @@ PlaceEdgeOverlapBlockWithMinCutBlocking_StdC_KSrc4Unroll_BoundsRefactor_LoopReor
                             int srcX = blockXStart;
                             int endX = std::min(blockXStart + blockSize, maxBlockX);
                             int blockIndex = srcY * maxBlockX + srcX;
-                            for (; srcX < endX-3; srcX+=4) {
+                            for (; srcX < endX - 3; srcX += 4) {
                                 int rSrc1 = srcRow[j4];
                                 int gSrc1 = srcRow[j4 + 1];
                                 int bSrc1 = srcRow[j4 + 2];
@@ -3356,7 +3367,7 @@ PlaceEdgeOverlapBlockWithMinCutBlocking_StdC_KSrc4Unroll_BoundsRefactor_LoopReor
                             int srcX = blockXStart;
                             int endX = std::min(blockXStart + blockSize, maxBlockX);
                             int blockIndex = srcY * maxBlockX + srcX;
-                            for (; srcX < endX-3; srcX+=4) {
+                            for (; srcX < endX - 3; srcX += 4) {
                                 int rSrc1 = srcRow[j4];
                                 int gSrc1 = srcRow[j4 + 1];
                                 int bSrc1 = srcRow[j4 + 2];
@@ -3485,11 +3496,10 @@ PlaceEdgeOverlapBlockWithMinCutBlocking_StdC_KSrc4Unroll_BoundsRefactor_LoopReor
     free(suitableBlocks);
 }
 
-void AdvanceAlgOptimiz
-::PlaceEdgeOverlapBlockWithMinCutBlocking_StdC_KSrc8Unroll_Vector_BoundsRefactor_LoopReorder_Blocking32(int
-                                                                                                                overlapType, int dstY, int dstX, int maxBlockX, int maxBlockY,
-                                                                                                            double errorTolerance, int bWidth, int bHeight)
-{
+void AdvanceAlgOptimiz ::
+    PlaceEdgeOverlapBlockWithMinCutBlocking_StdC_KSrc8Unroll_Vector_BoundsRefactor_LoopReorder_Blocking32(
+        int overlapType, int dstY, int dstX, int maxBlockX, int maxBlockY, double errorTolerance, int bWidth,
+        int bHeight) {
     int overlapXStart = (overlapType == horizontal) ? dstX : dstX - overlapWidth;
     int overlapYStart = (overlapType == vertical) ? dstY : dstY - overlapHeight;
 
@@ -3523,18 +3533,19 @@ void AdvanceAlgOptimiz
                         // We have vector 1,2,3,4,0,0,0,0. We need 1,2,3,4,1,2,3,4
                         // For this we shift array by 8 bytes to the left and perform OR operation with
                         // previous vector
-                        __m256i dst_extended = _mm256_broadcastsi128_si256(_mm_or_si128(dst, _mm_slli_si128
-                                                                                        (dst, 8)));
+                        __m256i dst_extended =
+                            _mm256_broadcastsi128_si256(_mm_or_si128(dst, _mm_slli_si128(dst, 8)));
                         int endY = std::min(blockYStart + blockSize, maxBlockY);
                         for (int srcY = blockYStart; srcY < endY; srcY++) {
                             unsigned char* srcRow = mData->data[srcY + i] + CHANNEL_NUM * blockXStart;
                             int srcX = blockXStart;
                             int endX = std::min(blockXStart + blockSize, maxBlockX);
                             int blockIndex = srcY * maxBlockX + srcX;
-                            for (; srcX < endX-7; srcX+=8) {
-                                __m256i src = _mm256_cvtepu8_epi16(_mm_load_si128((__m128i*)(srcRow + j * 4)));
-                                __m256i src2 = _mm256_cvtepu8_epi16(
-                                    _mm_load_si128((__m128i*)(srcRow + j * 4 + 16)));
+                            for (; srcX < endX - 7; srcX += 8) {
+                                __m256i src =
+                                    _mm256_cvtepu8_epi16(_mm_load_si128((__m128i*)(srcRow + j * 4)));
+                                __m256i src2 =
+                                    _mm256_cvtepu8_epi16(_mm_load_si128((__m128i*)(srcRow + j * 4 + 16)));
                                 __m256i diff = _mm256_sub_epi16(dst_extended, src);
                                 __m256i diff2 = _mm256_sub_epi16(dst_extended, src2);
                                 __m256i norm = _mm256_madd_epi16(diff, diff);
@@ -3558,7 +3569,8 @@ void AdvanceAlgOptimiz
                                 __m128i src = _mm_cvtepu8_epi16(_mm_loadu_si32(srcRow + j4));
                                 __m128i diff = _mm_sub_epi16(dst, src);
                                 __m128i norm = _mm_madd_epi16(diff, diff);
-                                blocks[blockIndex++].value += _mm_extract_epi32(norm, 0) + _mm_extract_epi32(norm, 1);
+                                blocks[blockIndex++].value +=
+                                    _mm_extract_epi32(norm, 0) + _mm_extract_epi32(norm, 1);
                                 srcRow += 4;
                             }
                         }
@@ -3578,8 +3590,8 @@ void AdvanceAlgOptimiz
                         // We have vector 1,2,3,4,0,0,0,0. We need 1,2,3,4,1,2,3,4
                         // For this we shift array by 8 bytes to the left and perform OR operation with
                         // previous vector
-                        __m256i dst_extended = _mm256_broadcastsi128_si256(_mm_or_si128(dst, _mm_slli_si128
-                                                                                        (dst, 8)));
+                        __m256i dst_extended =
+                            _mm256_broadcastsi128_si256(_mm_or_si128(dst, _mm_slli_si128(dst, 8)));
                         int endY = std::min(blockYStart + blockSize, maxBlockY);
                         for (int srcY = blockYStart; srcY < endY; srcY++) {
                             int srcYStart = srcY + overlapHeight;
@@ -3587,10 +3599,11 @@ void AdvanceAlgOptimiz
                             int srcX = blockXStart;
                             int endX = std::min(blockXStart + blockSize, maxBlockX);
                             int blockIndex = srcY * maxBlockX + srcX;
-                            for (; srcX < endX-7; srcX+=8) {
-                                __m256i src = _mm256_cvtepu8_epi16(_mm_load_si128((__m128i*)(srcRow + j * 4)));
-                                __m256i src2 = _mm256_cvtepu8_epi16(
-                                    _mm_load_si128((__m128i*)(srcRow + j * 4 + 16)));
+                            for (; srcX < endX - 7; srcX += 8) {
+                                __m256i src =
+                                    _mm256_cvtepu8_epi16(_mm_load_si128((__m128i*)(srcRow + j * 4)));
+                                __m256i src2 =
+                                    _mm256_cvtepu8_epi16(_mm_load_si128((__m128i*)(srcRow + j * 4 + 16)));
                                 __m256i diff = _mm256_sub_epi16(dst_extended, src);
                                 __m256i diff2 = _mm256_sub_epi16(dst_extended, src2);
                                 __m256i norm = _mm256_madd_epi16(diff, diff);
@@ -3614,7 +3627,8 @@ void AdvanceAlgOptimiz
                                 __m128i src = _mm_cvtepu8_epi16(_mm_loadu_si32(srcRow + j4));
                                 __m128i diff = _mm_sub_epi16(dst, src);
                                 __m128i norm = _mm_madd_epi16(diff, diff);
-                                blocks[blockIndex++].value += _mm_extract_epi32(norm, 0) + _mm_extract_epi32(norm, 1);
+                                blocks[blockIndex++].value +=
+                                    _mm_extract_epi32(norm, 0) + _mm_extract_epi32(norm, 1);
                                 srcRow += 4;
                             }
                         }
@@ -3633,18 +3647,19 @@ void AdvanceAlgOptimiz
                         // We have vector 1,2,3,4,0,0,0,0. We need 1,2,3,4,1,2,3,4
                         // For this we shift array by 8 bytes to the left and perform OR operation with
                         // previous vector
-                        __m256i dst_extended = _mm256_broadcastsi128_si256(_mm_or_si128(dst, _mm_slli_si128
-                                                                                        (dst, 8)));
+                        __m256i dst_extended =
+                            _mm256_broadcastsi128_si256(_mm_or_si128(dst, _mm_slli_si128(dst, 8)));
                         int endY = std::min(blockYStart + blockSize, maxBlockY);
                         for (int srcY = blockYStart; srcY < endY; srcY++) {
                             unsigned char* srcRow = mData->data[srcY + i] + CHANNEL_NUM * blockXStart;
                             int srcX = blockXStart;
                             int endX = std::min(blockXStart + blockSize, maxBlockX);
                             int blockIndex = srcY * maxBlockX + srcX;
-                            for (; srcX < endX-7; srcX+=8) {
-                                __m256i src = _mm256_cvtepu8_epi16(_mm_load_si128((__m128i*)(srcRow + j * 4)));
-                                __m256i src2 = _mm256_cvtepu8_epi16(
-                                    _mm_load_si128((__m128i*)(srcRow + j * 4 + 16)));
+                            for (; srcX < endX - 7; srcX += 8) {
+                                __m256i src =
+                                    _mm256_cvtepu8_epi16(_mm_load_si128((__m128i*)(srcRow + j * 4)));
+                                __m256i src2 =
+                                    _mm256_cvtepu8_epi16(_mm_load_si128((__m128i*)(srcRow + j * 4 + 16)));
                                 __m256i diff = _mm256_sub_epi16(dst_extended, src);
                                 __m256i diff2 = _mm256_sub_epi16(dst_extended, src2);
                                 __m256i norm = _mm256_madd_epi16(diff, diff);
@@ -3668,7 +3683,8 @@ void AdvanceAlgOptimiz
                                 __m128i src = _mm_cvtepu8_epi16(_mm_loadu_si32(srcRow + j4));
                                 __m128i diff = _mm_sub_epi16(dst, src);
                                 __m128i norm = _mm_madd_epi16(diff, diff);
-                                blocks[blockIndex++].value += _mm_extract_epi32(norm, 0) + _mm_extract_epi32(norm, 1);
+                                blocks[blockIndex++].value +=
+                                    _mm_extract_epi32(norm, 0) + _mm_extract_epi32(norm, 1);
                                 srcRow += 4;
                             }
                         }
@@ -3687,18 +3703,19 @@ void AdvanceAlgOptimiz
                         // We have vector 1,2,3,4,0,0,0,0. We need 1,2,3,4,1,2,3,4
                         // For this we shift array by 8 bytes to the left and perform OR operation with
                         // previous vector
-                        __m256i dst_extended = _mm256_broadcastsi128_si256(_mm_or_si128(dst, _mm_slli_si128
-                                                                                        (dst, 8)));
+                        __m256i dst_extended =
+                            _mm256_broadcastsi128_si256(_mm_or_si128(dst, _mm_slli_si128(dst, 8)));
                         int endY = std::min(blockYStart + blockSize, maxBlockY);
                         for (int srcY = blockYStart; srcY < endY; srcY++) {
                             unsigned char* srcRow = mData->data[srcY + i] + CHANNEL_NUM * blockXStart;
                             int srcX = blockXStart;
                             int endX = std::min(blockXStart + blockSize, maxBlockX);
                             int blockIndex = srcY * maxBlockX + srcX;
-                            for (; srcX < endX-7; srcX+=8) {
-                                __m256i src = _mm256_cvtepu8_epi16(_mm_load_si128((__m128i*)(srcRow + j * 4)));
-                                __m256i src2 = _mm256_cvtepu8_epi16(
-                                    _mm_load_si128((__m128i*)(srcRow + j * 4 + 16)));
+                            for (; srcX < endX - 7; srcX += 8) {
+                                __m256i src =
+                                    _mm256_cvtepu8_epi16(_mm_load_si128((__m128i*)(srcRow + j * 4)));
+                                __m256i src2 =
+                                    _mm256_cvtepu8_epi16(_mm_load_si128((__m128i*)(srcRow + j * 4 + 16)));
                                 __m256i diff = _mm256_sub_epi16(dst_extended, src);
                                 __m256i diff2 = _mm256_sub_epi16(dst_extended, src2);
                                 __m256i norm = _mm256_madd_epi16(diff, diff);
@@ -3722,7 +3739,8 @@ void AdvanceAlgOptimiz
                                 __m128i src = _mm_cvtepu8_epi16(_mm_loadu_si32(srcRow + j4));
                                 __m128i diff = _mm_sub_epi16(dst, src);
                                 __m128i norm = _mm_madd_epi16(diff, diff);
-                                blocks[blockIndex++].value += _mm_extract_epi32(norm, 0) + _mm_extract_epi32(norm, 1);
+                                blocks[blockIndex++].value +=
+                                    _mm_extract_epi32(norm, 0) + _mm_extract_epi32(norm, 1);
                                 srcRow += 4;
                             }
                         }
@@ -3759,7 +3777,8 @@ void AdvanceAlgOptimiz
     free(suitableBlocks);
 }
 
-void AdvanceAlgOptimiz::OverlapConstraintsWithMinCut_StdC_KSrc4Unroll_BoundsRefactor_LoopReorder_Blocking32() {
+void AdvanceAlgOptimiz::
+    OverlapConstraintsWithMinCut_StdC_KSrc4Unroll_BoundsRefactor_LoopReorder_Blocking32() {
     // Compute block parameters
     int hStep = mData->block_h - overlapHeight;
     int wStep = mData->block_w - overlapWidth;
@@ -3782,47 +3801,45 @@ void AdvanceAlgOptimiz::OverlapConstraintsWithMinCut_StdC_KSrc4Unroll_BoundsRefa
     int dstY = mData->block_h;
     for (; dstX < mData->output_w; dstX += wStep) {
         PlaceEdgeOverlapBlockWithMinCutBlocking_StdC_KSrc4Unroll_BoundsRefactor_LoopReorder_Blocking32(
-                vertical, 0, dstX, maxBlockX, maxBlockY, 0.1, regBlockW, regBlockH);
+            vertical, 0, dstX, maxBlockX, maxBlockY, 0.1, regBlockW, regBlockH);
     }
     int lastDstX = dstX - wStep;
     int blockWidth = mData->output_w - (lastDstX - overlapWidth);
 
     // fill all corner cases except borders
-    for (; dstY < mData->output_h-hStep; dstY += hStep) {
+    for (; dstY < mData->output_h - hStep; dstY += hStep) {
         // fill first column
         PlaceEdgeOverlapBlockWithMinCutBlocking_StdC_KSrc4Unroll_BoundsRefactor_LoopReorder_Blocking32(
-                horizontal, dstY, 0, maxBlockX, maxBlockY, 0.1, regBlockW, regBlockH);
+            horizontal, dstY, 0, maxBlockX, maxBlockY, 0.1, regBlockW, regBlockH);
         dstX = mData->block_w;
-        for (; dstX < mData->output_w-wStep; dstX += wStep) {
+        for (; dstX < mData->output_w - wStep; dstX += wStep) {
             PlaceEdgeOverlapBlockWithMinCutBlocking_StdC_KSrc4Unroll_BoundsRefactor_LoopReorder_Blocking32(
-                    both, dstY, dstX, maxBlockX, maxBlockY, 0.1, regBlockW, regBlockH);
+                both, dstY, dstX, maxBlockX, maxBlockY, 0.1, regBlockW, regBlockH);
         }
 
         // fill last column
         PlaceEdgeOverlapBlockWithMinCutBlocking_StdC_KSrc4Unroll_BoundsRefactor_LoopReorder_Blocking32(
-                both, dstY, dstX, maxBlockX, maxBlockY, 0.1, blockWidth, regBlockH);
+            both, dstY, dstX, maxBlockX, maxBlockY, 0.1, blockWidth, regBlockH);
     }
 
     // fill last row
     int blockHeight = mData->output_h - dstY;
     PlaceEdgeOverlapBlockWithMinCutBlocking_StdC_KSrc4Unroll_BoundsRefactor_LoopReorder_Blocking32(
-            horizontal, dstY, 0, maxBlockX, maxBlockY, 0.1, regBlockW, regBlockH);
+        horizontal, dstY, 0, maxBlockX, maxBlockY, 0.1, regBlockW, regBlockH);
     dstX = mData->block_w;
-    for (; dstX < mData->output_w-wStep; dstX += wStep) {
+    for (; dstX < mData->output_w - wStep; dstX += wStep) {
         PlaceEdgeOverlapBlockWithMinCutBlocking_StdC_KSrc4Unroll_BoundsRefactor_LoopReorder_Blocking32(
-                both, dstY, dstX, maxBlockX, maxBlockY, 0.1, mData->block_w, blockHeight);
-
+            both, dstY, dstX, maxBlockX, maxBlockY, 0.1, mData->block_w, blockHeight);
     }
     // bottom-right corner
     PlaceEdgeOverlapBlockWithMinCutBlocking_StdC_KSrc4Unroll_BoundsRefactor_LoopReorder_Blocking32(
-            both, dstY, lastDstX, maxBlockX, maxBlockY, 0.1, blockWidth, blockHeight);
+        both, dstY, lastDstX, maxBlockX, maxBlockY, 0.1, blockWidth, blockHeight);
 }
 
-void AdvanceAlgOptimiz
-    ::PlaceEdgeOverlapBlockWithMinCutBlocking_StdC_KSrc4Unroll_Vector_BoundsRefactor_LoopReorder_Blocking32
-    (int overlapType, int dstY, int dstX, int maxBlockX, int maxBlockY, double errorTolerance, int bWidth,
-     int bHeight)
-{
+void AdvanceAlgOptimiz ::
+    PlaceEdgeOverlapBlockWithMinCutBlocking_StdC_KSrc4Unroll_Vector_BoundsRefactor_LoopReorder_Blocking32(
+        int overlapType, int dstY, int dstX, int maxBlockX, int maxBlockY, double errorTolerance, int bWidth,
+        int bHeight) {
     int overlapXStart = (overlapType == horizontal) ? dstX : dstX - overlapWidth;
     int overlapYStart = (overlapType == vertical) ? dstY : dstY - overlapHeight;
 
@@ -3856,16 +3873,17 @@ void AdvanceAlgOptimiz
                         // We have vector 1,2,3,4,0,0,0,0. We need 1,2,3,4,1,2,3,4
                         // For this we shift array by 8 bytes to the left and perform OR operation with
                         // previous vector
-                        __m256i dst_extended = _mm256_broadcastsi128_si256(_mm_or_si128(dst, _mm_slli_si128
-                                                                                        (dst, 8)));
+                        __m256i dst_extended =
+                            _mm256_broadcastsi128_si256(_mm_or_si128(dst, _mm_slli_si128(dst, 8)));
                         int endY = std::min(blockYStart + blockSize, maxBlockY);
                         for (int srcY = blockYStart; srcY < endY; srcY++) {
                             unsigned char* srcRow = mData->data[srcY + i] + CHANNEL_NUM * blockXStart;
                             int srcX = blockXStart;
                             int endX = std::min(blockXStart + blockSize, maxBlockX);
                             int blockIndex = srcY * maxBlockX + srcX;
-                            for (; srcX < endX-3; srcX+=4) {
-                                __m256i src = _mm256_cvtepu8_epi16(_mm_load_si128((__m128i*)(srcRow + j * 4)));
+                            for (; srcX < endX - 3; srcX += 4) {
+                                __m256i src =
+                                    _mm256_cvtepu8_epi16(_mm_load_si128((__m128i*)(srcRow + j * 4)));
                                 __m256i diff = _mm256_sub_epi16(dst_extended, src);
                                 __m256i norm = _mm256_madd_epi16(diff, diff);
 
@@ -3880,7 +3898,8 @@ void AdvanceAlgOptimiz
                                 __m128i src = _mm_cvtepu8_epi16(_mm_loadu_si32(srcRow + j4));
                                 __m128i diff = _mm_sub_epi16(dst, src);
                                 __m128i norm = _mm_madd_epi16(diff, diff);
-                                blocks[blockIndex++].value += _mm_extract_epi32(norm, 0) + _mm_extract_epi32(norm, 1);
+                                blocks[blockIndex++].value +=
+                                    _mm_extract_epi32(norm, 0) + _mm_extract_epi32(norm, 1);
                                 srcRow += 4;
                             }
                         }
@@ -3900,8 +3919,8 @@ void AdvanceAlgOptimiz
                         // We have vector 1,2,3,4,0,0,0,0. We need 1,2,3,4,1,2,3,4
                         // For this we shift array by 8 bytes to the left and perform OR operation with
                         // previous vector
-                        __m256i dst_extended = _mm256_broadcastsi128_si256(_mm_or_si128(dst, _mm_slli_si128
-                                                                                        (dst, 8)));
+                        __m256i dst_extended =
+                            _mm256_broadcastsi128_si256(_mm_or_si128(dst, _mm_slli_si128(dst, 8)));
                         int endY = std::min(blockYStart + blockSize, maxBlockY);
                         for (int srcY = blockYStart; srcY < endY; srcY++) {
                             int srcYStart = srcY + overlapHeight;
@@ -3909,8 +3928,9 @@ void AdvanceAlgOptimiz
                             int srcX = blockXStart;
                             int endX = std::min(blockXStart + blockSize, maxBlockX);
                             int blockIndex = srcY * maxBlockX + srcX;
-                            for (; srcX < endX-3; srcX+=4) {
-                                __m256i src = _mm256_cvtepu8_epi16(_mm_load_si128((__m128i*)(srcRow + j * 4)));
+                            for (; srcX < endX - 3; srcX += 4) {
+                                __m256i src =
+                                    _mm256_cvtepu8_epi16(_mm_load_si128((__m128i*)(srcRow + j * 4)));
                                 __m256i diff = _mm256_sub_epi16(dst_extended, src);
                                 __m256i norm = _mm256_madd_epi16(diff, diff);
 
@@ -3925,7 +3945,8 @@ void AdvanceAlgOptimiz
                                 __m128i src = _mm_cvtepu8_epi16(_mm_loadu_si32(srcRow + j4));
                                 __m128i diff = _mm_sub_epi16(dst, src);
                                 __m128i norm = _mm_madd_epi16(diff, diff);
-                                blocks[blockIndex++].value += _mm_extract_epi32(norm, 0) + _mm_extract_epi32(norm, 1);
+                                blocks[blockIndex++].value +=
+                                    _mm_extract_epi32(norm, 0) + _mm_extract_epi32(norm, 1);
                                 srcRow += 4;
                             }
                         }
@@ -3944,16 +3965,17 @@ void AdvanceAlgOptimiz
                         // We have vector 1,2,3,4,0,0,0,0. We need 1,2,3,4,1,2,3,4
                         // For this we shift array by 8 bytes to the left and perform OR operation with
                         // previous vector
-                        __m256i dst_extended = _mm256_broadcastsi128_si256(_mm_or_si128(dst, _mm_slli_si128
-                                                                                        (dst, 8)));
+                        __m256i dst_extended =
+                            _mm256_broadcastsi128_si256(_mm_or_si128(dst, _mm_slli_si128(dst, 8)));
                         int endY = std::min(blockYStart + blockSize, maxBlockY);
                         for (int srcY = blockYStart; srcY < endY; srcY++) {
                             unsigned char* srcRow = mData->data[srcY + i] + CHANNEL_NUM * blockXStart;
                             int srcX = blockXStart;
                             int endX = std::min(blockXStart + blockSize, maxBlockX);
                             int blockIndex = srcY * maxBlockX + srcX;
-                            for (; srcX < endX-3; srcX+=4) {
-                                __m256i src = _mm256_cvtepu8_epi16(_mm_load_si128((__m128i*)(srcRow + j * 4)));
+                            for (; srcX < endX - 3; srcX += 4) {
+                                __m256i src =
+                                    _mm256_cvtepu8_epi16(_mm_load_si128((__m128i*)(srcRow + j * 4)));
                                 __m256i diff = _mm256_sub_epi16(dst_extended, src);
                                 __m256i norm = _mm256_madd_epi16(diff, diff);
 
@@ -3968,7 +3990,8 @@ void AdvanceAlgOptimiz
                                 __m128i src = _mm_cvtepu8_epi16(_mm_loadu_si32(srcRow + j4));
                                 __m128i diff = _mm_sub_epi16(dst, src);
                                 __m128i norm = _mm_madd_epi16(diff, diff);
-                                blocks[blockIndex++].value += _mm_extract_epi32(norm, 0) + _mm_extract_epi32(norm, 1);
+                                blocks[blockIndex++].value +=
+                                    _mm_extract_epi32(norm, 0) + _mm_extract_epi32(norm, 1);
                                 srcRow += 4;
                             }
                         }
@@ -3987,16 +4010,17 @@ void AdvanceAlgOptimiz
                         // We have vector 1,2,3,4,0,0,0,0. We need 1,2,3,4,1,2,3,4
                         // For this we shift array by 8 bytes to the left and perform OR operation with
                         // previous vector
-                        __m256i dst_extended = _mm256_broadcastsi128_si256(_mm_or_si128(dst, _mm_slli_si128
-                                                                                        (dst, 8)));
+                        __m256i dst_extended =
+                            _mm256_broadcastsi128_si256(_mm_or_si128(dst, _mm_slli_si128(dst, 8)));
                         int endY = std::min(blockYStart + blockSize, maxBlockY);
                         for (int srcY = blockYStart; srcY < endY; srcY++) {
                             unsigned char* srcRow = mData->data[srcY + i] + CHANNEL_NUM * blockXStart;
                             int srcX = blockXStart;
                             int endX = std::min(blockXStart + blockSize, maxBlockX);
                             int blockIndex = srcY * maxBlockX + srcX;
-                            for (; srcX < endX-3; srcX+=4) {
-                                __m256i src = _mm256_cvtepu8_epi16(_mm_load_si128((__m128i*)(srcRow + j * 4)));
+                            for (; srcX < endX - 3; srcX += 4) {
+                                __m256i src =
+                                    _mm256_cvtepu8_epi16(_mm_load_si128((__m128i*)(srcRow + j * 4)));
                                 __m256i diff = _mm256_sub_epi16(dst_extended, src);
                                 __m256i norm = _mm256_madd_epi16(diff, diff);
 
@@ -4011,7 +4035,8 @@ void AdvanceAlgOptimiz
                                 __m128i src = _mm_cvtepu8_epi16(_mm_loadu_si32(srcRow + j4));
                                 __m128i diff = _mm_sub_epi16(dst, src);
                                 __m128i norm = _mm_madd_epi16(diff, diff);
-                                blocks[blockIndex++].value += _mm_extract_epi32(norm, 0) + _mm_extract_epi32(norm, 1);
+                                blocks[blockIndex++].value +=
+                                    _mm_extract_epi32(norm, 0) + _mm_extract_epi32(norm, 1);
                                 srcRow += 4;
                             }
                         }
@@ -4048,8 +4073,8 @@ void AdvanceAlgOptimiz
     free(suitableBlocks);
 }
 
-void AdvanceAlgOptimiz
-    ::OverlapConstraintsWithMinCut_StdC_KSrc4Unroll_Vector_BoundsRefactor_LoopReorder_Blocking32() {
+void AdvanceAlgOptimiz ::
+    OverlapConstraintsWithMinCut_StdC_KSrc4Unroll_Vector_BoundsRefactor_LoopReorder_Blocking32() {
     // Compute block parameters
     int hStep = mData->block_h - overlapHeight;
     int wStep = mData->block_w - overlapWidth;
@@ -4078,12 +4103,12 @@ void AdvanceAlgOptimiz
     int blockWidth = mData->output_w - (lastDstX - overlapWidth);
 
     // fill all corner cases except borders
-    for (; dstY < mData->output_h-hStep; dstY += hStep) {
+    for (; dstY < mData->output_h - hStep; dstY += hStep) {
         // fill first column
         PlaceEdgeOverlapBlockWithMinCutBlocking_StdC_KSrc4Unroll_Vector_BoundsRefactor_LoopReorder_Blocking32(
             horizontal, dstY, 0, maxBlockX, maxBlockY, 0.1, regBlockW, regBlockH);
         dstX = mData->block_w;
-        for (; dstX < mData->output_w-wStep; dstX += wStep) {
+        for (; dstX < mData->output_w - wStep; dstX += wStep) {
             PlaceEdgeOverlapBlockWithMinCutBlocking_StdC_KSrc4Unroll_Vector_BoundsRefactor_LoopReorder_Blocking32(
                 both, dstY, dstX, maxBlockX, maxBlockY, 0.1, regBlockW, regBlockH);
         }
@@ -4098,18 +4123,17 @@ void AdvanceAlgOptimiz
     PlaceEdgeOverlapBlockWithMinCutBlocking_StdC_KSrc4Unroll_Vector_BoundsRefactor_LoopReorder_Blocking32(
         horizontal, dstY, 0, maxBlockX, maxBlockY, 0.1, regBlockW, regBlockH);
     dstX = mData->block_w;
-    for (; dstX < mData->output_w-wStep; dstX += wStep) {
+    for (; dstX < mData->output_w - wStep; dstX += wStep) {
         PlaceEdgeOverlapBlockWithMinCutBlocking_StdC_KSrc4Unroll_Vector_BoundsRefactor_LoopReorder_Blocking32(
             both, dstY, dstX, maxBlockX, maxBlockY, 0.1, mData->block_w, blockHeight);
-
     }
     // bottom-right corner
     PlaceEdgeOverlapBlockWithMinCutBlocking_StdC_KSrc4Unroll_Vector_BoundsRefactor_LoopReorder_Blocking32(
         both, dstY, lastDstX, maxBlockX, maxBlockY, 0.1, blockWidth, blockHeight);
 }
 
-void AdvanceAlgOptimiz
-    ::OverlapConstraintsWithMinCut_StdC_KSrc8Unroll_Vector_BoundsRefactor_LoopReorder_Blocking32() {
+void AdvanceAlgOptimiz ::
+    OverlapConstraintsWithMinCut_StdC_KSrc8Unroll_Vector_BoundsRefactor_LoopReorder_Blocking32() {
     // Compute block parameters
     int hStep = mData->block_h - overlapHeight;
     int wStep = mData->block_w - overlapWidth;
@@ -4138,12 +4162,12 @@ void AdvanceAlgOptimiz
     int blockWidth = mData->output_w - (lastDstX - overlapWidth);
 
     // fill all corner cases except borders
-    for (; dstY < mData->output_h-hStep; dstY += hStep) {
+    for (; dstY < mData->output_h - hStep; dstY += hStep) {
         // fill first column
         PlaceEdgeOverlapBlockWithMinCutBlocking_StdC_KSrc8Unroll_Vector_BoundsRefactor_LoopReorder_Blocking32(
             horizontal, dstY, 0, maxBlockX, maxBlockY, 0.1, regBlockW, regBlockH);
         dstX = mData->block_w;
-        for (; dstX < mData->output_w-wStep; dstX += wStep) {
+        for (; dstX < mData->output_w - wStep; dstX += wStep) {
             PlaceEdgeOverlapBlockWithMinCutBlocking_StdC_KSrc8Unroll_Vector_BoundsRefactor_LoopReorder_Blocking32(
                 both, dstY, dstX, maxBlockX, maxBlockY, 0.1, regBlockW, regBlockH);
         }
@@ -4158,10 +4182,9 @@ void AdvanceAlgOptimiz
     PlaceEdgeOverlapBlockWithMinCutBlocking_StdC_KSrc8Unroll_Vector_BoundsRefactor_LoopReorder_Blocking32(
         horizontal, dstY, 0, maxBlockX, maxBlockY, 0.1, regBlockW, regBlockH);
     dstX = mData->block_w;
-    for (; dstX < mData->output_w-wStep; dstX += wStep) {
+    for (; dstX < mData->output_w - wStep; dstX += wStep) {
         PlaceEdgeOverlapBlockWithMinCutBlocking_StdC_KSrc8Unroll_Vector_BoundsRefactor_LoopReorder_Blocking32(
             both, dstY, dstX, maxBlockX, maxBlockY, 0.1, mData->block_w, blockHeight);
-
     }
     // bottom-right corner
     PlaceEdgeOverlapBlockWithMinCutBlocking_StdC_KSrc8Unroll_Vector_BoundsRefactor_LoopReorder_Blocking32(
