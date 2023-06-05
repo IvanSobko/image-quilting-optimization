@@ -33,6 +33,8 @@ public:
 
     // Std C, bounds refactoring, loop reorder, blocking 32x32, and unrolling channels loop, srcX by 4
     static void StdC_KSrc4Unroll_BoundsRefactor_LoopReorder_Blocking32(ImgData * imgData, int seed);
+    static void StdC_KSrc4Unroll_Vector_BoundsRefactor_LoopReorder_Blocking32(ImgData * imgData, int seed);
+
     static void StdC_KSrc8Unroll_Vector_BoundsRefactor_LoopReorder_Blocking32(ImgData * imgData, int seed);
 
 private:
@@ -97,15 +99,22 @@ private:
     void OverlapConstraintsWithMinCut_StdC_KSrc2Unroll_BoundsRefactor_LoopReorder_Blocking32();
 
 
-    // Vectorizing unroll 2
-    void PlaceEdgeOverlapBlockWithMinCutBlocking_StdC_KSrc2Unroll_Vector_BoundsRefactor_LoopReorder_Blocking32
-            (int overlapType, int dstY, int dstX, int maxBlockX, int maxBlockY, double errorTolerance, int bWidth, int bHeight);
-    void OverlapConstraintsWithMinCut_StdC_KSrc2Unroll_Vector_BoundsRefactor_LoopReorder_Blocking32();
 
     // Std C, bounds refactoring, loop reorder, blocking 32x32, and unrolling channels loop, srcX by 4
     void PlaceEdgeOverlapBlockWithMinCutBlocking_StdC_KSrc4Unroll_BoundsRefactor_LoopReorder_Blocking32(int overlapType, int dstY, int dstX, int maxBlockX, int maxBlockY,
                                                                                                         double errorTolerance, int bWidth, int bHeight);
     void OverlapConstraintsWithMinCut_StdC_KSrc4Unroll_BoundsRefactor_LoopReorder_Blocking32();
+
+
+    // Vectorizing unroll 2
+    void PlaceEdgeOverlapBlockWithMinCutBlocking_StdC_KSrc2Unroll_Vector_BoundsRefactor_LoopReorder_Blocking32
+        (int overlapType, int dstY, int dstX, int maxBlockX, int maxBlockY, double errorTolerance, int bWidth, int bHeight);
+    void OverlapConstraintsWithMinCut_StdC_KSrc2Unroll_Vector_BoundsRefactor_LoopReorder_Blocking32();
+
+    // Vectorizing unroll 4
+    void PlaceEdgeOverlapBlockWithMinCutBlocking_StdC_KSrc4Unroll_Vector_BoundsRefactor_LoopReorder_Blocking32
+        (int overlapType, int dstY, int dstX, int maxBlockX, int maxBlockY, double errorTolerance, int bWidth, int bHeight);
+    void OverlapConstraintsWithMinCut_StdC_KSrc4Unroll_Vector_BoundsRefactor_LoopReorder_Blocking32();
 
     // Vectorizing unroll 8
     void PlaceEdgeOverlapBlockWithMinCutBlocking_StdC_KSrc8Unroll_Vector_BoundsRefactor_LoopReorder_Blocking32
