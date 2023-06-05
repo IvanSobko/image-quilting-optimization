@@ -103,7 +103,7 @@ int main(int argc, char* argv[]) {
         testing.RegisterTestFunction(CompOverlapOptimiz::BasicOpt, "compBasic");
         testing.RegisterTestFunction(CompOverlapOptimiz::AlgOpt, "compBasic+AlgImpr");
         testing.RegisterTestFunction(CompOverlapOptimiz::UnrollOpt, "compBasic+AlgImpr+Unroll");
-        testing.RegisterTestFunction(AdvanceAlgOptimiz::DividedFuncOpt, "Unroll+DividedFunctions");
+        testing.RegisterTestFunction(AdvanceAlgOptimiz::StdC_KUnroll_BoundsRefactor, "Unroll+DividedFunctions");
         testing.RegisterTestFunction(CompOverlapOptimiz::UnrollMaxOpt, "compBasic+AlgImpr+UnrollTheoreticalMax");
         testing.RegisterTestFunction(CompOverlapOptimiz::VectorizeOpt, "compBasic+AlgImpr+Unroll+Vectorize");
 
