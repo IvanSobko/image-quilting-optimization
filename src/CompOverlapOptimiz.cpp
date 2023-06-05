@@ -31,10 +31,12 @@ void CompOverlapOptimiz::UnrollMaxOpt(ImgData* imgData, int seed) {
     imageQuilting.Synthesis(seed, opt_unroll_max);
 }
 
+#ifdef __AVX2__
 void CompOverlapOptimiz::VectorizeOpt(ImgData* imgData, int seed) {
     CompOverlapOptimiz imageQuilting(imgData);
     imageQuilting.Synthesis(seed, opt_vectorize);
 }
+#endif
 
 void CompOverlapOptimiz::UnrollChnls(ImgData* imgData, int seed) {
     CompOverlapOptimiz imageQuilting(imgData);
@@ -104,6 +106,7 @@ volatile void CompOverlapOptimiz::UnrollMaxOptComponent(ImgData* imgData, int se
     }
 }
 
+#ifdef __AVX2__
 volatile void CompOverlapOptimiz::VectorizeOptComponent(ImgData* imgData, int seed) {
     CompOverlapOptimiz imageQuilting(imgData);
     int overlapType, dstY, dstX, srcY, srcX;
@@ -113,6 +116,7 @@ volatile void CompOverlapOptimiz::VectorizeOptComponent(ImgData* imgData, int se
         dummy += imageQuilting.ComputeOverlapVectorize(overlapType, dstY, dstX, srcY, srcX);
     }
 }
+#endif
 
 // Synthesize a new texture
 void CompOverlapOptimiz::Synthesis() {
@@ -949,6 +953,7 @@ double CompOverlapOptimiz::ComputeOverlapUnrollMax(int overlapType, int dstY, in
     return std::sqrt(l2norm);
 }
 
+#ifdef __AVX2__
 double CompOverlapOptimiz::ComputeOverlapVectorize(int overlapType, int dstY, int dstX, int srcY, int srcX) {
     // Compute the overlap region that we are working with
     int overlapXStart = overlapType != horizontal ? (dstX - overlapWidth) : dstX;
@@ -960,9 +965,7 @@ double CompOverlapOptimiz::ComputeOverlapVectorize(int overlapType, int dstY, in
     // Compute the l2 norm of the overlap between the two blocks
     volatile int l2norm = 0;
 
-
     int range = horizontalBlockWidthLocal - (horizontalBlockWidthLocal % 4);
-
     // Compute the horizontal overlap (+corner if needed)
     if (overlapType != vertical) {
         int dstXStart = CHANNEL_NUM * overlapXStart;
@@ -1066,7 +1069,7 @@ double CompOverlapOptimiz::ComputeOverlapVectorize(int overlapType, int dstY, in
 
     return std::sqrt(l2norm);
 }
-
+#endif
 // Base implementation of ComputeOverlap
 double CompOverlapOptimiz::ComputeOverlapBase(const int overlapType, const int dstY, const int dstX,
                                               const int srcY, const int srcX) {
@@ -1158,7 +1161,9 @@ void CompOverlapOptimiz::PlaceEdgeOverlapBlockWithMinCut(const int blockY, const
             } else if (opt_type == opt_unroll_max) {
                 blocks[blockIndex].value = ComputeOverlapUnrollMax(overlapType, blockY, blockX, i, j);
             } else if (opt_type == opt_vectorize) {
+#ifdef __AVX2__
                 blocks[blockIndex].value = ComputeOverlapVectorize(overlapType, blockY, blockX, i, j);
+#endif
             } else if (opt_type == opt_unroll_chnls) {
                 blocks[blockIndex].value = ComputeOverlapUnrollChannels(overlapType, blockY, blockX, i, j);
             }

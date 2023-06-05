@@ -19,7 +19,9 @@ class CompOverlapOptimiz {
     static void AlgOpt(ImgData* imgData, int seed);
     static void UnrollOpt(ImgData* imgData, int seed);
     static void UnrollMaxOpt(ImgData* imgData, int seed);
+#ifdef __AVX2__
     static void VectorizeOpt(ImgData* imgData, int seed);
+#endif
     static void UnrollChnls(ImgData* imgData, int seed);
 
     // Component test functions
@@ -30,7 +32,10 @@ class CompOverlapOptimiz {
     volatile static void AlgoOptComponent(ImgData* imgData, int seed);
     volatile static void UnrollOptComponent(ImgData* imgData, int seed);
     volatile static void UnrollMaxOptComponent(ImgData* imgData, int seed);
+
+#ifdef __AVX2__
     volatile static void VectorizeOptComponent(ImgData* imgData, int seed);
+#endif
 
     CompOverlapOptimiz() = delete;
     CompOverlapOptimiz(ImgData* data) {
@@ -82,7 +87,9 @@ class CompOverlapOptimiz {
     // Forced compiler to parallelize computations
     double ComputeOverlapUnrollMax(int overlapType, int dstY, int dstX, int srcY, int srcX);
 
+#ifdef __AVX2__
     double ComputeOverlapVectorize(int overlapType, int dstY, int dstX, int srcY, int srcX);
+#endif
 
     // Struct to sort blocks by their l2 norm
     struct BlockValue {

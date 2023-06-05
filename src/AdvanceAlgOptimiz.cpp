@@ -63,18 +63,20 @@ void AdvanceAlgOptimiz::StdC_KSrc2Unroll_BoundsRefactor_LoopReorder_Blocking32(I
     imageQuilting.OverlapConstraintsWithMinCut_StdC_KSrc2Unroll_BoundsRefactor_LoopReorder_Blocking32();
 }
 
+
+void AdvanceAlgOptimiz::StdC_KSrc4Unroll_BoundsRefactor_LoopReorder_Blocking32(ImgData* imgData, int seed) {
+    AdvanceAlgOptimiz imageQuilting(imgData);
+    SeedRandomNumberGenerator(seed);
+    imageQuilting.OverlapConstraintsWithMinCut_StdC_KSrc4Unroll_BoundsRefactor_LoopReorder_Blocking32();
+}
+
+#ifdef __AVX2__
 void AdvanceAlgOptimiz::StdC_KSrc2Unroll_Vector_BoundsRefactor_LoopReorder_Blocking32(ImgData* imgData,
                                                                                       int seed) {
     AdvanceAlgOptimiz imageQuilting(imgData);
     SeedRandomNumberGenerator(seed);
     imageQuilting
         .OverlapConstraintsWithMinCut_StdC_KSrc2Unroll_Vector_BoundsRefactor_LoopReorder_Blocking32();
-}
-
-void AdvanceAlgOptimiz::StdC_KSrc4Unroll_BoundsRefactor_LoopReorder_Blocking32(ImgData* imgData, int seed) {
-    AdvanceAlgOptimiz imageQuilting(imgData);
-    SeedRandomNumberGenerator(seed);
-    imageQuilting.OverlapConstraintsWithMinCut_StdC_KSrc4Unroll_BoundsRefactor_LoopReorder_Blocking32();
 }
 
 void AdvanceAlgOptimiz::StdC_KSrc4Unroll_Vector_BoundsRefactor_LoopReorder_Blocking32(ImgData* imgData,
@@ -92,6 +94,7 @@ void AdvanceAlgOptimiz::StdC_KSrc8Unroll_Vector_BoundsRefactor_LoopReorder_Block
     imageQuilting
         .OverlapConstraintsWithMinCut_StdC_KSrc8Unroll_Vector_BoundsRefactor_LoopReorder_Blocking32();
 }
+#endif
 
 // Seed the random number generator with the system time
 void AdvanceAlgOptimiz::SeedRandomNumberGenerator() {
@@ -2636,219 +2639,6 @@ void AdvanceAlgOptimiz::
     free(suitableBlocks);
 }
 
-void AdvanceAlgOptimiz::
-    PlaceEdgeOverlapBlockWithMinCutBlocking_StdC_KSrc2Unroll_Vector_BoundsRefactor_LoopReorder_Blocking32(
-        int overlapType, int dstY, int dstX, int maxBlockX, int maxBlockY, double errorTolerance, int bWidth,
-        int bHeight) {
-    int overlapXStart = (overlapType == horizontal) ? dstX : dstX - overlapWidth;
-    int overlapYStart = (overlapType == vertical) ? dstY : dstY - overlapHeight;
-
-    int dstXStart = CHANNEL_NUM * overlapXStart;
-
-    // Compute the value of each block
-    int numBlocks = maxBlockY * maxBlockX;
-    BlockValue* blocks = (BlockValue*)malloc(sizeof(BlockValue) * numBlocks);
-    int minVal = INT_MAX;
-
-    for (int srcY = 0; srcY < maxBlockY; srcY++) {
-        for (int srcX = 0; srcX < maxBlockX; srcX++) {
-            int blockIndex = srcY * maxBlockX + srcX;
-            blocks[blockIndex].y = srcY;
-            blocks[blockIndex].x = srcX;
-            blocks[blockIndex].value = 0;
-        }
-    }
-
-    // Blocking parameters
-    const int blockSize = 32;
-
-    if (overlapType == both) {
-        for (int i = 0; i < overlapHeight; i++) {
-            unsigned char* outputRow = mData->output_d[overlapYStart + i] + dstXStart;
-            for (int blockYStart = 0; blockYStart < maxBlockY + blockSize; blockYStart += blockSize) {
-                for (int blockXStart = 0; blockXStart < maxBlockX + blockSize; blockXStart += blockSize) {
-                    for (int j = 0; j < bWidth; j++) {
-                        __m128i dst = _mm_cvtepu8_epi16(_mm_loadu_si32(outputRow + j * 4));
-                        // We have vector 1,2,3,4,0,0,0,0. We need 1,2,3,4,1,2,3,4
-                        // For this we shift array by 8 bytes to the left and perform OR operation with
-                        // previous vector
-                        __m128i dst_extended = _mm_or_si128(dst, _mm_slli_si128(dst, 8));
-                        //TODO: if dst and src pixels are the same can we skip loop?
-                        int endY = std::min(blockYStart + blockSize, maxBlockY);
-                        for (int srcY = blockYStart; srcY < endY; srcY++) {
-                            unsigned char* srcRow = mData->data[srcY + i] + CHANNEL_NUM * blockXStart;
-                            int srcX = blockXStart;
-                            int endX = std::min(blockXStart + blockSize, maxBlockX);
-                            int blockIndex = srcY * maxBlockX + srcX;
-                            for (; srcX < endX - 1; srcX += 2) {
-                                __m128i src = _mm_cvtepu8_epi16(_mm_loadu_si64(srcRow + j * 4));
-                                __m128i diff = _mm_sub_epi16(dst_extended, src);
-                                __m128i norm = _mm_madd_epi16(diff, diff);
-                                __m128i sum = _mm_hadd_epi32(norm, norm);
-                                blocks[blockIndex++].value += _mm_extract_epi32(sum, 0);
-                                blocks[blockIndex++].value += _mm_extract_epi32(sum, 1);
-                                srcRow += 8;
-                            }
-                            for (; srcX < endX; srcX++) {
-                                __m128i src = _mm_cvtepu8_epi16(_mm_loadu_si32(srcRow + j * 4));
-                                __m128i diff = _mm_sub_epi16(dst, src);
-                                __m128i norm = _mm_madd_epi16(diff, diff);
-                                blocks[blockIndex++].value +=
-                                    _mm_extract_epi32(norm, 0) + _mm_extract_epi32(norm, 1);
-                                srcRow += 4;
-                            }
-                        }
-                    }
-                }
-            }
-        }
-        // Compute the vertical overlap
-        for (int i = 0; i < bHeight; i++) {
-            unsigned char* outputRow = mData->output_d[dstY + i] + dstXStart;
-            for (int blockYStart = 0; blockYStart < maxBlockY + blockSize; blockYStart += blockSize) {
-                for (int blockXStart = 0; blockXStart < maxBlockX + blockSize; blockXStart += blockSize) {
-                    int j = 0;
-                    for (; j < overlapWidth; j++) {
-                        __m128i dst = _mm_cvtepu8_epi16(_mm_loadu_si32(outputRow + j * 4));
-                        // We have vector 1,2,3,4,0,0,0,0. We need 1,2,3,4,1,2,3,4
-                        // For this we shift array by 8 bytes to the left and perform OR operation with
-                        // previous vector
-                        __m128i dst_extended = _mm_or_si128(dst, _mm_slli_si128(dst, 8));
-                        int endY = std::min(blockYStart + blockSize, maxBlockY);
-                        for (int srcY = blockYStart; srcY < endY; srcY++) {
-                            int srcYStart = srcY + overlapHeight;
-                            unsigned char* srcRow = mData->data[srcYStart + i] + CHANNEL_NUM * blockXStart;
-                            int srcX = blockXStart;
-                            int endX = std::min(blockXStart + blockSize, maxBlockX);
-                            int blockIndex = srcY * maxBlockX + srcX;
-                            for (; srcX < endX - 1; srcX += 2) {
-                                __m128i src = _mm_cvtepu8_epi16(_mm_loadu_si64(srcRow + j * 4));
-                                __m128i diff = _mm_sub_epi16(dst_extended, src);
-                                __m128i norm = _mm_madd_epi16(diff, diff);
-                                __m128i sum = _mm_hadd_epi32(norm, norm);
-                                blocks[blockIndex++].value += _mm_extract_epi32(sum, 0);
-                                blocks[blockIndex++].value += _mm_extract_epi32(sum, 1);
-                                srcRow += 8;
-                            }
-                            for (; srcX < endX; srcX++) {
-                                __m128i src = _mm_cvtepu8_epi16(_mm_loadu_si32(srcRow + j * 4));
-                                __m128i diff = _mm_sub_epi16(dst, src);
-                                __m128i norm = _mm_madd_epi16(diff, diff);
-                                blocks[blockIndex++].value +=
-                                    _mm_extract_epi32(norm, 0) + _mm_extract_epi32(norm, 1);
-                                srcRow += 4;
-                            }
-                        }
-                    }
-                }
-            }
-        }
-    } else if (overlapType == vertical) {
-        for (int i = 0; i < mData->block_h; i++) {
-            unsigned char* outputRow = mData->output_d[dstY + i] + dstXStart;
-            for (int blockYStart = 0; blockYStart < maxBlockY + blockSize; blockYStart += blockSize) {
-                for (int blockXStart = 0; blockXStart < maxBlockX + blockSize; blockXStart += blockSize) {
-                    for (int j = 0; j < overlapWidth; j++) {
-                        __m128i dst = _mm_cvtepu8_epi16(_mm_loadu_si32(outputRow + j * 4));
-                        // We have vector 1,2,3,4,0,0,0,0. We need 1,2,3,4,1,2,3,4
-                        // For this we shift array by 8 bytes to the left and perform OR operation with
-                        // previous vector
-                        __m128i dst_extended = _mm_or_si128(dst, _mm_slli_si128(dst, 8));
-                        int endY = std::min(blockYStart + blockSize, maxBlockY);
-                        for (int srcY = blockYStart; srcY < endY; srcY++) {
-                            unsigned char* srcRow = mData->data[srcY + i] + CHANNEL_NUM * blockXStart;
-                            int srcX = blockXStart;
-                            int endX = std::min(blockXStart + blockSize, maxBlockX);
-                            int blockIndex = srcY * maxBlockX + srcX;
-                            for (; srcX < endX - 1; srcX += 2) {
-                                __m128i src = _mm_cvtepu8_epi16(_mm_loadu_si64(srcRow + j * 4));
-                                __m128i diff = _mm_sub_epi16(dst_extended, src);
-                                __m128i norm = _mm_madd_epi16(diff, diff);
-                                __m128i sum = _mm_hadd_epi32(norm, norm);
-                                blocks[blockIndex++].value += _mm_extract_epi32(sum, 0);
-                                blocks[blockIndex++].value += _mm_extract_epi32(sum, 1);
-                                srcRow += 8;
-                            }
-                            for (; srcX < endX; srcX++) {
-                                __m128i src = _mm_cvtepu8_epi16(_mm_loadu_si32(srcRow + j * 4));
-                                __m128i diff = _mm_sub_epi16(dst, src);
-                                __m128i norm = _mm_madd_epi16(diff, diff);
-                                blocks[blockIndex++].value +=
-                                    _mm_extract_epi32(norm, 0) + _mm_extract_epi32(norm, 1);
-                                srcRow += 4;
-                            }
-                        }
-                    }
-                }
-            }
-        }
-    } else if (overlapType == horizontal) {
-        for (int i = 0; i < overlapHeight; i++) {
-            unsigned char* outputRow = mData->output_d[overlapYStart + i] + dstXStart;
-            for (int blockYStart = 0; blockYStart < maxBlockY + blockSize; blockYStart += blockSize) {
-                for (int blockXStart = 0; blockXStart < maxBlockX + blockSize; blockXStart += blockSize) {
-                    for (int j = 0; j < mData->block_w; j++) {
-                        __m128i dst = _mm_cvtepu8_epi16(_mm_loadu_si32(outputRow + j * 4));
-                        // We have vector 1,2,3,4,0,0,0,0. We need 1,2,3,4,1,2,3,4
-                        // For this we shift array by 8 bytes to the left and perform OR operation with
-                        // previous vector
-                        __m128i dst_extended = _mm_or_si128(dst, _mm_slli_si128(dst, 8));
-                        int endY = std::min(blockYStart + blockSize, maxBlockY);
-                        for (int srcY = blockYStart; srcY < endY; srcY++) {
-                            unsigned char* srcRow = mData->data[srcY + i] + CHANNEL_NUM * blockXStart;
-                            int srcX = blockXStart;
-                            int endX = std::min(blockXStart + blockSize, maxBlockX);
-                            int blockIndex = srcY * maxBlockX + srcX;
-                            for (; srcX < endX - 1; srcX += 2) {
-                                __m128i src = _mm_cvtepu8_epi16(_mm_loadu_si64(srcRow + j * 4));
-                                __m128i diff = _mm_sub_epi16(dst_extended, src);
-                                __m128i norm = _mm_madd_epi16(diff, diff);
-                                __m128i sum = _mm_hadd_epi32(norm, norm);
-                                blocks[blockIndex++].value += _mm_extract_epi32(sum, 0);
-                                blocks[blockIndex++].value += _mm_extract_epi32(sum, 1);
-                                srcRow += 8;
-                            }
-                            for (; srcX < endX; srcX++) {
-                                __m128i src = _mm_cvtepu8_epi16(_mm_loadu_si32(srcRow + j * 4));
-                                __m128i diff = _mm_sub_epi16(dst, src);
-                                __m128i norm = _mm_madd_epi16(diff, diff);
-                                blocks[blockIndex++].value +=
-                                    _mm_extract_epi32(norm, 0) + _mm_extract_epi32(norm, 1);
-                                srcRow += 4;
-                            }
-                        }
-                    }
-                }
-            }
-        }
-    }
-    for (int i = 0; i < numBlocks; i++) {
-        if (blocks[i].value < minVal) {
-            minVal = blocks[i].value;
-        }
-    }
-
-    // Choose a random block within the tolerance
-    double upperBound = (1.0 + errorTolerance) * std::sqrt(minVal);
-    upperBound = upperBound * upperBound;
-    BlockValue* suitableBlocks = (BlockValue*)malloc(sizeof(BlockValue) * numBlocks);
-    int numSuitableBlocks = 0;
-    for (int i = 0; i < numBlocks; i++) {
-        if (blocks[i].value <= upperBound) {
-            suitableBlocks[numSuitableBlocks] = blocks[i];
-            numSuitableBlocks++;
-        }
-    }
-
-    // Sample and place a block
-    int blockIndex = GetRandomInt(0, numSuitableBlocks - 1);
-    WriteBlockOverlapWithMinCut(overlapType, dstY, dstX, suitableBlocks[blockIndex].y,
-                                suitableBlocks[blockIndex].x);
-
-    // Clean up
-    free(blocks);
-    free(suitableBlocks);
-}
 
 void AdvanceAlgOptimiz::
     OverlapConstraintsWithMinCut_StdC_KSrc2Unroll_BoundsRefactor_LoopReorder_Blocking32() {
@@ -2909,64 +2699,6 @@ void AdvanceAlgOptimiz::
         both, dstY, lastDstX, maxBlockX, maxBlockY, 0.1, blockWidth, blockHeight);
 }
 
-void AdvanceAlgOptimiz::
-    OverlapConstraintsWithMinCut_StdC_KSrc2Unroll_Vector_BoundsRefactor_LoopReorder_Blocking32() {
-    // Compute block parameters
-    int hStep = mData->block_h - overlapHeight;
-    int wStep = mData->block_w - overlapWidth;
-
-    int maxBlockY = mData->height - mData->block_h;
-    int maxBlockX = mData->width - mData->block_w;
-
-    int regBlockW = mData->block_w;
-    int regBlockH = mData->block_h - overlapHeight;
-
-    // Randomly choose the upper-left corner of a block
-    int srcY = GetRandomInt(0, maxBlockY - 1);
-    int srcX = GetRandomInt(0, maxBlockX - 1);
-
-    // Write the randomly chosen block to the output
-    WriteBlock(0, 0, srcY, srcX);
-
-    // fill first row
-    int dstX = mData->block_w;
-    int dstY = mData->block_h;
-    for (; dstX < mData->output_w; dstX += wStep) {
-        PlaceEdgeOverlapBlockWithMinCutBlocking_StdC_KSrc2Unroll_Vector_BoundsRefactor_LoopReorder_Blocking32(
-            vertical, 0, dstX, maxBlockX, maxBlockY, 0.1, regBlockW, regBlockH);
-    }
-    int lastDstX = dstX - wStep;
-    int blockWidth = mData->output_w - (lastDstX - overlapWidth);
-
-    // fill all corner cases except borders
-    for (; dstY < mData->output_h - hStep; dstY += hStep) {
-        // fill first column
-        PlaceEdgeOverlapBlockWithMinCutBlocking_StdC_KSrc2Unroll_Vector_BoundsRefactor_LoopReorder_Blocking32(
-            horizontal, dstY, 0, maxBlockX, maxBlockY, 0.1, regBlockW, regBlockH);
-        dstX = mData->block_w;
-        for (; dstX < mData->output_w - wStep; dstX += wStep) {
-            PlaceEdgeOverlapBlockWithMinCutBlocking_StdC_KSrc2Unroll_Vector_BoundsRefactor_LoopReorder_Blocking32(
-                both, dstY, dstX, maxBlockX, maxBlockY, 0.1, regBlockW, regBlockH);
-        }
-
-        // fill last column
-        PlaceEdgeOverlapBlockWithMinCutBlocking_StdC_KSrc2Unroll_Vector_BoundsRefactor_LoopReorder_Blocking32(
-            both, dstY, dstX, maxBlockX, maxBlockY, 0.1, blockWidth, regBlockH);
-    }
-
-    // fill last row
-    int blockHeight = mData->output_h - dstY;
-    PlaceEdgeOverlapBlockWithMinCutBlocking_StdC_KSrc2Unroll_Vector_BoundsRefactor_LoopReorder_Blocking32(
-        horizontal, dstY, 0, maxBlockX, maxBlockY, 0.1, regBlockW, regBlockH);
-    dstX = mData->block_w;
-    for (; dstX < mData->output_w - wStep; dstX += wStep) {
-        PlaceEdgeOverlapBlockWithMinCutBlocking_StdC_KSrc2Unroll_Vector_BoundsRefactor_LoopReorder_Blocking32(
-            both, dstY, dstX, maxBlockX, maxBlockY, 0.1, mData->block_w, blockHeight);
-    }
-    // bottom-right corner
-    PlaceEdgeOverlapBlockWithMinCutBlocking_StdC_KSrc2Unroll_Vector_BoundsRefactor_LoopReorder_Blocking32(
-        both, dstY, lastDstX, maxBlockX, maxBlockY, 0.1, blockWidth, blockHeight);
-}
 
 // Std C, bounds refactoring, loop reorder, blocking 32x32, and unrolling channels loop and srcX by 2
 void AdvanceAlgOptimiz::
@@ -3496,6 +3228,339 @@ void AdvanceAlgOptimiz::
     free(suitableBlocks);
 }
 
+void AdvanceAlgOptimiz::
+    OverlapConstraintsWithMinCut_StdC_KSrc4Unroll_BoundsRefactor_LoopReorder_Blocking32() {
+    // Compute block parameters
+    int hStep = mData->block_h - overlapHeight;
+    int wStep = mData->block_w - overlapWidth;
+
+    int maxBlockY = mData->height - mData->block_h;
+    int maxBlockX = mData->width - mData->block_w;
+
+    int regBlockW = mData->block_w;
+    int regBlockH = mData->block_h - overlapHeight;
+
+    // Randomly choose the upper-left corner of a block
+    int srcY = GetRandomInt(0, maxBlockY - 1);
+    int srcX = GetRandomInt(0, maxBlockX - 1);
+
+    // Write the randomly chosen block to the output
+    WriteBlock(0, 0, srcY, srcX);
+
+    // fill first row
+    int dstX = mData->block_w;
+    int dstY = mData->block_h;
+    for (; dstX < mData->output_w; dstX += wStep) {
+        PlaceEdgeOverlapBlockWithMinCutBlocking_StdC_KSrc4Unroll_BoundsRefactor_LoopReorder_Blocking32(
+            vertical, 0, dstX, maxBlockX, maxBlockY, 0.1, regBlockW, regBlockH);
+    }
+    int lastDstX = dstX - wStep;
+    int blockWidth = mData->output_w - (lastDstX - overlapWidth);
+
+    // fill all corner cases except borders
+    for (; dstY < mData->output_h - hStep; dstY += hStep) {
+        // fill first column
+        PlaceEdgeOverlapBlockWithMinCutBlocking_StdC_KSrc4Unroll_BoundsRefactor_LoopReorder_Blocking32(
+            horizontal, dstY, 0, maxBlockX, maxBlockY, 0.1, regBlockW, regBlockH);
+        dstX = mData->block_w;
+        for (; dstX < mData->output_w - wStep; dstX += wStep) {
+            PlaceEdgeOverlapBlockWithMinCutBlocking_StdC_KSrc4Unroll_BoundsRefactor_LoopReorder_Blocking32(
+                both, dstY, dstX, maxBlockX, maxBlockY, 0.1, regBlockW, regBlockH);
+        }
+
+        // fill last column
+        PlaceEdgeOverlapBlockWithMinCutBlocking_StdC_KSrc4Unroll_BoundsRefactor_LoopReorder_Blocking32(
+            both, dstY, dstX, maxBlockX, maxBlockY, 0.1, blockWidth, regBlockH);
+    }
+
+    // fill last row
+    int blockHeight = mData->output_h - dstY;
+    PlaceEdgeOverlapBlockWithMinCutBlocking_StdC_KSrc4Unroll_BoundsRefactor_LoopReorder_Blocking32(
+        horizontal, dstY, 0, maxBlockX, maxBlockY, 0.1, regBlockW, regBlockH);
+    dstX = mData->block_w;
+    for (; dstX < mData->output_w - wStep; dstX += wStep) {
+        PlaceEdgeOverlapBlockWithMinCutBlocking_StdC_KSrc4Unroll_BoundsRefactor_LoopReorder_Blocking32(
+            both, dstY, dstX, maxBlockX, maxBlockY, 0.1, mData->block_w, blockHeight);
+    }
+    // bottom-right corner
+    PlaceEdgeOverlapBlockWithMinCutBlocking_StdC_KSrc4Unroll_BoundsRefactor_LoopReorder_Blocking32(
+        both, dstY, lastDstX, maxBlockX, maxBlockY, 0.1, blockWidth, blockHeight);
+}
+
+#ifdef __AVX2__
+void AdvanceAlgOptimiz::
+    PlaceEdgeOverlapBlockWithMinCutBlocking_StdC_KSrc2Unroll_Vector_BoundsRefactor_LoopReorder_Blocking32(
+        int overlapType, int dstY, int dstX, int maxBlockX, int maxBlockY, double errorTolerance, int bWidth,
+        int bHeight) {
+    int overlapXStart = (overlapType == horizontal) ? dstX : dstX - overlapWidth;
+    int overlapYStart = (overlapType == vertical) ? dstY : dstY - overlapHeight;
+
+    int dstXStart = CHANNEL_NUM * overlapXStart;
+
+    // Compute the value of each block
+    int numBlocks = maxBlockY * maxBlockX;
+    BlockValue* blocks = (BlockValue*)malloc(sizeof(BlockValue) * numBlocks);
+    int minVal = INT_MAX;
+
+    for (int srcY = 0; srcY < maxBlockY; srcY++) {
+        for (int srcX = 0; srcX < maxBlockX; srcX++) {
+            int blockIndex = srcY * maxBlockX + srcX;
+            blocks[blockIndex].y = srcY;
+            blocks[blockIndex].x = srcX;
+            blocks[blockIndex].value = 0;
+        }
+    }
+
+    // Blocking parameters
+    const int blockSize = 32;
+
+    if (overlapType == both) {
+        for (int i = 0; i < overlapHeight; i++) {
+            unsigned char* outputRow = mData->output_d[overlapYStart + i] + dstXStart;
+            for (int blockYStart = 0; blockYStart < maxBlockY + blockSize; blockYStart += blockSize) {
+                for (int blockXStart = 0; blockXStart < maxBlockX + blockSize; blockXStart += blockSize) {
+                    for (int j = 0; j < bWidth; j++) {
+                        __m128i dst = _mm_cvtepu8_epi16(_mm_loadu_si32(outputRow + j * 4));
+                        // We have vector 1,2,3,4,0,0,0,0. We need 1,2,3,4,1,2,3,4
+                        // For this we shift array by 8 bytes to the left and perform OR operation with
+                        // previous vector
+                        __m128i dst_extended = _mm_or_si128(dst, _mm_slli_si128(dst, 8));
+                        //TODO: if dst and src pixels are the same can we skip loop?
+                        int endY = std::min(blockYStart + blockSize, maxBlockY);
+                        for (int srcY = blockYStart; srcY < endY; srcY++) {
+                            unsigned char* srcRow = mData->data[srcY + i] + CHANNEL_NUM * blockXStart;
+                            int srcX = blockXStart;
+                            int endX = std::min(blockXStart + blockSize, maxBlockX);
+                            int blockIndex = srcY * maxBlockX + srcX;
+                            for (; srcX < endX - 1; srcX += 2) {
+                                __m128i src = _mm_cvtepu8_epi16(_mm_loadu_si64(srcRow + j * 4));
+                                __m128i diff = _mm_sub_epi16(dst_extended, src);
+                                __m128i norm = _mm_madd_epi16(diff, diff);
+                                __m128i sum = _mm_hadd_epi32(norm, norm);
+                                blocks[blockIndex++].value += _mm_extract_epi32(sum, 0);
+                                blocks[blockIndex++].value += _mm_extract_epi32(sum, 1);
+                                srcRow += 8;
+                            }
+                            for (; srcX < endX; srcX++) {
+                                __m128i src = _mm_cvtepu8_epi16(_mm_loadu_si32(srcRow + j * 4));
+                                __m128i diff = _mm_sub_epi16(dst, src);
+                                __m128i norm = _mm_madd_epi16(diff, diff);
+                                blocks[blockIndex++].value +=
+                                    _mm_extract_epi32(norm, 0) + _mm_extract_epi32(norm, 1);
+                                srcRow += 4;
+                            }
+                        }
+                    }
+                }
+            }
+        }
+        // Compute the vertical overlap
+        for (int i = 0; i < bHeight; i++) {
+            unsigned char* outputRow = mData->output_d[dstY + i] + dstXStart;
+            for (int blockYStart = 0; blockYStart < maxBlockY + blockSize; blockYStart += blockSize) {
+                for (int blockXStart = 0; blockXStart < maxBlockX + blockSize; blockXStart += blockSize) {
+                    int j = 0;
+                    for (; j < overlapWidth; j++) {
+                        __m128i dst = _mm_cvtepu8_epi16(_mm_loadu_si32(outputRow + j * 4));
+                        // We have vector 1,2,3,4,0,0,0,0. We need 1,2,3,4,1,2,3,4
+                        // For this we shift array by 8 bytes to the left and perform OR operation with
+                        // previous vector
+                        __m128i dst_extended = _mm_or_si128(dst, _mm_slli_si128(dst, 8));
+                        int endY = std::min(blockYStart + blockSize, maxBlockY);
+                        for (int srcY = blockYStart; srcY < endY; srcY++) {
+                            int srcYStart = srcY + overlapHeight;
+                            unsigned char* srcRow = mData->data[srcYStart + i] + CHANNEL_NUM * blockXStart;
+                            int srcX = blockXStart;
+                            int endX = std::min(blockXStart + blockSize, maxBlockX);
+                            int blockIndex = srcY * maxBlockX + srcX;
+                            for (; srcX < endX - 1; srcX += 2) {
+                                __m128i src = _mm_cvtepu8_epi16(_mm_loadu_si64(srcRow + j * 4));
+                                __m128i diff = _mm_sub_epi16(dst_extended, src);
+                                __m128i norm = _mm_madd_epi16(diff, diff);
+                                __m128i sum = _mm_hadd_epi32(norm, norm);
+                                blocks[blockIndex++].value += _mm_extract_epi32(sum, 0);
+                                blocks[blockIndex++].value += _mm_extract_epi32(sum, 1);
+                                srcRow += 8;
+                            }
+                            for (; srcX < endX; srcX++) {
+                                __m128i src = _mm_cvtepu8_epi16(_mm_loadu_si32(srcRow + j * 4));
+                                __m128i diff = _mm_sub_epi16(dst, src);
+                                __m128i norm = _mm_madd_epi16(diff, diff);
+                                blocks[blockIndex++].value +=
+                                    _mm_extract_epi32(norm, 0) + _mm_extract_epi32(norm, 1);
+                                srcRow += 4;
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    } else if (overlapType == vertical) {
+        for (int i = 0; i < mData->block_h; i++) {
+            unsigned char* outputRow = mData->output_d[dstY + i] + dstXStart;
+            for (int blockYStart = 0; blockYStart < maxBlockY + blockSize; blockYStart += blockSize) {
+                for (int blockXStart = 0; blockXStart < maxBlockX + blockSize; blockXStart += blockSize) {
+                    for (int j = 0; j < overlapWidth; j++) {
+                        __m128i dst = _mm_cvtepu8_epi16(_mm_loadu_si32(outputRow + j * 4));
+                        // We have vector 1,2,3,4,0,0,0,0. We need 1,2,3,4,1,2,3,4
+                        // For this we shift array by 8 bytes to the left and perform OR operation with
+                        // previous vector
+                        __m128i dst_extended = _mm_or_si128(dst, _mm_slli_si128(dst, 8));
+                        int endY = std::min(blockYStart + blockSize, maxBlockY);
+                        for (int srcY = blockYStart; srcY < endY; srcY++) {
+                            unsigned char* srcRow = mData->data[srcY + i] + CHANNEL_NUM * blockXStart;
+                            int srcX = blockXStart;
+                            int endX = std::min(blockXStart + blockSize, maxBlockX);
+                            int blockIndex = srcY * maxBlockX + srcX;
+                            for (; srcX < endX - 1; srcX += 2) {
+                                __m128i src = _mm_cvtepu8_epi16(_mm_loadu_si64(srcRow + j * 4));
+                                __m128i diff = _mm_sub_epi16(dst_extended, src);
+                                __m128i norm = _mm_madd_epi16(diff, diff);
+                                __m128i sum = _mm_hadd_epi32(norm, norm);
+                                blocks[blockIndex++].value += _mm_extract_epi32(sum, 0);
+                                blocks[blockIndex++].value += _mm_extract_epi32(sum, 1);
+                                srcRow += 8;
+                            }
+                            for (; srcX < endX; srcX++) {
+                                __m128i src = _mm_cvtepu8_epi16(_mm_loadu_si32(srcRow + j * 4));
+                                __m128i diff = _mm_sub_epi16(dst, src);
+                                __m128i norm = _mm_madd_epi16(diff, diff);
+                                blocks[blockIndex++].value +=
+                                    _mm_extract_epi32(norm, 0) + _mm_extract_epi32(norm, 1);
+                                srcRow += 4;
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    } else if (overlapType == horizontal) {
+        for (int i = 0; i < overlapHeight; i++) {
+            unsigned char* outputRow = mData->output_d[overlapYStart + i] + dstXStart;
+            for (int blockYStart = 0; blockYStart < maxBlockY + blockSize; blockYStart += blockSize) {
+                for (int blockXStart = 0; blockXStart < maxBlockX + blockSize; blockXStart += blockSize) {
+                    for (int j = 0; j < mData->block_w; j++) {
+                        __m128i dst = _mm_cvtepu8_epi16(_mm_loadu_si32(outputRow + j * 4));
+                        // We have vector 1,2,3,4,0,0,0,0. We need 1,2,3,4,1,2,3,4
+                        // For this we shift array by 8 bytes to the left and perform OR operation with
+                        // previous vector
+                        __m128i dst_extended = _mm_or_si128(dst, _mm_slli_si128(dst, 8));
+                        int endY = std::min(blockYStart + blockSize, maxBlockY);
+                        for (int srcY = blockYStart; srcY < endY; srcY++) {
+                            unsigned char* srcRow = mData->data[srcY + i] + CHANNEL_NUM * blockXStart;
+                            int srcX = blockXStart;
+                            int endX = std::min(blockXStart + blockSize, maxBlockX);
+                            int blockIndex = srcY * maxBlockX + srcX;
+                            for (; srcX < endX - 1; srcX += 2) {
+                                __m128i src = _mm_cvtepu8_epi16(_mm_loadu_si64(srcRow + j * 4));
+                                __m128i diff = _mm_sub_epi16(dst_extended, src);
+                                __m128i norm = _mm_madd_epi16(diff, diff);
+                                __m128i sum = _mm_hadd_epi32(norm, norm);
+                                blocks[blockIndex++].value += _mm_extract_epi32(sum, 0);
+                                blocks[blockIndex++].value += _mm_extract_epi32(sum, 1);
+                                srcRow += 8;
+                            }
+                            for (; srcX < endX; srcX++) {
+                                __m128i src = _mm_cvtepu8_epi16(_mm_loadu_si32(srcRow + j * 4));
+                                __m128i diff = _mm_sub_epi16(dst, src);
+                                __m128i norm = _mm_madd_epi16(diff, diff);
+                                blocks[blockIndex++].value +=
+                                    _mm_extract_epi32(norm, 0) + _mm_extract_epi32(norm, 1);
+                                srcRow += 4;
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    }
+    for (int i = 0; i < numBlocks; i++) {
+        if (blocks[i].value < minVal) {
+            minVal = blocks[i].value;
+        }
+    }
+
+    // Choose a random block within the tolerance
+    double upperBound = (1.0 + errorTolerance) * std::sqrt(minVal);
+    upperBound = upperBound * upperBound;
+    BlockValue* suitableBlocks = (BlockValue*)malloc(sizeof(BlockValue) * numBlocks);
+    int numSuitableBlocks = 0;
+    for (int i = 0; i < numBlocks; i++) {
+        if (blocks[i].value <= upperBound) {
+            suitableBlocks[numSuitableBlocks] = blocks[i];
+            numSuitableBlocks++;
+        }
+    }
+
+    // Sample and place a block
+    int blockIndex = GetRandomInt(0, numSuitableBlocks - 1);
+    WriteBlockOverlapWithMinCut(overlapType, dstY, dstX, suitableBlocks[blockIndex].y,
+                                suitableBlocks[blockIndex].x);
+
+    // Clean up
+    free(blocks);
+    free(suitableBlocks);
+}
+
+void AdvanceAlgOptimiz::
+    OverlapConstraintsWithMinCut_StdC_KSrc2Unroll_Vector_BoundsRefactor_LoopReorder_Blocking32() {
+    // Compute block parameters
+    int hStep = mData->block_h - overlapHeight;
+    int wStep = mData->block_w - overlapWidth;
+
+    int maxBlockY = mData->height - mData->block_h;
+    int maxBlockX = mData->width - mData->block_w;
+
+    int regBlockW = mData->block_w;
+    int regBlockH = mData->block_h - overlapHeight;
+
+    // Randomly choose the upper-left corner of a block
+    int srcY = GetRandomInt(0, maxBlockY - 1);
+    int srcX = GetRandomInt(0, maxBlockX - 1);
+
+    // Write the randomly chosen block to the output
+    WriteBlock(0, 0, srcY, srcX);
+
+    // fill first row
+    int dstX = mData->block_w;
+    int dstY = mData->block_h;
+    for (; dstX < mData->output_w; dstX += wStep) {
+        PlaceEdgeOverlapBlockWithMinCutBlocking_StdC_KSrc2Unroll_Vector_BoundsRefactor_LoopReorder_Blocking32(
+            vertical, 0, dstX, maxBlockX, maxBlockY, 0.1, regBlockW, regBlockH);
+    }
+    int lastDstX = dstX - wStep;
+    int blockWidth = mData->output_w - (lastDstX - overlapWidth);
+
+    // fill all corner cases except borders
+    for (; dstY < mData->output_h - hStep; dstY += hStep) {
+        // fill first column
+        PlaceEdgeOverlapBlockWithMinCutBlocking_StdC_KSrc2Unroll_Vector_BoundsRefactor_LoopReorder_Blocking32(
+            horizontal, dstY, 0, maxBlockX, maxBlockY, 0.1, regBlockW, regBlockH);
+        dstX = mData->block_w;
+        for (; dstX < mData->output_w - wStep; dstX += wStep) {
+            PlaceEdgeOverlapBlockWithMinCutBlocking_StdC_KSrc2Unroll_Vector_BoundsRefactor_LoopReorder_Blocking32(
+                both, dstY, dstX, maxBlockX, maxBlockY, 0.1, regBlockW, regBlockH);
+        }
+
+        // fill last column
+        PlaceEdgeOverlapBlockWithMinCutBlocking_StdC_KSrc2Unroll_Vector_BoundsRefactor_LoopReorder_Blocking32(
+            both, dstY, dstX, maxBlockX, maxBlockY, 0.1, blockWidth, regBlockH);
+    }
+
+    // fill last row
+    int blockHeight = mData->output_h - dstY;
+    PlaceEdgeOverlapBlockWithMinCutBlocking_StdC_KSrc2Unroll_Vector_BoundsRefactor_LoopReorder_Blocking32(
+        horizontal, dstY, 0, maxBlockX, maxBlockY, 0.1, regBlockW, regBlockH);
+    dstX = mData->block_w;
+    for (; dstX < mData->output_w - wStep; dstX += wStep) {
+        PlaceEdgeOverlapBlockWithMinCutBlocking_StdC_KSrc2Unroll_Vector_BoundsRefactor_LoopReorder_Blocking32(
+            both, dstY, dstX, maxBlockX, maxBlockY, 0.1, mData->block_w, blockHeight);
+    }
+    // bottom-right corner
+    PlaceEdgeOverlapBlockWithMinCutBlocking_StdC_KSrc2Unroll_Vector_BoundsRefactor_LoopReorder_Blocking32(
+        both, dstY, lastDstX, maxBlockX, maxBlockY, 0.1, blockWidth, blockHeight);
+}
+
 void AdvanceAlgOptimiz ::
     PlaceEdgeOverlapBlockWithMinCutBlocking_StdC_KSrc8Unroll_Vector_BoundsRefactor_LoopReorder_Blocking32(
         int overlapType, int dstY, int dstX, int maxBlockX, int maxBlockY, double errorTolerance, int bWidth,
@@ -3775,65 +3840,6 @@ void AdvanceAlgOptimiz ::
     // Clean up
     free(blocks);
     free(suitableBlocks);
-}
-
-void AdvanceAlgOptimiz::
-    OverlapConstraintsWithMinCut_StdC_KSrc4Unroll_BoundsRefactor_LoopReorder_Blocking32() {
-    // Compute block parameters
-    int hStep = mData->block_h - overlapHeight;
-    int wStep = mData->block_w - overlapWidth;
-
-    int maxBlockY = mData->height - mData->block_h;
-    int maxBlockX = mData->width - mData->block_w;
-
-    int regBlockW = mData->block_w;
-    int regBlockH = mData->block_h - overlapHeight;
-
-    // Randomly choose the upper-left corner of a block
-    int srcY = GetRandomInt(0, maxBlockY - 1);
-    int srcX = GetRandomInt(0, maxBlockX - 1);
-
-    // Write the randomly chosen block to the output
-    WriteBlock(0, 0, srcY, srcX);
-
-    // fill first row
-    int dstX = mData->block_w;
-    int dstY = mData->block_h;
-    for (; dstX < mData->output_w; dstX += wStep) {
-        PlaceEdgeOverlapBlockWithMinCutBlocking_StdC_KSrc4Unroll_BoundsRefactor_LoopReorder_Blocking32(
-            vertical, 0, dstX, maxBlockX, maxBlockY, 0.1, regBlockW, regBlockH);
-    }
-    int lastDstX = dstX - wStep;
-    int blockWidth = mData->output_w - (lastDstX - overlapWidth);
-
-    // fill all corner cases except borders
-    for (; dstY < mData->output_h - hStep; dstY += hStep) {
-        // fill first column
-        PlaceEdgeOverlapBlockWithMinCutBlocking_StdC_KSrc4Unroll_BoundsRefactor_LoopReorder_Blocking32(
-            horizontal, dstY, 0, maxBlockX, maxBlockY, 0.1, regBlockW, regBlockH);
-        dstX = mData->block_w;
-        for (; dstX < mData->output_w - wStep; dstX += wStep) {
-            PlaceEdgeOverlapBlockWithMinCutBlocking_StdC_KSrc4Unroll_BoundsRefactor_LoopReorder_Blocking32(
-                both, dstY, dstX, maxBlockX, maxBlockY, 0.1, regBlockW, regBlockH);
-        }
-
-        // fill last column
-        PlaceEdgeOverlapBlockWithMinCutBlocking_StdC_KSrc4Unroll_BoundsRefactor_LoopReorder_Blocking32(
-            both, dstY, dstX, maxBlockX, maxBlockY, 0.1, blockWidth, regBlockH);
-    }
-
-    // fill last row
-    int blockHeight = mData->output_h - dstY;
-    PlaceEdgeOverlapBlockWithMinCutBlocking_StdC_KSrc4Unroll_BoundsRefactor_LoopReorder_Blocking32(
-        horizontal, dstY, 0, maxBlockX, maxBlockY, 0.1, regBlockW, regBlockH);
-    dstX = mData->block_w;
-    for (; dstX < mData->output_w - wStep; dstX += wStep) {
-        PlaceEdgeOverlapBlockWithMinCutBlocking_StdC_KSrc4Unroll_BoundsRefactor_LoopReorder_Blocking32(
-            both, dstY, dstX, maxBlockX, maxBlockY, 0.1, mData->block_w, blockHeight);
-    }
-    // bottom-right corner
-    PlaceEdgeOverlapBlockWithMinCutBlocking_StdC_KSrc4Unroll_BoundsRefactor_LoopReorder_Blocking32(
-        both, dstY, lastDstX, maxBlockX, maxBlockY, 0.1, blockWidth, blockHeight);
 }
 
 void AdvanceAlgOptimiz ::
@@ -4190,3 +4196,4 @@ void AdvanceAlgOptimiz ::
     PlaceEdgeOverlapBlockWithMinCutBlocking_StdC_KSrc8Unroll_Vector_BoundsRefactor_LoopReorder_Blocking32(
         both, dstY, lastDstX, maxBlockX, maxBlockY, 0.1, blockWidth, blockHeight);
 }
+#endif

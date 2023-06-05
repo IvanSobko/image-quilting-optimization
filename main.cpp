@@ -105,7 +105,9 @@ int main(int argc, char* argv[]) {
         testing.RegisterTestFunction(CompOverlapOptimiz::UnrollOpt, "compBasic+AlgImpr+Unroll");
         testing.RegisterTestFunction(AdvanceAlgOptimiz::StdC_KUnroll_BoundsRefactor, "Unroll+DividedFunctions");
         testing.RegisterTestFunction(CompOverlapOptimiz::UnrollMaxOpt, "compBasic+AlgImpr+UnrollTheoreticalMax");
+#ifdef __AVX2__
         testing.RegisterTestFunction(CompOverlapOptimiz::VectorizeOpt, "compBasic+AlgImpr+Unroll+Vectorize");
+#endif
 
         std::cout << std::endl;
         testing.TestCorrectnessAndTiming(stabilize);
@@ -127,10 +129,11 @@ int main(int argc, char* argv[]) {
                                               CompOverlapOptimiz::UnrollMaxOptComponent,
                                               "compBasic+AlgImpr+UnrollTheoreticalMax");
 
+#ifdef __AVX2__
         testing.RegisterComponentTestFunction(CompOverlapOptimiz::BaseComponent,
                                               CompOverlapOptimiz::VectorizeOptComponent,
                                               "compBasic+AlgImpr+Unroll+Vectorize");
-
+#endif
         std::cout << std::endl;
         testing.TestComponentsTiming(stabilize);
     }
@@ -142,8 +145,9 @@ int main(int argc, char* argv[]) {
         testing.RegisterTestingComponentAdvisor(CompOverlapOptimiz::BasicOptComponent, "compBasic");
         testing.RegisterTestingComponentAdvisor(CompOverlapOptimiz::UnrollOptComponent, "compBasic+AlgImpr+Unroll");
         testing.RegisterTestingComponentAdvisor(CompOverlapOptimiz::UnrollMaxOptComponent, "compBasic+AlgImpr+UnrollTheoreticalMax");
+#ifdef __AVX2__
         testing.RegisterTestingComponentAdvisor(CompOverlapOptimiz::VectorizeOptComponent, "compBasic+AlgImpr+Unroll+Vectorize");
-
+#endif
         testing.ComponentsTimingAdvisor();
     }
 
