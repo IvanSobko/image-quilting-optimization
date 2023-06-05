@@ -15,14 +15,14 @@ class CompOverlapOptimiz {
     const static int numOptTypes = 3;
 
     // Algorithm test functions
-    static void BasicOpt(ImgData* imgData, int seed);
-    static void AlgOpt(ImgData* imgData, int seed);
-    static void UnrollOpt(ImgData* imgData, int seed);
-    static void UnrollMaxOpt(ImgData* imgData, int seed);
+    static double BasicOpt(ImgData* imgData, int seed);
+    static double AlgOpt(ImgData* imgData, int seed);
+    static double UnrollOpt(ImgData* imgData, int seed);
+    static double UnrollMaxOpt(ImgData* imgData, int seed);
 #ifdef __AVX2__
-    static void VectorizeOpt(ImgData* imgData, int seed);
+    static double VectorizeOpt(ImgData* imgData, int seed);
 #endif
-    static void UnrollChnls(ImgData* imgData, int seed);
+    static double UnrollChnls(ImgData* imgData, int seed);
 
     // Component test functions
     static void GetComponentParameters(ImgData* imgData, int& overlapType, int& dstY, int& dstX, int& srcY,
@@ -32,7 +32,6 @@ class CompOverlapOptimiz {
     volatile static void AlgoOptComponent(ImgData* imgData, int seed);
     volatile static void UnrollOptComponent(ImgData* imgData, int seed);
     volatile static void UnrollMaxOptComponent(ImgData* imgData, int seed);
-
 #ifdef __AVX2__
     volatile static void VectorizeOptComponent(ImgData* imgData, int seed);
 #endif

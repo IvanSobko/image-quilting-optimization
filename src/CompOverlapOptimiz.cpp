@@ -11,36 +11,42 @@
 #define IND_FUNC_REP 10000
 
 // Image quilting function wrapper for testing and timing
-void CompOverlapOptimiz::BasicOpt(ImgData* imgData, int seed) {
+double CompOverlapOptimiz::BasicOpt(ImgData* imgData, int seed) {
     CompOverlapOptimiz imageQuilting(imgData);
     imageQuilting.Synthesis(seed, opt_indices);
+    return static_cast<double>(imageQuilting.getFlopCount());
 }
 
-void CompOverlapOptimiz::AlgOpt(ImgData* imgData, int seed) {
+double CompOverlapOptimiz::AlgOpt(ImgData* imgData, int seed) {
     CompOverlapOptimiz imageQuilting(imgData);
     imageQuilting.Synthesis(seed, opt_algorithm);
+    return static_cast<double>(imageQuilting.getFlopCount());
 }
 
-void CompOverlapOptimiz::UnrollOpt(ImgData* imgData, int seed) {
+double CompOverlapOptimiz::UnrollOpt(ImgData* imgData, int seed) {
     CompOverlapOptimiz imageQuilting(imgData);
     imageQuilting.Synthesis(seed, opt_unroll);
+    return static_cast<double>(imageQuilting.getFlopCount());
 }
 
-void CompOverlapOptimiz::UnrollMaxOpt(ImgData* imgData, int seed) {
+double CompOverlapOptimiz::UnrollMaxOpt(ImgData* imgData, int seed) {
     CompOverlapOptimiz imageQuilting(imgData);
     imageQuilting.Synthesis(seed, opt_unroll_max);
+    return static_cast<double>(imageQuilting.getFlopCount());
 }
 
 #ifdef __AVX2__
-void CompOverlapOptimiz::VectorizeOpt(ImgData* imgData, int seed) {
+double CompOverlapOptimiz::VectorizeOpt(ImgData* imgData, int seed) {
     CompOverlapOptimiz imageQuilting(imgData);
     imageQuilting.Synthesis(seed, opt_vectorize);
+    return static_cast<double>(imageQuilting.getFlopCount());
 }
 #endif
 
-void CompOverlapOptimiz::UnrollChnls(ImgData* imgData, int seed) {
+double CompOverlapOptimiz::UnrollChnls(ImgData* imgData, int seed) {
     CompOverlapOptimiz imageQuilting(imgData);
     imageQuilting.Synthesis(seed, opt_unroll_chnls);
+    return static_cast<double>(imageQuilting.getFlopCount());
 }
 
 void CompOverlapOptimiz::GetComponentParameters(ImgData* imgData, int& overlapType, int& dstY, int& dstX,

@@ -82,9 +82,10 @@ void Testing::GenerateOutputFiles() {
 }
 
 // Functional wrapper for the image quilting algorithm
-void Testing::ImageQuiltingFunction(ImgData* imgData, int seed) {
+double Testing::ImageQuiltingFunction(ImgData* imgData, int seed) {
     ImageQuilting imageQuilting(imgData);
     imageQuilting.Synthesis(seed);
+    return static_cast<double>(imageQuilting.getFlopCount());
 }
 
 // Functional wrapper for the empty image quilting algorithm

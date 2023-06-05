@@ -34,7 +34,7 @@ class Testing {
     // Run the image quilting algorithm on all the input files to generate the output files
     void GenerateOutputFiles();
     // Functional wrapper for the image quilting algorithm
-    static void ImageQuiltingFunction(ImgData* imgData, int seed);
+    static double ImageQuiltingFunction(ImgData* imgData, int seed);
     // Functional wrapper for the empty image quilting algorithm
     static void EmptyImageQuiltingFunction(ImgData* imgData, int seed);
     // Register a function to test
