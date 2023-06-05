@@ -18,7 +18,7 @@ bool runTiming = false;
 bool generate = false;
 bool test = false;
 bool testCorrectnessAndTiming = true;
-bool advisor = true;
+bool advisor = false;
 bool stabilize = false;
 
 void parse_args(int argc, char* argv[]) {
@@ -115,10 +115,19 @@ int main(int argc, char* argv[]) {
 //        testing.RegisterTestFunction(AdvanceAlgOptimiz::StdC_KUnroll_BoundsRefactor_LoopReorder, "loop reorder");
 //        testing.RegisterTestFunction(AdvanceAlgOptimiz::StdC_KUnroll_BoundsRefactor_LoopReorder_Blocking32, "blocking 32x32");
         testing.RegisterTestFunction(CompOverlapOptimiz::UnrollOpt, "basic unrolling");
+        testing.RegisterTestFunction(CompOverlapOptimiz::VectorizeOpt, "vectorize");
         testing.RegisterTestFunction(AdvanceAlgOptimiz::StdC_KSrc2Unroll_BoundsRefactor_LoopReorder_Blocking32,
                                      "blocking & unroll by 2");
         testing.RegisterTestFunction(AdvanceAlgOptimiz::StdC_KSrc4Unroll_BoundsRefactor_LoopReorder_Blocking32,
                                      "blocking & unroll by 4");
+        testing.RegisterTestFunction(
+            AdvanceAlgOptimiz::StdC_KSrc2Unroll_Vector_BoundsRefactor_LoopReorder_Blocking32, "blocking & "
+            "unroll by 2 & vectorize");
+        testing.RegisterTestFunction(
+            AdvanceAlgOptimiz::StdC_KSrc8Unroll_Vector_BoundsRefactor_LoopReorder_Blocking32, "blocking & "
+            "unroll by 8 & vectorize");
+
+
 //        testing.RegisterTestFunction(AdvanceAlgOptimiz::StdC_KUnroll_BoundsRefactor_LoopReorder_Blocking48, "blocking 48x48");
 //        testing.RegisterTestFunction(AdvanceAlgOptimiz::StdC_KUnroll_BoundsRefactor_LoopReorder_Blocking64, "blocking 64x64");
 //        testing.RegisterTestFunction(AdvanceAlgOptimiz::StdC_KUnroll_BoundsRefactor_LoopReorder_Blocking96, "blocking 96x96");

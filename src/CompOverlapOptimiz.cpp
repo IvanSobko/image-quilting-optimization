@@ -952,13 +952,13 @@ double CompOverlapOptimiz::ComputeOverlapUnrollMax(int overlapType, int dstY, in
 // Calculates the sum of all vector elements. Overflow will wrap around
 // The hadd instruction is inefficient, and may be split into two instructions for faster decoding
 static inline int32_t horizontal_add (__m256i const vec) {
-    // __m128i vec_low = _mm256_extracti128_si256(vec,1);//lat 3, tp:1
-    // __m128i vec_high = _mm256_castsi256_si128(vec);
+    __m128i vec_low = _mm256_extracti128_si256(vec,1);//lat 3, tp:1
+    __m128i vec_high = _mm256_castsi256_si128(vec);
 
-    // __m128i sum1  = _mm_add_epi32(vec_low, vec_high);//lat 1, tp: 0.3
-    // __m128i sum2  = _mm_add_epi32(sum1,_mm_unpackhi_epi64(sum1,sum1)); //lat:1 + 1, tp: 1 + 0.3
-    // __m128i sum3  = _mm_add_epi32(sum2,_mm_shuffle_epi32(sum2,1)); //lat:1 + 1, tp: 1 + 0.3
-    // return (int32_t)_mm_cvtsi128_si32(sum3); //lat2, tp:1
+    __m128i sum1  = _mm_add_epi32(vec_low, vec_high);//lat 1, tp: 0.3
+    __m128i sum2  = _mm_add_epi32(sum1,_mm_unpackhi_epi64(sum1,sum1)); //lat:1 + 1, tp: 1 + 0.3
+    __m128i sum3  = _mm_add_epi32(sum2,_mm_shuffle_epi32(sum2,1)); //lat:1 + 1, tp: 1 + 0.3
+    return (int32_t)_mm_cvtsi128_si32(sum3); //lat2, tp:1
 }
 
 double CompOverlapOptimiz::ComputeOverlapVectorize(int overlapType, int dstY, int dstX, int srcY, int srcX) {
@@ -982,32 +982,32 @@ double CompOverlapOptimiz::ComputeOverlapVectorize(int overlapType, int dstY, in
             //TODO: check for edge cases (horizontalBlockWidthLocal is not power of 8)
             for (int j = 0; j < horizontalBlockWidthLocal; j += 8) {
                 // load 16 8-bit integers(chars) and convert it to 16 16-bit integers
-                //cycle 1
-                // __m128i dst = _mm_load_si128((__m128i*)(outputRow + j * 4)); // lat:6, tp: 0.5
-                // __m128i src = _mm_load_si128((__m128i*)(srcRow + j * 4));   // lat:6, tp: 0.5
-                // //cycle 2
-                // __m128i dst2 = _mm_load_si128((__m128i*)(outputRow + (j + 4) * 4)); // lat:6, tp: 0.5
-                // __m128i src2 = _mm_load_si128((__m128i*)(srcRow + (j + 4) * 4));    // lat:6, tp: 0.5
-                // //cycle 6
-                // __m256i dst_16bit = _mm256_cvtepu8_epi16(dst); // lat:3, tp: 1
-                // __m256i src_16bit = _mm256_cvtepu8_epi16(src); // lat:3, tp: 1
-                // __m256i dst2_16bit = _mm256_cvtepu8_epi16(dst2); // lat:3, tp: 1
-                // __m256i src2_16bit = _mm256_cvtepu8_epi16(src2); // lat:3, tp: 1
-                // //cycle 10
-                // __m256i diff = _mm256_sub_epi16(dst_16bit, src_16bit); //lat: 1, tp:0.3
-                // //cycle 11
-                // __m256i norm = _mm256_madd_epi16(diff, diff); //lat 5, tp: 0.5
-                // //cycle 12
-                // __m256i diff2 = _mm256_sub_epi16(dst2_16bit, src2_16bit); //lat: 1, tp:0.3
-                // //cycle 13
-                // __m256i norm2 = _mm256_madd_epi16(diff2, diff2);//lat 5, tp: 0.5
+                // cycle 1
+                __m128i dst = _mm_load_si128((__m128i*)(outputRow + j * 4)); // lat:6, tp: 0.5
+                __m128i src = _mm_load_si128((__m128i*)(srcRow + j * 4));   // lat:6, tp: 0.5
+                //cycle 2
+                __m128i dst2 = _mm_load_si128((__m128i*)(outputRow + (j + 4) * 4)); // lat:6, tp: 0.5
+                __m128i src2 = _mm_load_si128((__m128i*)(srcRow + (j + 4) * 4));    // lat:6, tp: 0.5
+                //cycle 6
+                __m256i dst_16bit = _mm256_cvtepu8_epi16(dst); // lat:3, tp: 1
+                __m256i src_16bit = _mm256_cvtepu8_epi16(src); // lat:3, tp: 1
+                __m256i dst2_16bit = _mm256_cvtepu8_epi16(dst2); // lat:3, tp: 1
+                __m256i src2_16bit = _mm256_cvtepu8_epi16(src2); // lat:3, tp: 1
+                //cycle 10
+                __m256i diff = _mm256_sub_epi16(dst_16bit, src_16bit); //lat: 1, tp:0.3
+                //cycle 11
+                __m256i norm = _mm256_madd_epi16(diff, diff); //lat 5, tp: 0.5
+                //cycle 12
+                __m256i diff2 = _mm256_sub_epi16(dst2_16bit, src2_16bit); //lat: 1, tp:0.3
+                //cycle 13
+                __m256i norm2 = _mm256_madd_epi16(diff2, diff2);//lat 5, tp: 0.5
 
-                // // cycle 16
-                // int32_t final_sum1 = horizontal_add(norm);
-                // // cycle 18
-                // int32_t final_sum2 = horizontal_add(norm2);
+                // cycle 16
+                int32_t final_sum1 = horizontal_add(norm);
+                // cycle 18
+                int32_t final_sum2 = horizontal_add(norm2);
 
-                // l2norm += final_sum1 + final_sum2;
+                l2norm += final_sum1 + final_sum2;
             }
         }
     }
@@ -1024,31 +1024,31 @@ double CompOverlapOptimiz::ComputeOverlapVectorize(int overlapType, int dstY, in
             for (int j = 0; j < overlapWidth; j += 8) {
                 // load 16 8-bit integers(chars) and convert it to 16 16-bit integers
                 //cycle 1
-                // __m128i dst = _mm_load_si128((__m128i*)(outputRow + j * 4)); // lat:6, tp: 0.5
-                // __m128i src = _mm_load_si128((__m128i*)(srcRow + j * 4));   // lat:6, tp: 0.5
-                // //cycle 2
-                // __m128i dst2 = _mm_load_si128((__m128i*)(outputRow + (j + 4) * 4)); // lat:6, tp: 0.5
-                // __m128i src2 = _mm_load_si128((__m128i*)(srcRow + (j + 4) * 4));    // lat:6, tp: 0.5
-                // //cycle 6
-                // __m256i dst_16bit = _mm256_cvtepu8_epi16(dst); // lat:3, tp: 1
-                // __m256i src_16bit = _mm256_cvtepu8_epi16(src); // lat:3, tp: 1
-                // __m256i dst2_16bit = _mm256_cvtepu8_epi16(dst2); // lat:3, tp: 1
-                // __m256i src2_16bit = _mm256_cvtepu8_epi16(src2); // lat:3, tp: 1
-                // //cycle 10
-                // __m256i diff = _mm256_sub_epi16(dst_16bit, src_16bit); //lat: 1, tp:0.3
-                // //cycle 11
-                // __m256i norm = _mm256_madd_epi16(diff, diff); //lat 5, tp: 0.5
-                // //cycle 12
-                // __m256i diff2 = _mm256_sub_epi16(dst2_16bit, src2_16bit); //lat: 1, tp:0.3
-                // //cycle 13
-                // __m256i norm2 = _mm256_madd_epi16(diff2, diff2);//lat 5, tp: 0.5
+                __m128i dst = _mm_load_si128((__m128i*)(outputRow + j * 4)); // lat:6, tp: 0.5
+                __m128i src = _mm_load_si128((__m128i*)(srcRow + j * 4));   // lat:6, tp: 0.5
+                //cycle 2
+                __m128i dst2 = _mm_load_si128((__m128i*)(outputRow + (j + 4) * 4)); // lat:6, tp: 0.5
+                __m128i src2 = _mm_load_si128((__m128i*)(srcRow + (j + 4) * 4));    // lat:6, tp: 0.5
+                //cycle 6
+                __m256i dst_16bit = _mm256_cvtepu8_epi16(dst); // lat:3, tp: 1
+                __m256i src_16bit = _mm256_cvtepu8_epi16(src); // lat:3, tp: 1
+                __m256i dst2_16bit = _mm256_cvtepu8_epi16(dst2); // lat:3, tp: 1
+                __m256i src2_16bit = _mm256_cvtepu8_epi16(src2); // lat:3, tp: 1
+                //cycle 10
+                __m256i diff = _mm256_sub_epi16(dst_16bit, src_16bit); //lat: 1, tp:0.3
+                //cycle 11
+                __m256i norm = _mm256_madd_epi16(diff, diff); //lat 5, tp: 0.5
+                //cycle 12
+                __m256i diff2 = _mm256_sub_epi16(dst2_16bit, src2_16bit); //lat: 1, tp:0.3
+                //cycle 13
+                __m256i norm2 = _mm256_madd_epi16(diff2, diff2);//lat 5, tp: 0.5
 
-                // // cycle 16
-                // int32_t final_sum1 = horizontal_add(norm);
-                // // cycle 18
-                // int32_t final_sum2 = horizontal_add(norm2);
+                // cycle 16
+                int32_t final_sum1 = horizontal_add(norm);
+                // cycle 18
+                int32_t final_sum2 = horizontal_add(norm2);
 
-                // l2norm += final_sum1 + final_sum2;
+                l2norm += final_sum1 + final_sum2;
             }
         }
     }
