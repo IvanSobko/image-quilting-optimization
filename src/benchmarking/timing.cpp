@@ -4,6 +4,7 @@
 #include <algorithm>
 #include <cstring>
 #include <string>
+#include <ctime>
 
 #include "PngReader.h"
 #include "tsc_x86.h"
@@ -169,13 +170,14 @@ timing::TimingData timing::rdtsc_functional(const ImageQuiltingFunction & imageQ
 // Get the current date and time as a string
 // From ChatGPT
 std::string getCurrentDateTime() {
-    auto now = std::chrono::system_clock::now();
-    std::time_t currentTime = std::chrono::system_clock::to_time_t(now);
+    std::time_t now = std::time(nullptr);
+    std::tm timeinfo;
+    localtime_r(&now, &timeinfo);
 
-    char buffer[100];
-    std::strftime(buffer, sizeof(buffer), "%Y-%m-%d_%H-%M-%S", std::localtime(&currentTime));
+    char buffer[20];
+    std::strftime(buffer, sizeof(buffer), "%m-%d-%H-%M-%S", &timeinfo);
 
-    return std::string(buffer);
+    return buffer;
 }
 
 // Empty image quilting function for debugging purposes
@@ -204,7 +206,7 @@ std::vector<std::string> getRelativePaths(const std::string & directory, const s
 void timing::run_timing_functional(
     const std::string & label,
     const std::string & inputDirectory, const std::string & filenameFilter, const std::string & outputDirectory,
-    const ImageQuiltingFunction & imageQuiltingFunction)
+    const ImageQuiltingFunction & imageQuiltingFunction, int outputScale, int blockDivisor)
 {
     // Intro
     std::cout << "Running functional timing for:" << std::endl << "\t" << label << std::endl;
@@ -221,6 +223,26 @@ void timing::run_timing_functional(
         + getCurrentDateTime() + ".txt";
     std::cout << "Writing results to: " << std::endl << "\t" << outputFile << std::endl;
 
-    // Outro
+    // Perform the timing
+    std::cout << "Performing timing and writing results..." << std::endl;
+    for (const auto & inputFile : inputFiles) {
+
+        // Read the input
+        ImgData imgData;
+        file::read_png_file(inputFile.c_str(), imgData);
+
+        // Set the image quilting parameters and allocate the output
+        imgData.output_h = outputScale * imgData.height;
+        imgData.output_w = outputScale * imgData.width;
+        imgData.block_h = imgData.height / blockDivisor;
+        imgData.block_w = imgData.width / blockDivisor;
+        imgData.AllocateOutput();
+
+        // Write
+
+        // Clean up
+        imgData.FreeInput();
+        imgData.FreeOutput();
+    }
     std::cout << "Done!" << std::endl << std::endl;
 }

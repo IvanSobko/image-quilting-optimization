@@ -155,10 +155,9 @@ int main(int argc, char* argv[]) {
     }
     // Run the functional timing code
     else if (timingFunctional) {
-        int inputBlockRatio = 4;
         timing::run_timing_functional(
             "default", "./timing/input", "input0", "./timing/results",
-            timing::EmptyImageQuiltingFunction);
+            timing::EmptyImageQuiltingFunction, 2, 4);
     }
     // Main
     else {
