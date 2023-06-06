@@ -157,7 +157,7 @@ int main(int argc, char* argv[]) {
     else if (timingFunctional) {
         timing::run_timing_functional(
             "default", "./timing/input", "input0", "./timing/results",
-            timing::EmptyImageQuiltingFunction, 2, 4);
+            timing::EmptyImageQuiltingFunction, 2, 4, 0);
     }
     // Main
     else {

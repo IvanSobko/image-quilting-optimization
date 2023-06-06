@@ -5,6 +5,8 @@
 #include <cstring>
 #include <string>
 #include <ctime>
+#include <iostream>
+#include <fstream>
 
 #include "PngReader.h"
 #include "tsc_x86.h"
@@ -132,7 +134,6 @@ timing::TimingData timing::rdtsc_functional(const ImageQuiltingFunction & imageQ
     // Warm-up phase: we determine a number of executions that allows
     // the code to be executed for at least CYCLES_REQUIRED cycles.
     // This helps excluding timing overhead when measuring small runtimes.
-    printf("Doing warmup phase...");
     do {
         num_runs = num_runs * multiplier;
         start = start_tsc();
@@ -148,7 +149,6 @@ timing::TimingData timing::rdtsc_functional(const ImageQuiltingFunction & imageQ
 
     // Actual performance measurements repeated REP times.
     // We simply store all results and compute medians during post-processing.
-    printf("actually measuring performance (%i times).\n", num_runs * REP);
     double total_cycles = 0;
     double total_flops = 0;
     for (size_t j = 0; j < REP; j++) {
@@ -206,7 +206,7 @@ std::vector<std::string> getRelativePaths(const std::string & directory, const s
 void timing::run_timing_functional(
     const std::string & label,
     const std::string & inputDirectory, const std::string & filenameFilter, const std::string & outputDirectory,
-    const ImageQuiltingFunction & imageQuiltingFunction, int outputScale, int blockDivisor)
+    const ImageQuiltingFunction & imageQuiltingFunction, int outputScale, int blockDivisor, int seed)
 {
     // Intro
     std::cout << "Running functional timing for:" << std::endl << "\t" << label << std::endl;
@@ -217,14 +217,32 @@ void timing::run_timing_functional(
     for (const auto & inputFile : inputFiles) std::cout << "\t" << inputFile << std::endl;
 
     // WARNING: _CompileFlags must be defined!
-    std::string outputFile =
+    std::string compileFlagsString = std::string(_CompileFlags);
+    std::string timeString = getCurrentDateTime();
+    std::string filename =
         outputDirectory + "/" + label + "_"
-        + std::string(_CompileFlags) + "_"
-        + getCurrentDateTime() + ".txt";
-    std::cout << "Writing results to: " << std::endl << "\t" << outputFile << std::endl;
+        + compileFlagsString + "_"
+        + timeString + ".txt";
+    std::cout << "Writing results to: " << std::endl << "\t" << filename << std::endl;
 
     // Perform the timing
     std::cout << "Performing timing and writing results..." << std::endl;
+
+    // Open the output file
+    std::ofstream outputFile(filename);
+    if (!outputFile.is_open()) {
+        std::cerr << "ERROR: failed to open the file: \"" << filename << "\"" << std::endl;
+        return;
+    }
+    // Output file header
+    outputFile << "label=" << label;
+    outputFile << ", compileFlags=" << compileFlagsString;
+    outputFile << ", time=" << timeString;
+    outputFile << ", outputScale=" << outputScale;
+    outputFile << ", blockDivisor=" << blockDivisor;
+    outputFile << ", seed=" << seed << std::endl;
+
+    // Run the image quilting variant on each of the input files
     for (const auto & inputFile : inputFiles) {
 
         // Read the input
@@ -238,11 +256,19 @@ void timing::run_timing_functional(
         imgData.block_w = imgData.width / blockDivisor;
         imgData.AllocateOutput();
 
-        // Write
+        // Write to the output file
+        auto timingData = rdtsc_functional(imageQuiltingFunction, &imgData, seed);
+        double performance = (double)timingData.flops / timingData.cycles;
+        outputFile << "size=" << imgData.height << "x" << imgData.width;
+        outputFile << ", n=" << imgData.height * imgData.width;
+        outputFile << ", performance=" << performance;
+        outputFile << ", flops=" << timingData.flops;
+        outputFile << ", cycles=" << timingData.cycles << std::endl;
 
         // Clean up
         imgData.FreeInput();
         imgData.FreeOutput();
+        outputFile.close();
     }
     std::cout << "Done!" << std::endl << std::endl;
 }

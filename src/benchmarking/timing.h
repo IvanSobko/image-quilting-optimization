@@ -28,7 +28,7 @@ typedef std::function<void(ImgData* imgData)> ParameterFunction;
 // Struct to keep track of the cycles and flops for a given function call
 struct TimingData {
     double cycles;
-    double flops;
+    int64_t flops;
     TimingData(double cycles, double flops) : cycles(cycles), flops(flops) {}
 };
 // Call the image quilting variant on the specified input and return the number of cycles and flops
@@ -38,6 +38,6 @@ TimingData rdtsc_functional(const ImageQuiltingFunction & imageQuiltingFunction,
 void run_timing_functional(
     const std::string & label,
     const std::string & inputDirectory, const std::string & filenameFilter, const std::string & outputDirectory,
-    const ImageQuiltingFunction & imageQuiltingFunction, int outputScale, int blockDivisor);
+    const ImageQuiltingFunction & imageQuiltingFunction, int outputScale, int blockDivisor, int seed);
 
 }  // namespace timing
