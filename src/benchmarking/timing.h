@@ -21,6 +21,10 @@ std::vector<std::string> read_files(const std::string &directory, const std::str
 // Function that runs the image quilting variant on the specified input and returns the number of flops
 typedef std::function<double(ImgData* imgData, int seed)> ImageQuiltingFunction;
 double EmptyImageQuiltingFunction(ImgData* imgData, int seed);
+
+// Function that sets the image quilting parameters
+typedef std::function<void(ImgData* imgData)> ParameterFunction;
+
 // Struct to keep track of the cycles and flops for a given function call
 struct TimingData {
     double cycles;
@@ -34,6 +38,6 @@ TimingData rdtsc_functional(const ImageQuiltingFunction & imageQuiltingFunction,
 void run_timing_functional(
     const std::string & label,
     const std::string & inputDirectory, const std::string & filenameFilter, const std::string & outputDirectory,
-    const ImageQuiltingFunction & imageQuiltingFunction);
+    const ImageQuiltingFunction & imageQuiltingFunction, int outputScale, int blockDivisor);
 
 }  // namespace timing
