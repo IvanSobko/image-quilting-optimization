@@ -1,0 +1,11 @@
+label=StdC_Algorithm, compileFlags=-O1, time=06-06-20-43-20, outputScale=2, blockDivisor=4, seed=0
+size=277x277, n=76729, performance=1.31975, flops=70955924153, cycles=5.37646e+10
+size=72x72, n=5184, performance=1.19533, flops=341957324, cycles=2.86078e+08
+size=212x212, n=44944, performance=1.20972, flops=23169294266, cycles=1.91527e+10
+size=162x162, n=26244, performance=1.36247, flops=7725095609, cycles=5.66992e+09
+size=363x363, n=131769, performance=1.36016, flops=217373176361, cycles=1.59814e+11
+size=55x55, n=3025, performance=1.00094, flops=100097722, cycles=1.00003e+08
+size=42x42, n=1764, performance=0.719509, flops=22717536, cycles=3.15737e+07
+size=95x95, n=9025, performance=1.11985, flops=775746799, cycles=6.92726e+08
+size=124x124, n=15376, performance=1.24706, flops=2901138790, cycles=2.32639e+09
+size=32x32, n=1024, performance=0.841612, flops=10311204, cycles=1.22517e+07
