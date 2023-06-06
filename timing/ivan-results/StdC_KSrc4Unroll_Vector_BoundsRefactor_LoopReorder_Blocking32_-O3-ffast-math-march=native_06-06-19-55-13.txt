@@ -1,0 +1,11 @@
+label=StdC_KSrc4Unroll_Vector_BoundsRefactor_LoopReorder_Blocking32, compileFlags=-O3-ffast-math-march=native, time=06-06-19-55-13, outputScale=2, blockDivisor=4, seed=0
+size=42x42, n=1764, performance=4.59833, flops=19177486, cycles=4.17053e+06
+size=212x212, n=44944, performance=8.03908, flops=19193532403, cycles=2.38753e+09
+size=363x363, n=131769, performance=7.75122, flops=178722042753, cycles=2.30573e+10
+size=162x162, n=26244, performance=7.72143, flops=6401791878, cycles=8.29094e+08
+size=277x277, n=76729, performance=7.45727, flops=58543039879, cycles=7.85047e+09
+size=32x32, n=1024, performance=5.87442, flops=8591328, cycles=1.4625e+06
+size=95x95, n=9025, performance=6.84515, flops=648558618, cycles=9.47471e+07
+size=124x124, n=15376, performance=6.91755, flops=2390793597, cycles=3.45613e+08
+size=72x72, n=5184, performance=5.43835, flops=280893065, cycles=5.16504e+07
+size=55x55, n=3025, performance=4.81311, flops=82653819, cycles=1.71726e+07

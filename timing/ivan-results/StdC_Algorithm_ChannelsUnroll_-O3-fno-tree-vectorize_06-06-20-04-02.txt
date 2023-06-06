@@ -1,0 +1,11 @@
+label=StdC_Algorithm_ChannelsUnroll, compileFlags=-O3-fno-tree-vectorize, time=06-06-20-04-02, outputScale=2, blockDivisor=4, seed=0
+size=42x42, n=1764, performance=1.85925, flops=22717368, cycles=1.22186e+07
+size=212x212, n=44944, performance=2.8202, flops=23169294195, cycles=8.21547e+09
+size=363x363, n=131769, performance=2.69905, flops=217373176846, cycles=8.0537e+10
+size=162x162, n=26244, performance=2.76361, flops=7725095085, cycles=2.79529e+09
+size=277x277, n=76729, performance=2.85468, flops=70955922472, cycles=2.4856e+10
+size=32x32, n=1024, performance=1.67095, flops=10311114, cycles=6.17083e+06
+size=95x95, n=9025, performance=2.59223, flops=775747125, cycles=2.99259e+08
+size=124x124, n=15376, performance=2.70101, flops=2901138441, cycles=1.07409e+09
+size=72x72, n=5184, performance=2.53893, flops=341956974, cycles=1.34686e+08
+size=55x55, n=3025, performance=2.08473, flops=100097322, cycles=4.80144e+07

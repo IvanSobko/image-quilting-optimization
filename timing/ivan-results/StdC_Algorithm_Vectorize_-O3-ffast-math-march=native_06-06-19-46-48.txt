@@ -1,0 +1,11 @@
+label=StdC_Algorithm_Vectorize, compileFlags=-O3-ffast-math-march=native, time=06-06-19-46-48, outputScale=2, blockDivisor=4, seed=0
+size=42x42, n=1764, performance=1.36644, flops=22717368, cycles=1.66252e+07
+size=212x212, n=44944, performance=13.5951, flops=23169294195, cycles=1.70423e+09
+size=363x363, n=131769, performance=8.63746, flops=217373176846, cycles=2.51663e+10
+size=162x162, n=26244, performance=6.9399, flops=7725095085, cycles=1.11314e+09
+size=277x277, n=76729, performance=7.99345, flops=70955922472, cycles=8.87676e+09
+size=32x32, n=1024, performance=1.51447, flops=10311114, cycles=6.80838e+06
+size=95x95, n=9025, performance=2.69431, flops=775747125, cycles=2.8792e+08
+size=124x124, n=15376, performance=6.3133, flops=2901138441, cycles=4.59528e+08
+size=72x72, n=5184, performance=2.61494, flops=341956974, cycles=1.3077e+08
+size=55x55, n=3025, performance=2.52835, flops=100097322, cycles=3.959e+07

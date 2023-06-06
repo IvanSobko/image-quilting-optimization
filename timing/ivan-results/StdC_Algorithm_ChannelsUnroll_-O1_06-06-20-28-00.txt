@@ -1,0 +1,11 @@
+label=StdC_Algorithm_ChannelsUnroll, compileFlags=-O1, time=06-06-20-28-00, outputScale=2, blockDivisor=4, seed=0
+size=42x42, n=1764, performance=1.63467, flops=22717368, cycles=1.38972e+07
+size=212x212, n=44944, performance=2.67485, flops=23169294195, cycles=8.6619e+09
+size=363x363, n=131769, performance=2.69163, flops=217373176846, cycles=8.07589e+10
+size=162x162, n=26244, performance=2.85071, flops=7725095085, cycles=2.70989e+09
+size=277x277, n=76729, performance=2.82765, flops=70955922472, cycles=2.50936e+10
+size=32x32, n=1024, performance=1.57889, flops=10311114, cycles=6.5306e+06
+size=95x95, n=9025, performance=2.29332, flops=775747125, cycles=3.38263e+08
+size=124x124, n=15376, performance=2.67821, flops=2901138441, cycles=1.08324e+09
+size=72x72, n=5184, performance=2.66497, flops=341956974, cycles=1.28316e+08
+size=55x55, n=3025, performance=2.34347, flops=100097322, cycles=4.27133e+07
