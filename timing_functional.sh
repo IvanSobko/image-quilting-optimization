@@ -28,9 +28,14 @@ do
   echo "Building project with \"$flags\":"
 
   # Configure CMake with the specific compile flags and define _CompileFlags accordingly
-  #echo "cmake""$project_dir" -DCMAKE_BUILD_TYPE=Release -DCMAKE_CXX_FLAGS="\"$flags\" -D_CompileFlags=\"$name\"" ".."
-  echo "cmake" "$project_dir" -DCMAKE_BUILD_TYPE=Release -DCMAKE_CXX_FLAGS="\"$flags\" -D_CompileFlags=\"\\\""$name"\\\"\"" ".."
-  cmake"$project_dir" -DCMAKE_BUILD_TYPE=Release -DCMAKE_CXX_FLAGS="\"$flags\" -D_CompileFlags=\"\\\""$name"\\\"\"" ".."
+  if [ "$index" != 2 ]; then
+    echo "cmake" "$project_dir" -DCMAKE_BUILD_TYPE=Release -DCMAKE_CXX_FLAGS="\"$flags\" -D_CompileFlags=\"\\\""$name"\\\"\"" ".."
+    cmake"$project_dir" -DCMAKE_BUILD_TYPE=Release -DCMAKE_CXX_FLAGS="\"$flags\" -D_CompileFlags=\"\\\""$name"\\\"\"" ".."
+  else
+    echo "cmake" "$project_dir" -DCMAKE_BUILD_TYPE=Release -DCMAKE_CXX_FLAGS="\"$flags\" -D_CompileFlags=\"\\\""$name"\\\"\" -DVECTORIZED" ".."
+    cmake"$project_dir" -DCMAKE_BUILD_TYPE=Release -DCMAKE_CXX_FLAGS="\"$flags\" -D_CompileFlags=\"\\\""$name"\\\"\" -DVECTORIZED" ".."
+  fi
+
 
   # Build the project
   cmake --build . -j
