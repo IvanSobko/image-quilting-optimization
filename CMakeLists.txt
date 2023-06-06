@@ -25,8 +25,8 @@ add_executable(team19
         src/Blocking.cpp)
 
 # We can use different compiler flags
-#set(CompileFlags "-g" "-O3" "-ffast-math" "-march=native")
-#add_definitions(-D_CompileFlags="-O3-ffast-math-march=native") # pass variable _CompileFlags to c++ code
+set(CompileFlags "-g" "-O3" "-ffast-math" "-march=native")
+add_definitions(-D_CompileFlags="-O3-ffast-math-march=native") # pass variable _CompileFlags to c++ code
 
 #set(CompileFlags "-g" "-O3" "-fno-tree-vectorize")
 #add_definitions(-D_CompileFlags="-O3-fno-tree-vectorize")
@@ -34,7 +34,7 @@ add_executable(team19
 #set(CompileFlags "-g" "-O1")
 #add_definitions(-D_CompileFlags="-O1")
 
-#target_compile_options(team19 PRIVATE ${CompileFlags})
+target_compile_options(team19 PRIVATE ${CompileFlags})
 
 find_package(PNG 1.6 REQUIRED)
 include_directories(${PNG_INCLUDE_DIR})
