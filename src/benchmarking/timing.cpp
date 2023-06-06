@@ -14,7 +14,7 @@
 //TODO: should we modify cycles required? 1e8 is value from homeworks
 #define CYCLES_REQUIRED 1e8
 #define RDTSC_LATENCY 26
-#define REP 2
+#define REP 1
 
 // Original timing
 void timing::run_timing(int inputBlockRatio) {
