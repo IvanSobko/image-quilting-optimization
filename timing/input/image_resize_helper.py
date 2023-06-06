@@ -1,6 +1,6 @@
 from math import *
 from PIL import Image
-
+import numpy as np
 
 def resize_image(input_image_path, output_image_path, new_width, new_height):
     # Open the image file
@@ -11,7 +11,8 @@ def resize_image(input_image_path, output_image_path, new_width, new_height):
         resized_image.save(output_image_path)
 
 
-for i in range(10, 23):
-    width = ceil(sqrt(2**i))
+for i in range(10):
+    j = 7*(i/9)+10
+    width = ceil(sqrt(2**j))
     filename = "input0_" + str(width) + ".png"
-    resize_image("timing/input/input0_192x192.png", filename, width, width)
+    resize_image("input0_192x192.png", filename, width, width)
