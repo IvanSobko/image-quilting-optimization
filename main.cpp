@@ -158,8 +158,14 @@ int main(int argc, char* argv[]) {
         // Define the set of image quilting functions
         std::vector<std::pair<std::string, timing::ImageQuiltingFunction>> imageQuiltingFunctions = {
             {"default", Testing::ImageQuiltingFunction},
-            {"AlgOpt", CompOverlapOptimiz::AlgOpt},
+            {"StdC_Algorithm", CompOverlapOptimiz::AlgOpt},
+            {"StdC_Algorithm_ChannelsUnroll", CompOverlapOptimiz::UnrollChnls},
+#ifdef __AVX2__
+            {"StdC_Algorithm_Vectorize", CompOverlapOptimiz::VectorizeOpt},
+#endif
             {"StdC_KUnroll_BoundsRefactor", AdvanceAlgOptimiz::StdC_KUnroll_BoundsRefactor},
+
+            // TODO: do we need to test all possible block sizes? Maybe we know that some of them are not beneficial?
             {"StdC_KUnroll_BoundsRefactor_LoopReorder", AdvanceAlgOptimiz::StdC_KUnroll_BoundsRefactor_LoopReorder},
             {"StdC_KUnroll_BoundsRefactor_LoopReorder_Blocking32", AdvanceAlgOptimiz::StdC_KUnroll_BoundsRefactor_LoopReorder_Blocking32},
             {"StdC_KUnroll_BoundsRefactor_LoopReorder_Blocking48", AdvanceAlgOptimiz::StdC_KUnroll_BoundsRefactor_LoopReorder_Blocking48},
@@ -167,7 +173,11 @@ int main(int argc, char* argv[]) {
             {"StdC_KUnroll_BoundsRefactor_LoopReorder_Blocking96", AdvanceAlgOptimiz::StdC_KUnroll_BoundsRefactor_LoopReorder_Blocking96},
             {"StdC_KUnroll_BoundsRefactor_LoopReorder_Blocking128", AdvanceAlgOptimiz::StdC_KUnroll_BoundsRefactor_LoopReorder_Blocking128},
             {"StdC_KSrc2Unroll_BoundsRefactor_LoopReorder_Blocking32", AdvanceAlgOptimiz::StdC_KSrc2Unroll_BoundsRefactor_LoopReorder_Blocking32},
-            {"StdC_KSrc4Unroll_BoundsRefactor_LoopReorder_Blocking32", AdvanceAlgOptimiz::StdC_KSrc4Unroll_BoundsRefactor_LoopReorder_Blocking32}
+            {"StdC_KSrc4Unroll_BoundsRefactor_LoopReorder_Blocking32", AdvanceAlgOptimiz::StdC_KSrc4Unroll_BoundsRefactor_LoopReorder_Blocking32},
+#ifdef __AVX2__
+            {"StdC_KSrc2Unroll_Vector_BoundsRefactor_LoopReorder_Blocking32", AdvanceAlgOptimiz::StdC_KSrc2Unroll_Vector_BoundsRefactor_LoopReorder_Blocking32},
+            {"StdC_KSrc4Unroll_Vector_BoundsRefactor_LoopReorder_Blocking32", AdvanceAlgOptimiz::StdC_KSrc4Unroll_Vector_BoundsRefactor_LoopReorder_Blocking32},
+#endif
         };
 
         // Run on the small - medium inputs; block divisor 4
