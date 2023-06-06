@@ -12,6 +12,6 @@ def resize_image(input_image_path, output_image_path, new_width, new_height):
 
 
 for i in range(10, 23):
-    width = floor(sqrt(2**i))
+    width = ceil(sqrt(2**i))
     filename = "input0_" + str(width) + ".png"
-    resize_image("input0_192x192.png", filename, width, width)
+    resize_image("timing/input/input0_192x192.png", filename, width, width)

@@ -170,47 +170,11 @@ int main(int argc, char* argv[]) {
             {"StdC_KSrc4Unroll_BoundsRefactor_LoopReorder_Blocking32", AdvanceAlgOptimiz::StdC_KSrc4Unroll_BoundsRefactor_LoopReorder_Blocking32}
         };
 
-        // Run the functional timing for each of the image quilting functions
-
         // Run on the small - medium inputs; block divisor 4
         for (const auto & pair : imageQuiltingFunctions) {
             timing::run_timing_functional(
                 pair.first, "./timing/input", "input0", "./timing/results",
                 pair.second, 2, 4, 0);
-        }
-
-        // Run on the large inputs; block divisor 4
-        for (const auto & pair : imageQuiltingFunctions) {
-            timing::run_timing_functional(
-                pair.first, "./timing/input", "input1", "./timing/results",
-                pair.second, 2, 4, 0);
-        }
-
-        // Run on the small - medium inputs; block divisor 2
-        for (const auto & pair : imageQuiltingFunctions) {
-            timing::run_timing_functional(
-                pair.first, "./timing/input", "input0", "./timing/results",
-                pair.second, 2, 2, 0);
-        }
-
-        // Run on the large inputs; block divisor 2
-        for (const auto & pair : imageQuiltingFunctions) {
-            timing::run_timing_functional(
-                pair.first, "./timing/input", "input1", "./timing/results",
-                pair.second, 2, 2, 0);
-        }
-        // Run on the small - medium inputs; block divisor 8
-        for (const auto & pair : imageQuiltingFunctions) {
-            timing::run_timing_functional(
-                pair.first, "./timing/input", "input0", "./timing/results",
-                pair.second, 2, 2, 0);
-        }
-
-        // Run on the large inputs; block divisor 8
-        for (const auto & pair : imageQuiltingFunctions) {
-            timing::run_timing_functional(
-                pair.first, "./timing/input", "input1", "./timing/results",
-                pair.second, 2, 8, 0);
         }
     }
     // Main
