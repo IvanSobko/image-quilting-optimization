@@ -80,14 +80,18 @@ def runtime_plot(filenames_and_labels, cpu, compiler, output_filename):
 
 
 if __name__ == "__main__":
-    # Filenames, cpu, and compiler for the plots
+
+    # Ivan's cpu and compiler
+    cpu_ivan = ""
+    cpu = "AMD Ryzen 7 5800H @3.2GHz"
+    compiler = "GCC 12.2.0"
+
+    # Filenames and labels
     filenames_and_labels = [
         ("default_-O1_06-06-19-26-46.txt", "Default Low"),
         ("default_-O3-fno-tree-vectorize_06-06-19-26-47.txt", "Default Mid"),
         ("default_-O3-ffast-math-march=native_06-06-19-26-48.txt", "Default High"),
     ]
-    cpu = "Intel® Core™ i7-1068NG7 @2.3 GHz"
-    compiler = "Apple clang 14.0.0"
 
     # Generate the desired plots
     performance_plot(filenames_and_labels, cpu, compiler, "my_performance.png")
