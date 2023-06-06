@@ -1,4 +1,4 @@
-label=AlgOpt, compileFlags=-O3-fno-tree-vectorize, time=06-06-11-51-43, outputScale=2, blockDivisor=4, seed=0
+label=StdC_Algorithm, compileFlags=-O3-fno-tree-vectorize, time=06-06-11-51-43, outputScale=2, blockDivisor=4, seed=0
 size=277x277, n=76729, performance=2.81703, flops=70955924081, cycles=2.51882e+10
 size=72x72, n=5184, performance=2.40825, flops=341957345, cycles=1.41994e+08
 size=212x212, n=44944, performance=2.63408, flops=23169294187, cycles=8.79598e+09

@@ -1,4 +1,4 @@
-label=AlgOpt, compileFlags=-O3-ffast-math-march=native, time=06-06-12-34-07, outputScale=2, blockDivisor=4, seed=0
+label=StdC_Algorithm, compileFlags=-O3-ffast-math-march=native, time=06-06-12-34-07, outputScale=2, blockDivisor=4, seed=0
 size=277x277, n=76729, performance=2.81239, flops=70955924081, cycles=2.52298e+10
 size=72x72, n=5184, performance=2.33583, flops=341957345, cycles=1.46396e+08
 size=212x212, n=44944, performance=2.64047, flops=23169294187, cycles=8.77469e+09
