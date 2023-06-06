@@ -1,0 +1,11 @@
+label=default, compileFlags=-O1, time=06-06-11-00-31, outputScale=2, blockDivisor=4, seed=0
+size=277x277, n=76729, performance=0.903859, flops=76030291446, cycles=8.41174e+10
+size=72x72, n=5184, performance=0.919803, flops=366525746, cycles=3.98483e+08
+size=212x212, n=44944, performance=0.909279, flops=24733726174, cycles=2.72015e+10
+size=162x162, n=26244, performance=0.902872, flops=8241214058, cycles=9.12777e+09
+size=363x363, n=131769, performance=0.898616, flops=233648822906, cycles=2.6001e+11
+size=55x55, n=3025, performance=0.883065, flops=106462382, cycles=1.2056e+08
+size=42x42, n=1764, performance=0.613245, flops=15615291, cycles=2.54634e+07
+size=95x95, n=9025, performance=0.899397, flops=819542507, cycles=9.11213e+08
+size=124x124, n=15376, performance=0.915084, flops=3108499798, cycles=3.39696e+09
+size=32x32, n=1024, performance=0.51798, flops=6012246, cycles=1.16071e+07

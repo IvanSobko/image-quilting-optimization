@@ -1,0 +1,11 @@
+label=default, compileFlags=-O3-fno-tree-vectorize, time=06-06-11-43-23, outputScale=2, blockDivisor=4, seed=0
+size=277x277, n=76729, performance=0.909121, flops=76030291446, cycles=8.36306e+10
+size=72x72, n=5184, performance=0.920398, flops=366525746, cycles=3.98225e+08
+size=212x212, n=44944, performance=0.914104, flops=24733726174, cycles=2.70579e+10
+size=162x162, n=26244, performance=0.906595, flops=8241214058, cycles=9.09029e+09
+size=363x363, n=131769, performance=0.903615, flops=233648822906, cycles=2.58571e+11
+size=55x55, n=3025, performance=0.900177, flops=106462382, cycles=1.18268e+08
+size=42x42, n=1764, performance=0.61364, flops=15615291, cycles=2.5447e+07
+size=95x95, n=9025, performance=0.903159, flops=819542507, cycles=9.07418e+08
+size=124x124, n=15376, performance=0.923017, flops=3108499798, cycles=3.36776e+09
+size=32x32, n=1024, performance=0.522295, flops=6012246, cycles=1.15112e+07
