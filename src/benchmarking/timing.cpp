@@ -268,7 +268,9 @@ void timing::run_timing_functional(
         // Clean up
         imgData.FreeInput();
         imgData.FreeOutput();
-        outputFile.close();
     }
+
+    // Clean up
+    outputFile.close();
     std::cout << "Done!" << std::endl << std::endl;
 }
