@@ -1,0 +1,11 @@
+label=StdC_Algorithm, compileFlags=-O3-fno-tree-vectorize, time=06-07-00-11-58, outputScale=2, blockDivisor=4, seed=0
+size=55x55, n=3025, performance=0.826326, flops=100097478, cycles=1.21136e+08
+size=363x363, n=131769, performance=1.59955, flops=217373176846, cycles=1.35896e+11
+size=95x95, n=9025, performance=1.55954, flops=775747125, cycles=4.9742e+08
+size=212x212, n=44944, performance=1.74246, flops=23169294195, cycles=1.32969e+10
+size=277x277, n=76729, performance=1.66747, flops=70955922472, cycles=4.25531e+10
+size=42x42, n=1764, performance=1.01441, flops=22717368, cycles=2.23946e+07
+size=72x72, n=5184, performance=1.54333, flops=341956974, cycles=2.21571e+08
+size=124x124, n=15376, performance=1.58511, flops=2901138441, cycles=1.83024e+09
+size=162x162, n=26244, performance=1.64536, flops=7725095085, cycles=4.69507e+09
+size=32x32, n=1024, performance=0.963046, flops=10311114, cycles=1.07068e+07

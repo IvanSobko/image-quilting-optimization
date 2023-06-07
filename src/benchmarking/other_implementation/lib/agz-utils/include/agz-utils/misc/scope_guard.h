@@ -2,6 +2,7 @@
 
 #include "../common/common.h"
 #include "uncopyable.h"
+#include <exception>
 
 namespace agz::misc
 {

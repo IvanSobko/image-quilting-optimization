@@ -1,6 +1,7 @@
 #include <agz-utils/file.h>
 #include <agz-utils/image.h>
 #include <agz-utils/string.h>
+#include <optional>
  
 #include <cxxopts.hpp>
 

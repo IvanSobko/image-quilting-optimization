@@ -1,0 +1,1 @@
+/usr/bin/c++ CMakeFiles/ImageQuilting.dir/src/main.cpp.o CMakeFiles/ImageQuilting.dir/src/imageQuilting.cpp.o -o ImageQuilting  lib/agz-utils/libAGZUtils.a -pthread 

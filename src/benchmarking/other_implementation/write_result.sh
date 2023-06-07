@@ -3,37 +3,51 @@
 # Note: this script will not run on Windows.
 # It should run on MacOS and Linux if bash is installed.
 
-GAL_DIR="../../../gallery"
-RES_FILE_2="../../../results/blockdiv_2/timing_results_-BASE_O3-ffast-math-march=native.txt"
-RES_FILE_4="../../../results/blockdiv_4/timing_results_-BASE_O3-ffast-math-march=native.txt"
-RES_FILE_8="../../../results/blockdiv_8/timing_results_-BASE_O3-ffast-math-march=native.txt"
+GAL_DIR="../../../timing/input"
+RES_FILE_HIGH="../../../timing/results/baseline_-O3-ffast-math-march=native.txt"
+RES_FILE_MID="../../../timing/results/baseline_-O3-fno-tree-vectorize.txt"
+RES_FILE_LOW="../../../timing/results/baseline_-O1.txt"
 
-cmake .
-cmake --build .
+<<"COMMENT" # Those values raise errors (too low ?)
+./build_low/ImageQuilting --input=$GAL_DIR/input0_32.png --output=output.png --blockW=8 --blockH=8 --width=64 --height=64 > $RES_FILE_LOW
+./build_mid/ImageQuilting --input=$GAL_DIR/input0_32.png --output=output.png --blockW=8 --blockH=8 --width=64 --height=64 > $RES_FILE_MID
+./build_high/ImageQuilting --input=$GAL_DIR/input0_32.png --output=output.png --blockW=8 --blockH=8 --width=64 --height=64 > $RES_FILE_HIGH
 
-# Block too small here ?
-./ImageQuilting --input=$GAL_DIR/input0_24x24.png --output=$GAL_DIR/output.png --blockW=12 --blockH=12 --width=48 --height=48 > $RES_FILE_2
-# ./ImageQuilting --input=$GAL_DIR/input0_24x24.png --output=$GAL_DIR/output.png --blockW=6 --blockH=6 --width=48 --height=48 > $RES_FILE_4
-# ./ImageQuilting --input=$GAL_DIR/input0_24x24.png --output=$GAL_DIR/output.png --blockW=3 --blockH=3 --width=48 --height=48 > $RES_FILE_8
+./build_low/ImageQuilting --input=$GAL_DIR/input0_42.png --output=output.png --blockW=10 --blockH=10 --width=84 --height=84 >> $RES_FILE_LOW
+./build_mid/ImageQuilting --input=$GAL_DIR/input0_42.png --output=output.png --blockW=10 --blockH=10 --width=84 --height=84 >> $RES_FILE_MID
+./build_high/ImageQuilting --input=$GAL_DIR/input0_42.png --output=output.png --blockW=10 --blockH=10 --width=84 --height=84 >> $RES_FILE_HIGH
+COMMENT
 
-./ImageQuilting --input=$GAL_DIR/input0_48x48.png --output=$GAL_DIR/output.png --blockW=24 --blockH=24 --width=96 --height=96 >> $RES_FILE_2
-./ImageQuilting --input=$GAL_DIR/input0_48x48.png --output=$GAL_DIR/output.png --blockW=12 --blockH=12 --width=96 --height=96 >> $RES_FILE_4
-# ./ImageQuilting --input=$GAL_DIR/input0_48x48.png --output=$GAL_DIR/output.png --blockW=6 --blockH=6 --width=96 --height=96 >> $RES_FILE_8
+./build_low/ImageQuilting --input=$GAL_DIR/input0_55.png --output=output.png --blockW=13 --blockH=13 --width=110 --height=110 > $RES_FILE_LOW
+./build_mid/ImageQuilting --input=$GAL_DIR/input0_55.png --output=output.png --blockW=13 --blockH=13 --width=110 --height=110 > $RES_FILE_MID
+./build_high/ImageQuilting --input=$GAL_DIR/input0_55.png --output=output.png --blockW=13 --blockH=13 --width=110 --height=110 > $RES_FILE_HIGH
 
-./ImageQuilting --input=$GAL_DIR/input0_96x96.png --output=$GAL_DIR/output.png --blockW=48 --blockH=48 --width=192 --height=192 >> $RES_FILE_2
-./ImageQuilting --input=$GAL_DIR/input0_96x96.png --output=$GAL_DIR/output.png --blockW=24 --blockH=24 --width=192 --height=192 >> $RES_FILE_4
-# ./ImageQuilting --input=$GAL_DIR/input0_96x96.png --output=$GAL_DIR/output.png --blockW=12 --blockH=12 --width=192 --height=192 >> $RES_FILE_8
+./build_low/ImageQuilting --input=$GAL_DIR/input0_72.png --output=output.png --blockW=18 --blockH=18 --width=144 --height=144 >> $RES_FILE_LOW
+./build_mid/ImageQuilting --input=$GAL_DIR/input0_72.png --output=output.png --blockW=18 --blockH=18 --width=144 --height=144 >> $RES_FILE_MID
+./build_high/ImageQuilting --input=$GAL_DIR/input0_72.png --output=output.png --blockW=18 --blockH=18 --width=144 --height=144 >> $RES_FILE_HIGH
 
-./ImageQuilting --input=$GAL_DIR/input0_192x192.png --output=$GAL_DIR/output.png --blockW=96 --blockH=96 --width=384 --height=384 >> $RES_FILE_2
-./ImageQuilting --input=$GAL_DIR/input0_192x192.png --output=$GAL_DIR/output.png --blockW=48 --blockH=48 --width=384 --height=384 >> $RES_FILE_4
-# ./ImageQuilting --input=$GAL_DIR/input0_192x192.png --output=$GAL_DIR/output.png --blockW=24 --blockH=24 --width=384 --height=384 >> $RES_FILE_8
+./build_low/ImageQuilting --input=$GAL_DIR/input0_95.png --output=output.png --blockW=23 --blockH=23 --width=190 --height=190 >> $RES_FILE_LOW
+./build_mid/ImageQuilting --input=$GAL_DIR/input0_95.png --output=output.png --blockW=23 --blockH=23 --width=190 --height=190 >> $RES_FILE_MID
+./build_high/ImageQuilting --input=$GAL_DIR/input0_95.png --output=output.png --blockW=23 --blockH=23 --width=190 --height=190 >> $RES_FILE_HIGH
 
-./ImageQuilting --input=$GAL_DIR/input0_384x384.png --output=$GAL_DIR/output.png --blockW=192 --blockH=192 --width=768 --height=768 >> $RES_FILE_2
-./ImageQuilting --input=$GAL_DIR/input0_384x384.png --output=$GAL_DIR/output.png --blockW=96 --blockH=96 --width=768 --height=768 >> $RES_FILE_4
-# ./ImageQuilting --input=$GAL_DIR/input0_384x384.png --output=$GAL_DIR/output.png --blockW=48 --blockH=48 --width=768 --height=768 >> $RES_FILE_8
+./build_low/ImageQuilting --input=$GAL_DIR/input0_124.png --output=output.png --blockW=31 --blockH=31 --width=248 --height=248 >> $RES_FILE_LOW
+./build_mid/ImageQuilting --input=$GAL_DIR/input0_124.png --output=output.png --blockW=31 --blockH=31 --width=248 --height=248 >> $RES_FILE_MID
+./build_high/ImageQuilting --input=$GAL_DIR/input0_124.png --output=output.png --blockW=31 --blockH=31 --width=248 --height=248 >> $RES_FILE_HIGH
 
-./ImageQuilting --input=$GAL_DIR/input0_768x768.png --output=$GAL_DIR/output.png --blockW=384 --blockH=384 --width=1536 --height=1536 >> $RES_FILE_2
-./ImageQuilting --input=$GAL_DIR/input0_768x768.png --output=$GAL_DIR/output.png --blockW=192 --blockH=192 --width=1536 --height=1536 >> $RES_FILE_4
-# ./ImageQuilting --input=$GAL_DIR/input0_768x768.png --output=$GAL_DIR/output.png --blockW=96 --blockH=96 --width=1536 --height=1536 >> $RES_FILE_8
+./build_low/ImageQuilting --input=$GAL_DIR/input0_162.png --output=output.png --blockW=40 --blockH=40 --width=324 --height=324 >> $RES_FILE_LOW
+./build_mid/ImageQuilting --input=$GAL_DIR/input0_162.png --output=output.png --blockW=40 --blockH=40 --width=324 --height=324 >> $RES_FILE_MID
+./build_high/ImageQuilting --input=$GAL_DIR/input0_162.png --output=output.png --blockW=40 --blockH=40 --width=324 --height=324 >> $RES_FILE_HIGH
 
-rm -rf CMakeCache.txt CMakeFiles/ cmake_install.cmake ImageQuilting Makefile 
+./build_low/ImageQuilting --input=$GAL_DIR/input0_212.png --output=output.png --blockW=53 --blockH=53 --width=424 --height=424 >> $RES_FILE_LOW
+./build_mid/ImageQuilting --input=$GAL_DIR/input0_212.png --output=output.png --blockW=53 --blockH=53 --width=424 --height=424 >> $RES_FILE_MID
+./build_high/ImageQuilting --input=$GAL_DIR/input0_212.png --output=output.png --blockW=53 --blockH=53 --width=424 --height=424 >> $RES_FILE_HIGH
+
+./build_low/ImageQuilting --input=$GAL_DIR/input0_277.png --output=output.png --blockW=69 --blockH=69 --width=554 --height=554 >> $RES_FILE_LOW
+./build_mid/ImageQuilting --input=$GAL_DIR/input0_277.png --output=output.png --blockW=69 --blockH=69 --width=554 --height=554 >> $RES_FILE_MID
+./build_high/ImageQuilting --input=$GAL_DIR/input0_277.png --output=output.png --blockW=69 --blockH=69 --width=554 --height=554 >> $RES_FILE_HIGH
+
+./build_low/ImageQuilting --input=$GAL_DIR/input0_363.png --output=output.png --blockW=90 --blockH=90 --width=726 --height=726 >> $RES_FILE_LOW
+./build_mid/ImageQuilting --input=$GAL_DIR/input0_363.png --output=output.png --blockW=90 --blockH=90 --width=726 --height=726 >> $RES_FILE_MID
+./build_high/ImageQuilting --input=$GAL_DIR/input0_363.png --output=output.png --blockW=90 --blockH=90 --width=726 --height=726 >> $RES_FILE_HIGH
+
+rm -rf CMakeCache.txt CMakeFiles/ cmake_install.cmake ImageQuilting Makefile output.png

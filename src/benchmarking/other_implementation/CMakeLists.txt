@@ -1,22 +1,17 @@
-﻿CMAKE_MINIMUM_REQUIRED(VERSION 3.10)
+﻿cmake_minimum_required(VERSION 3.18)
+project(ImageQuilting)
 
-PROJECT(IMAGE-QUILTING)
+add_subdirectory(lib/agz-utils)
 
-ADD_SUBDIRECTORY(lib/agz-utils)
-TARGET_COMPILE_DEFINITIONS(AGZUtils PUBLIC AGZ_UTILS_SSE)
+set(CMAKE_FIND_FRAMEWORK LAST)
+set(CMAKE_CXX_STANDARD 17)
 
-FILE(GLOB_RECURSE SRC
-		"${PROJECT_SOURCE_DIR}/src/*.cpp"
-		"${PROJECT_SOURCE_DIR}/src/*.h")
-
-ADD_EXECUTABLE(ImageQuilting ${SRC})
-
-FOREACH(_SRC IN ITEMS ${SRC})
-    GET_FILENAME_COMPONENT(SRC "${_SRC}" PATH)
-    STRING(REPLACE "${PROJECT_SOURCE_DIR}/src" "src" _GRP_PATH "${SRC}")
-    STRING(REPLACE "/" "\\" _GRP_PATH "${_GRP_PATH}")
-    SOURCE_GROUP("${_GRP_PATH}" FILES "${_SRC}")
-ENDFOREACH()
+include_directories(src)
+add_executable(ImageQuilting
+        src/main.cpp
+        src/imageQuilting.cpp
+        src/imageQuilting.h
+        src/tsc_x86.h)
 
 # We can use different compiler flags
 set(CompileFlags "-g" "-O3" "-ffast-math" "-march=native")
@@ -28,8 +23,8 @@ add_definitions(-D_CompileFlags="-O3-ffast-math-march=native") # pass variable _
 #set(CompileFlags "-g" "-O1")
 #add_definitions(-D_CompileFlags="-O1")
 
-SET_PROPERTY(TARGET ImageQuilting PROPERTY CXX_STANDARD 17)
-SET_PROPERTY(TARGET ImageQuilting PROPERTY CXX_STANDARD_REQUIRED ON)
+target_compile_definitions(AGZUtils PUBLIC AGZ_UTILS_SSE)
+target_compile_options(ImageQuilting PRIVATE ${CompileFlags})
 
-TARGET_INCLUDE_DIRECTORIES(ImageQuilting PUBLIC "${PROJECT_SOURCE_DIR}/lib/cxxopts")
-TARGET_LINK_LIBRARIES(ImageQuilting PUBLIC AGZUtils)
+include_directories(ImageQuilting PUBLIC "${PROJECT_SOURCE_DIR}/lib/cxxopts")
+target_link_libraries(ImageQuilting PUBLIC AGZUtils)

@@ -82,12 +82,26 @@ def runtime_plot(filenames_and_labels, cpu, compiler, output_filename):
 if __name__ == "__main__":
     # Filenames, cpu, and compiler for the plots
     filenames_and_labels = [
-        ("default_-O1_06-06-19-26-46.txt", "Default Low"),
-        ("default_-O3-fno-tree-vectorize_06-06-19-26-47.txt", "Default Mid"),
-        ("default_-O3-ffast-math-march=native_06-06-19-26-48.txt", "Default High"),
+        ("baseline_-O1.txt", "Baseline Low"),
+        ("baseline_-O3-fno-tree-vectorize.txt", "Baseline Mid"),
+        ("baseline_-O3-ffast-math-march=native.txt", "Baseline High"),
+
+        ("default_-O1_06-06-23-50-22.txt", "Default Low"),
+        ("default_-O3-fno-tree-vectorize_06-07-00-04-54.txt", "Default Mid"),
+        ("default_-O3-ffast-math-march=native_06-07-00-17-47.txt", "Default High"),
+
+        ("StdC_Algorithm_-O1_06-06-23-57-34.txt", "StdC_Algo Low"),
+        ("StdC_Algorithm_-O3-fno-tree-vectorize_06-07-00-11-58.txt", "StdC_Algo Mid"),
+        ("StdC_Algorithm_-O3-ffast-math-march=native_06-07-00-22-13.txt", "StdC_Algo High"),
+
+        ("StdC_Algorithm_ChannelsUnroll_-O1_06-07-00-01-58.txt", "StdC_Unroll Low"),
+        ("StdC_Algorithm_ChannelsUnroll_-O3-fno-tree-vectorize_06-07-00-14-51.txt", "StdC_Unroll Mid"),
+        ("StdC_Algorithm_ChannelsUnroll_-O3-ffast-math-march=native_06-07-00-23-12.txt", "StdC_Unroll High"),
+
+        ("StdC_Algorithm_Vectorize_-O3-ffast-math-march=native_06-07-00-25-40.txt", "StdC_Vectorize High"),
     ]
-    cpu = "Intel® Core™ i7-1068NG7 @2.3 GHz"
-    compiler = "Apple clang 14.0.0"
+    cpu = "Intel(R) Core(TM) i7-10510U @1.8GHz"
+    compiler = "GCC 12.2.0"
 
     # Generate the desired plots
     performance_plot(filenames_and_labels, cpu, compiler, "my_performance.png")
