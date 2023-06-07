@@ -1,6 +1,6 @@
 #pragma once
 
-#include "../ImageQuilting.h"
+#include "../image_quilting.h"
 
 #include <string>
 #include <vector>

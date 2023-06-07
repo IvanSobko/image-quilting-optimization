@@ -1,18 +1,15 @@
 #pragma once
 
-#include "ImgData.h"
+#include "img_data.h"
 
 class CompOverlapOptimiz {
-   public:
-    enum OptType {
-        opt_indices = 0,
-        opt_algorithm = 1,
-        opt_unroll = 2,
-        opt_unroll_max = 3,
-        opt_vectorize = 4,
-        opt_unroll_chnls = 5,
-    };
-    const static int numOptTypes = 3;
+public:
+    CompOverlapOptimiz() = delete;
+    CompOverlapOptimiz(ImgData* data) {
+        mData = data;
+        overlapHeight = mData->block_h / 6;
+        overlapWidth = mData->block_w / 6;
+    }
 
     // Algorithm test functions
     static double BasicOpt(ImgData* imgData, int seed);
@@ -36,15 +33,6 @@ class CompOverlapOptimiz {
     volatile static void VectorizeOptComponent(ImgData* imgData, int seed);
 #endif
 
-    CompOverlapOptimiz() = delete;
-    CompOverlapOptimiz(ImgData* data) {
-        mData = data;
-        overlapHeight = mData->block_h / 6;
-        overlapWidth = mData->block_w / 6;
-    }
-
-    // Synthesize a new texture
-    void Synthesis();
     // Synthesize a new texture with the given seed
     void Synthesis(int seed, int opt);
 
@@ -57,9 +45,24 @@ class CompOverlapOptimiz {
 
     int64_t getFlopCount() const;
 
-   private:
-    // Keep a pointer to the input image data
-    ImgData* mData;
+private:
+    enum OptType {
+        opt_indices = 0,
+        opt_algorithm = 1,
+        opt_unroll = 2,
+        opt_unroll_max = 3,
+        opt_vectorize = 4,
+        opt_unroll_chnls = 5,
+    };
+
+    // Struct to sort blocks by their l2 norm
+    struct BlockValue {
+        int y, x;
+        double value;
+    };
+
+    // Enum representing the type of overlap between blocks
+    enum OverlapType { vertical = 0, horizontal = 1, both = 2 };
 
     // Write a block from the source data to the output data given their upper-left corners
     void WriteBlock(int dstY, int dstX, int srcY, int srcX);
@@ -90,15 +93,6 @@ class CompOverlapOptimiz {
     double ComputeOverlapVectorize(int overlapType, int dstY, int dstX, int srcY, int srcX);
 #endif
 
-    // Struct to sort blocks by their l2 norm
-    struct BlockValue {
-        int y, x;
-        double value;
-    };
-
-    // Enum representing the type of overlap between blocks
-    enum OverlapType { vertical = 0, horizontal = 1, both = 2 };
-
     // Place an edge overlap block with respect to the given block of the output image
     void PlaceEdgeOverlapBlockWithMinCut(int blockY, int blockX, int maxBlockX, int maxBlockY,
                                          double errorTolerance);
@@ -111,4 +105,7 @@ class CompOverlapOptimiz {
 
     int64_t flopCount = 0;
     int opt_type = 0;
+
+    // Keep a pointer to the input image data
+    ImgData* mData;
 };

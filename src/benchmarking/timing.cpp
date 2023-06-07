@@ -8,7 +8,7 @@
 #include <iostream>
 #include <fstream>
 
-#include "PngReader.h"
+#include "png_reader.h"
 #include "tsc_x86.h"
 
 //TODO: should we modify cycles required? 1e8 is value from homeworks

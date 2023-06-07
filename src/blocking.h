@@ -1,49 +1,37 @@
 #pragma once
 
-#include "ImgData.h"
-#include "Testing.h"
+#include "img_data.h"
+#include "testing.h"
 
 class Blocking {
-   public:
-
+public:
     // Struct to keep track of blocks and an associated value
-    struct BlockValue{
+    struct BlockValue {
         int y, x;
         double value;
     };
 
     // Enum representing the type of overlap between blocks
-    enum OverlapType {
-        vertical = 0,
-        horizontal = 1,
-        both = 2
-    };
+    enum OverlapType { vertical = 0, horizontal = 1, both = 2 };
 
     // Enum representing the different optimization variations
-    enum OptType {
-        none = 0,
-        refactor = 1,
-        blocking = 2
-    };
+    enum OptType { none = 0, refactor = 1, blocking = 2 };
     OptType optType = none;
 
     // Set custom image quilting parameters
-    static void SetParameters(ImgData * imgData);
+    static void SetParameters(ImgData* imgData);
 
     // Get the parameters required to call a component test function
-    static void GetComponentParameters(
-        ImgData* imgData,
-        int & dstY, int & dstX, int & maxBlockY, int & maxBlockX, int & overlapType,
-        BlockValue** blockValues);
+    static void GetComponentParameters(ImgData* imgData, int& dstY, int& dstX, int& maxBlockY, int& maxBlockX,
+                                       int& overlapType, BlockValue** blockValues);
 
     // Refactor computing the block values into its own function
     static void Base(ImgData* imgData, int seed);
     static void BaseComponent(ImgData* imgData, int seed);
 
     // Refactor computing the potential block errors to iterate over the output overlap region exactly once
-    void ComputeBlockValuesRefactor(
-        int dstY, int dstX, int maxBlockY, int maxBlockX, int overlapType,
-        BlockValue* blockValues);
+    void ComputeBlockValuesRefactor(int dstY, int dstX, int maxBlockY, int maxBlockX, int overlapType,
+                                    BlockValue* blockValues);
     static void Refactor(ImgData* imgData, int seed);
     static void RefactorComponent(ImgData* imgData, int seed);
 
@@ -51,26 +39,22 @@ class Blocking {
     int targetBlockSizeY = 1;
     int targetBlockSizeX = 1;
     void SetBlockSize(int blockSizeY, int blockSizeX);
-    void ComputeBlockValuesBlocked(
-        int dstY, int dstX, int maxBlockY, int maxBlockX, int overlapType,
-        BlockValue* blockValues);
+    void ComputeBlockValuesBlocked(int dstY, int dstX, int maxBlockY, int maxBlockX, int overlapType,
+                                   BlockValue* blockValues);
     static Testing::TestFunction Blocked(int blockSize);
     static void BlockedComponent(ImgData* imgData, int seed);
 
     // Helper function to block the vertical overlap
-    void BlockingHelperVertical(int iMin, int iMax, int jMin, int jMax,
-                                int dstY, int overlapXStart, int maxBlockY, int maxBlockX, int srcYOffset,
-                                BlockValue * blockValues);
+    void BlockingHelperVertical(int iMin, int iMax, int jMin, int jMax, int dstY, int overlapXStart,
+                                int maxBlockY, int maxBlockX, int srcYOffset, BlockValue* blockValues);
 
     // Helper function to block the horizontal overlap
-    void BlockingHelperHorizontal(int iMin, int iMax, int jMin, int jMax,
-                                  int overlapYStart, int overlapXStart, int maxBlockY, int maxBlockX,
-                                  BlockValue * blockValues);
+    void BlockingHelperHorizontal(int iMin, int iMax, int jMin, int jMax, int overlapYStart,
+                                  int overlapXStart, int maxBlockY, int maxBlockX, BlockValue* blockValues);
 
     // Compute the block values for a given destination block
-    void ComputeBlockValues(
-        int dstY, int dstX, int maxBlockY, int maxBlockX, int overlapType,
-        BlockValue* blockValues);
+    void ComputeBlockValues(int dstY, int dstX, int maxBlockY, int maxBlockX, int overlapType,
+                            BlockValue* blockValues);
 
     Blocking() = delete;
     Blocking(ImgData* data);
@@ -89,8 +73,7 @@ class Blocking {
 
     int64_t getFlopCount() const;
 
-   private:
-
+private:
     // Keep a pointer to the input image data
     ImgData* mData;
     int overlapWidth = 0;
@@ -109,7 +92,8 @@ class Blocking {
     double ComputeOverlap(int overlapType, int dstY, int dstX, int srcY, int srcX);
 
     // Place an edge overlap block with respect to the given block of the output image
-    void PlaceEdgeOverlapBlockWithMinCut(int blockY, int blockX, int maxBlockX, int maxBlockY, double errorTolerance);
+    void PlaceEdgeOverlapBlockWithMinCut(int blockY, int blockX, int maxBlockX, int maxBlockY,
+                                         double errorTolerance);
 
     // Synthesize a new texture by randomly choosing blocks satisfying constraints and applying minimum cuts
     void OverlapConstraintsWithMinCut();

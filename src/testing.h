@@ -1,16 +1,16 @@
 #pragma once
 
-#include <iostream>
-#include <vector>
+#include <cmath>
 #include <filesystem>
 #include <functional>
-#include <cmath>
-#include <tuple>
+#include <iostream>
 #include <map>
+#include <tuple>
+#include <vector>
 
-#include "PngReader.h"
-#include "ImageQuilting.h"
 #include "benchmarking/tsc_x86.h"
+#include "image_quilting.h"
+#include "png_reader.h"
 
 // Defines for timing
 #define CYCLES_REQUIRED 1e8
@@ -18,7 +18,7 @@
 #define REP 1
 
 class Testing {
-   public:
+public:
     // Construct a Testing object with the given input files
     Testing(int seed);
     // Seed getter and setter
@@ -30,7 +30,7 @@ class Testing {
     typedef std::function<void(ImgData* imgData)> ImgDataFunction;
 
     // Set the image quilting parameters function
-    void SetParameterFunction(const ImgDataFunction & parameterFunction);
+    void SetParameterFunction(const ImgDataFunction& parameterFunction);
     // Run the image quilting algorithm on all the input files to generate the output files
     void GenerateOutputFiles();
     // Functional wrapper for the image quilting algorithm
@@ -38,14 +38,14 @@ class Testing {
     // Functional wrapper for the empty image quilting algorithm
     static void EmptyImageQuiltingFunction(ImgData* imgData, int seed);
     // Register a function to test
-    void RegisterTestFunction(const TestFunction & testFunction, std::string label);
+    void RegisterTestFunction(const TestFunction& testFunction, std::string label);
     // Register a component function to test
-    void RegisterComponentTestFunction(
-        const TestFunction & baseFunction, const TestFunction & testFunction, std::string label);
+    void RegisterComponentTestFunction(const TestFunction& baseFunction, const TestFunction& testFunction,
+                                       std::string label);
     // Test the correctness of all the registered functions on every input
     void TestCorrectness();
     // Set the input for the TestCorrectnessAndTiming test suite
-    void SetCorrectnessAndTimingInput(const std::string & label);
+    void SetCorrectnessAndTimingInput(const std::string& label);
     // Test the correctness and timing of all the registered test functions against the specified input
     void TestCorrectnessAndTiming(bool stabilize);
     // Test the correctness and timing of all the registered component test functions against the specified input
@@ -53,9 +53,9 @@ class Testing {
     // Runs a given collection of functions to be timed by Intel Advisor
     void ComponentsTimingAdvisor();
     // Adds a function we wanted tested by Intel Advisor in ComponentsTimingAdvisor()
-    void RegisterTestingComponentAdvisor(const TestFunction & testFunction,const std::string label);
+    void RegisterTestingComponentAdvisor(const TestFunction& testFunction, const std::string label);
 
-   private:
+private:
     const std::string inputDirectory = "./testing/input/";
     const std::string outputDirectory = "./testing/output/";
     int seed = 0;
@@ -68,13 +68,13 @@ class Testing {
     int testingInputIndex = 0;
 
     // Get the output file path
-    std::string GetOutputfile(const std::filesystem::path & input);
+    std::string GetOutputfile(const std::filesystem::path& input);
     // Default image quilting algorithm parameters
     static void DefaultParameters(ImgData* imgData);
     // Call the parameter function to set the image quilting algorithm parameters
     void SetImageQuiltingParameters(ImgData* imgData);
     // Compute the l2 error between two images
-    static double ComputeError(unsigned char ** image0, unsigned char ** image1, int height, int width);
+    static double ComputeError(unsigned char** image0, unsigned char** image1, int height, int width);
     // Count the number of cycles of a testFunction call
     static double rdtsc(const TestFunction& testFunction, ImgData* inputData, int seed);
 };

@@ -1,4 +1,4 @@
-#include "CompOverlapOptimiz.h"
+#include "comp_overlap_optimiz.h"
 #include <algorithm>
 #include <cfloat>
 #include <cstdlib>
@@ -123,13 +123,6 @@ volatile void CompOverlapOptimiz::VectorizeOptComponent(ImgData* imgData, int se
     }
 }
 #endif
-
-// Synthesize a new texture
-void CompOverlapOptimiz::Synthesis() {
-    flopCount = 0;
-    SeedRandomNumberGenerator();
-    OverlapConstraintsWithMinCut();
-}
 
 // Synthesize a new texture with the given seed
 void CompOverlapOptimiz::Synthesis(int seed, int opt) {
@@ -525,7 +518,8 @@ double CompOverlapOptimiz::ComputeOverlapAlgImpr(int overlapType, int dstY, int 
     return std::sqrt(l2norm);
 }
 
-double CompOverlapOptimiz::ComputeOverlapUnrollChannels(int overlapType, int dstY, int dstX, int srcY, int srcX) {
+double CompOverlapOptimiz::ComputeOverlapUnrollChannels(int overlapType, int dstY, int dstX, int srcY,
+                                                        int srcX) {
     // Compute the overlap region that we are working with
     int overlapXStart = overlapType != horizontal ? (dstX - overlapWidth) : dstX;
     int overlapYStart = overlapType != vertical ? (dstY - overlapHeight) : dstY;
@@ -545,14 +539,14 @@ double CompOverlapOptimiz::ComputeOverlapUnrollChannels(int overlapType, int dst
             unsigned char* outputRow = mData->output_d[overlapYStart + i] + dstXStart;
             unsigned char* srcRow = mData->data[srcY + i] + srcXStart;
             for (int j = 0; j < horizontalBlockWidthLocal; j++) {
-                int rDst = outputRow[j*4];
-                int gDst = outputRow[j*4+1];
-                int bDst = outputRow[j*4+2];
-                int aDst = outputRow[j*4+3];
-                int rSrc = srcRow[j*4];
-                int gSrc = srcRow[j*4+1];
-                int bSrc = srcRow[j*4+2];
-                int aSrc = srcRow[j*4+3];
+                int rDst = outputRow[j * 4];
+                int gDst = outputRow[j * 4 + 1];
+                int bDst = outputRow[j * 4 + 2];
+                int aDst = outputRow[j * 4 + 3];
+                int rSrc = srcRow[j * 4];
+                int gSrc = srcRow[j * 4 + 1];
+                int bSrc = srcRow[j * 4 + 2];
+                int aSrc = srcRow[j * 4 + 3];
 
                 int rDiff = rDst - rSrc;
                 int gDiff = gDst - gSrc;
@@ -582,14 +576,14 @@ double CompOverlapOptimiz::ComputeOverlapUnrollChannels(int overlapType, int dst
             unsigned char* outputRow = mData->output_d[dstY + i] + dstXStart;
             unsigned char* srcRow = mData->data[srcYStart + i] + srcXStart;
             for (int j = 0; j < overlapWidth; j++) {
-                int rDst = outputRow[j*4];
-                int gDst = outputRow[j*4+1];
-                int bDst = outputRow[j*4+2];
-                int aDst = outputRow[j*4+3];
-                int rSrc = srcRow[j*4];
-                int gSrc = srcRow[j*4+1];
-                int bSrc = srcRow[j*4+2];
-                int aSrc = srcRow[j*4+3];
+                int rDst = outputRow[j * 4];
+                int gDst = outputRow[j * 4 + 1];
+                int bDst = outputRow[j * 4 + 2];
+                int aDst = outputRow[j * 4 + 3];
+                int rSrc = srcRow[j * 4];
+                int gSrc = srcRow[j * 4 + 1];
+                int bSrc = srcRow[j * 4 + 2];
+                int aSrc = srcRow[j * 4 + 3];
 
                 int rDiff = rDst - rSrc;
                 int gDiff = gDst - gSrc;
@@ -631,27 +625,30 @@ double CompOverlapOptimiz::ComputeOverlapUnroll(int overlapType, int dstY, int d
         for (int i = 0; i < overlapHeight; i++) {
             unsigned char* outputRow = mData->output_d[overlapYStart + i] + dstXStart;
             unsigned char* srcRow = mData->data[srcY + i] + srcXStart;
-            int j=0;
-            int sum1 = 0; int sum2 = 0; int sum3 = 0; int sum4 = 0;
-            for (j = 0; j < horizontalBlockWidthLocal-1; j += 2) {
-                int pos = j*4;
+            int j = 0;
+            int sum1 = 0;
+            int sum2 = 0;
+            int sum3 = 0;
+            int sum4 = 0;
+            for (j = 0; j < horizontalBlockWidthLocal - 1; j += 2) {
+                int pos = j * 4;
                 int rDst1 = outputRow[pos];
-                int gDst1 = outputRow[pos+1];
-                int bDst1 = outputRow[pos+2];
-                int aDst1 = outputRow[pos+3];
+                int gDst1 = outputRow[pos + 1];
+                int bDst1 = outputRow[pos + 2];
+                int aDst1 = outputRow[pos + 3];
                 int rSrc1 = srcRow[pos];
-                int gSrc1 = srcRow[pos+1];
-                int bSrc1 = srcRow[pos+2];
-                int aSrc1 = srcRow[pos+3];
+                int gSrc1 = srcRow[pos + 1];
+                int bSrc1 = srcRow[pos + 2];
+                int aSrc1 = srcRow[pos + 3];
 
-                int rDst2 = outputRow[pos+4];
-                int gDst2 = outputRow[pos+5];
-                int bDst2 = outputRow[pos+6];
-                int aDst2 = outputRow[pos+7];
-                int rSrc2 = srcRow[pos+4];
-                int gSrc2 = srcRow[pos+5];
-                int bSrc2 = srcRow[pos+6];
-                int aSrc2 = srcRow[pos+7];
+                int rDst2 = outputRow[pos + 4];
+                int gDst2 = outputRow[pos + 5];
+                int bDst2 = outputRow[pos + 6];
+                int aDst2 = outputRow[pos + 7];
+                int rSrc2 = srcRow[pos + 4];
+                int gSrc2 = srcRow[pos + 5];
+                int bSrc2 = srcRow[pos + 6];
+                int aSrc2 = srcRow[pos + 7];
 
                 int rDiff1 = rDst1 - rSrc1;
                 int gDiff1 = gDst1 - gSrc1;
@@ -679,15 +676,15 @@ double CompOverlapOptimiz::ComputeOverlapUnroll(int overlapType, int dstY, int d
                 sum4 += bNorm2 + aNorm2;
             }
             l2norm += sum1 + sum2 + sum3 + sum4;
-            for (;j < horizontalBlockWidthLocal; j++) {
-                int rDst = outputRow[j*4];
-                int gDst = outputRow[j*4+1];
-                int bDst = outputRow[j*4+2];
-                int aDst = outputRow[j*4+3];
-                int rSrc = srcRow[j*4];
-                int gSrc = srcRow[j*4+1];
-                int bSrc = srcRow[j*4+2];
-                int aSrc = srcRow[j*4+3];
+            for (; j < horizontalBlockWidthLocal; j++) {
+                int rDst = outputRow[j * 4];
+                int gDst = outputRow[j * 4 + 1];
+                int bDst = outputRow[j * 4 + 2];
+                int aDst = outputRow[j * 4 + 3];
+                int rSrc = srcRow[j * 4];
+                int gSrc = srcRow[j * 4 + 1];
+                int bSrc = srcRow[j * 4 + 2];
+                int aSrc = srcRow[j * 4 + 3];
 
                 int rDiff = rDst - rSrc;
                 int gDiff = gDst - gSrc;
@@ -716,27 +713,30 @@ double CompOverlapOptimiz::ComputeOverlapUnroll(int overlapType, int dstY, int d
         for (int i = 0; i < verticalBlockHeightLocal; i++) {
             unsigned char* outputRow = mData->output_d[dstY + i] + dstXStart;
             unsigned char* srcRow = mData->data[srcYStart + i] + srcXStart;
-            int j=0;
-            int sum1 = 0; int sum2 = 0; int sum3 = 0; int sum4 = 0;
-            for (j = 0; j < overlapWidth-1; j += 2) {
-                int pos = j*4;
+            int j = 0;
+            int sum1 = 0;
+            int sum2 = 0;
+            int sum3 = 0;
+            int sum4 = 0;
+            for (j = 0; j < overlapWidth - 1; j += 2) {
+                int pos = j * 4;
                 int rDst1 = outputRow[pos];
-                int gDst1 = outputRow[pos+1];
-                int bDst1 = outputRow[pos+2];
-                int aDst1 = outputRow[pos+3];
+                int gDst1 = outputRow[pos + 1];
+                int bDst1 = outputRow[pos + 2];
+                int aDst1 = outputRow[pos + 3];
                 int rSrc1 = srcRow[pos];
-                int gSrc1 = srcRow[pos+1];
-                int bSrc1 = srcRow[pos+2];
-                int aSrc1 = srcRow[pos+3];
+                int gSrc1 = srcRow[pos + 1];
+                int bSrc1 = srcRow[pos + 2];
+                int aSrc1 = srcRow[pos + 3];
 
-                int rDst2 = outputRow[pos+4];
-                int gDst2 = outputRow[pos+5];
-                int bDst2 = outputRow[pos+6];
-                int aDst2 = outputRow[pos+7];
-                int rSrc2 = srcRow[pos+4];
-                int gSrc2 = srcRow[pos+5];
-                int bSrc2 = srcRow[pos+6];
-                int aSrc2 = srcRow[pos+7];
+                int rDst2 = outputRow[pos + 4];
+                int gDst2 = outputRow[pos + 5];
+                int bDst2 = outputRow[pos + 6];
+                int aDst2 = outputRow[pos + 7];
+                int rSrc2 = srcRow[pos + 4];
+                int gSrc2 = srcRow[pos + 5];
+                int bSrc2 = srcRow[pos + 6];
+                int aSrc2 = srcRow[pos + 7];
 
                 int rDiff1 = rDst1 - rSrc1;
                 int gDiff1 = gDst1 - gSrc1;
@@ -764,15 +764,15 @@ double CompOverlapOptimiz::ComputeOverlapUnroll(int overlapType, int dstY, int d
                 sum4 += bNorm2 + aNorm2;
             }
             l2norm += sum1 + sum2 + sum3 + sum4;
-            for (;j < overlapWidth; j++) {
-                int rDst = outputRow[j*4];
-                int gDst = outputRow[j*4+1];
-                int bDst = outputRow[j*4+2];
-                int aDst = outputRow[j*4+3];
-                int rSrc = srcRow[j*4];
-                int gSrc = srcRow[j*4+1];
-                int bSrc = srcRow[j*4+2];
-                int aSrc = srcRow[j*4+3];
+            for (; j < overlapWidth; j++) {
+                int rDst = outputRow[j * 4];
+                int gDst = outputRow[j * 4 + 1];
+                int bDst = outputRow[j * 4 + 2];
+                int aDst = outputRow[j * 4 + 3];
+                int rSrc = srcRow[j * 4];
+                int gSrc = srcRow[j * 4 + 1];
+                int bSrc = srcRow[j * 4 + 2];
+                int aSrc = srcRow[j * 4 + 3];
 
                 int rDiff = rDst - rSrc;
                 int gDiff = gDst - gSrc;
@@ -815,9 +815,12 @@ double CompOverlapOptimiz::ComputeOverlapUnrollMax(int overlapType, int dstY, in
         for (int i = 0; i < overlapHeight; i++) {
             unsigned char* outputRow = mData->output_d[overlapYStart + i] + dstXStart;
             unsigned char* srcRow = mData->data[srcY + i] + srcXStart;
-            int norm0 = 0; int norm1 = 0; int norm2 = 0; int norm3 = 0;
+            int norm0 = 0;
+            int norm1 = 0;
+            int norm2 = 0;
+            int norm3 = 0;
             int j;
-            for (j = 0; j < horizontalBlockWidthLocal-3; j+=4) {
+            for (j = 0; j < horizontalBlockWidthLocal - 3; j += 4) {
                 int rDiff1 = outputRow[0] - srcRow[0];
                 int gDiff1 = outputRow[1] - srcRow[1];
                 int bDiff1 = outputRow[2] - srcRow[2];
@@ -866,7 +869,7 @@ double CompOverlapOptimiz::ComputeOverlapUnrollMax(int overlapType, int dstY, in
                 outputRow += 16;
                 srcRow += 16;
             }
-            for (;j < horizontalBlockWidthLocal; j++) {
+            for (; j < horizontalBlockWidthLocal; j++) {
                 int rDst = *(outputRow++);
                 int rSrc = *(srcRow++);
                 int gDst = *(outputRow++);
@@ -896,7 +899,7 @@ double CompOverlapOptimiz::ComputeOverlapUnrollMax(int overlapType, int dstY, in
             unsigned char* outputRow = mData->output_d[dstY + i] + dstXStart;
             unsigned char* srcRow = mData->data[srcYStart + i] + srcXStart;
             int j;
-            for (j = 0; j < overlapWidth-3; j+=4) {
+            for (j = 0; j < overlapWidth - 3; j += 4) {
                 int rDiff1 = outputRow[0] - srcRow[0];
                 int gDiff1 = outputRow[1] - srcRow[1];
                 int bDiff1 = outputRow[2] - srcRow[2];
@@ -992,29 +995,31 @@ double CompOverlapOptimiz::ComputeOverlapVectorize(int overlapType, int dstY, in
             for (j = 0; j < range; j += 4) {
                 // load 16 8-bit integers(chars) and convert it to 16 16-bit integers
                 // cycle 1
-                __m128i dst = _mm_load_si128((__m128i*)(outputRow + j * 4)); // lat:6, tp: 0.5
-                __m128i src = _mm_load_si128((__m128i*)(srcRow + j * 4));   // lat:6, tp: 0.5
+                __m128i dst = _mm_load_si128((__m128i*)(outputRow + j * 4));  // lat:6, tp: 0.5
+                __m128i src = _mm_load_si128((__m128i*)(srcRow + j * 4));     // lat:6, tp: 0.5
                 //cycle 6
-                __m256i dst_16bit = _mm256_cvtepu8_epi16(dst); // lat:3, tp: 1
-                __m256i src_16bit = _mm256_cvtepu8_epi16(src); // lat:3, tp: 1
+                __m256i dst_16bit = _mm256_cvtepu8_epi16(dst);  // lat:3, tp: 1
+                __m256i src_16bit = _mm256_cvtepu8_epi16(src);  // lat:3, tp: 1
 
                 //cycle 10
-                __m256i diff = _mm256_sub_epi16(dst_16bit, src_16bit); //lat: 1, tp:0.3
+                __m256i diff = _mm256_sub_epi16(dst_16bit, src_16bit);  //lat: 1, tp:0.3
 
                 //cycle 11
-                __m256i norm = _mm256_madd_epi16(diff, diff); //lat 5, tp: 0.5
+                __m256i norm = _mm256_madd_epi16(diff, diff);  //lat 5, tp: 0.5
 
                 // Start calculation of the sum of all norm elements. Overflow will wrap around
                 // cycle 16
-                __m128i norm_low = _mm256_extracti128_si256(norm,1);//lat 3, tp:1
-                __m128i norm_high = _mm256_castsi256_si128(norm); //lat 0
+                __m128i norm_low = _mm256_extracti128_si256(norm, 1);  //lat 3, tp:1
+                __m128i norm_high = _mm256_castsi256_si128(norm);      //lat 0
 
                 //cycle 19
-                __m128i norm_sum1  = _mm_add_epi32(norm_low, norm_high);//lat 1, tp: 0.3
+                __m128i norm_sum1 = _mm_add_epi32(norm_low, norm_high);  //lat 1, tp: 0.3
                 //cycle 20
-                __m128i norm_sum2  = _mm_add_epi32(norm_sum1,_mm_unpackhi_epi64(norm_sum1,norm_sum1)); //lat:1 + 1, tp: 1 + 0.3
+                __m128i norm_sum2 = _mm_add_epi32(
+                    norm_sum1, _mm_unpackhi_epi64(norm_sum1, norm_sum1));  //lat:1 + 1, tp: 1 + 0.3
                 //cycle 22
-                __m128i norm_sum3  = _mm_add_epi32(norm_sum2,_mm_shuffle_epi32(norm_sum2,1)); //lat:1 + 1, tp: 1 + 0.3
+                __m128i norm_sum3 =
+                    _mm_add_epi32(norm_sum2, _mm_shuffle_epi32(norm_sum2, 1));  //lat:1 + 1, tp: 1 + 0.3
 
                 l2norm += _mm_cvtsi128_si32(norm_sum3);
             }
@@ -1044,37 +1049,39 @@ double CompOverlapOptimiz::ComputeOverlapVectorize(int overlapType, int dstY, in
             for (j = 0; j < range; j += 4) {
                 // load 16 8-bit integers(chars) and convert it to 16 16-bit integers
                 //cycle 1
-                __m128i dst = _mm_load_si128((__m128i*)(outputRow + j * 4)); // lat:6, tp: 0.5
-                __m128i src = _mm_load_si128((__m128i*)(srcRow + j * 4));   // lat:6, tp: 0.5
+                __m128i dst = _mm_load_si128((__m128i*)(outputRow + j * 4));  // lat:6, tp: 0.5
+                __m128i src = _mm_load_si128((__m128i*)(srcRow + j * 4));     // lat:6, tp: 0.5
                 //cycle 6
-                __m256i dst_16bit = _mm256_cvtepu8_epi16(dst); // lat:3, tp: 1
-                __m256i src_16bit = _mm256_cvtepu8_epi16(src); // lat:3, tp: 1
+                __m256i dst_16bit = _mm256_cvtepu8_epi16(dst);  // lat:3, tp: 1
+                __m256i src_16bit = _mm256_cvtepu8_epi16(src);  // lat:3, tp: 1
                 //cycle 10
-                __m256i diff = _mm256_sub_epi16(dst_16bit, src_16bit); //lat: 1, tp:0.3
+                __m256i diff = _mm256_sub_epi16(dst_16bit, src_16bit);  //lat: 1, tp:0.3
                 //cycle 11
-                __m256i norm = _mm256_madd_epi16(diff, diff); //lat 5, tp: 0.5
+                __m256i norm = _mm256_madd_epi16(diff, diff);  //lat 5, tp: 0.5
 
                 // Start calculation of the sum of all norm elements. Overflow will wrap around
                 // cycle 16
-                __m128i norm_low = _mm256_extracti128_si256(norm,1);//lat 3, tp:1
-                __m128i norm_high = _mm256_castsi256_si128(norm); //lat 0
+                __m128i norm_low = _mm256_extracti128_si256(norm, 1);  //lat 3, tp:1
+                __m128i norm_high = _mm256_castsi256_si128(norm);      //lat 0
 
                 //cycle 19
-                __m128i norm_sum1  = _mm_add_epi32(norm_low, norm_high);//lat 1, tp: 0.3
+                __m128i norm_sum1 = _mm_add_epi32(norm_low, norm_high);  //lat 1, tp: 0.3
                 //cycle 20
-                __m128i norm_sum2  = _mm_add_epi32(norm_sum1,_mm_unpackhi_epi64(norm_sum1,norm_sum1)); //lat:1 + 1, tp: 1 + 0.3
+                __m128i norm_sum2 = _mm_add_epi32(
+                    norm_sum1, _mm_unpackhi_epi64(norm_sum1, norm_sum1));  //lat:1 + 1, tp: 1 + 0.3
                 //cycle 22
-                __m128i norm_sum3  = _mm_add_epi32(norm_sum2,_mm_shuffle_epi32(norm_sum2,1)); //lat:1 + 1, tp: 1 + 0.3
+                __m128i norm_sum3 =
+                    _mm_add_epi32(norm_sum2, _mm_shuffle_epi32(norm_sum2, 1));  //lat:1 + 1, tp: 1 + 0.3
 
                 int norm_sum = _mm_cvtsi128_si32(norm_sum3);
 
-                l2norm += _mm_cvtsi128_si32(norm_sum3);// + norm2_sum;
+                l2norm += _mm_cvtsi128_si32(norm_sum3);  // + norm2_sum;
             }
 
             for (; j < overlapWidth; j++) {
                 for (int k = 0; k < CHANNEL_NUM; k++) {
                     int x0 = *(outputRow + 4 * j + k);
-                    int x1 = *(srcRow+ 4 * j + k);
+                    int x1 = *(srcRow + 4 * j + k);
                     int norm = x0 - x1;
                     l2norm += norm * norm;
                 }

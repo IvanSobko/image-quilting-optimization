@@ -7,22 +7,22 @@ set(CMAKE_CXX_STANDARD 17)
 include_directories(src)
 add_executable(team19
         main.cpp
-        src/PngReader.cpp
-        src/PngReader.h
-        src/ImageQuilting.cpp
-        src/ImageQuilting.h
-        src/AdvanceAlgOptimiz.cpp
-        src/AdvanceAlgOptimiz.h
-        src/CompOverlapOptimiz.cpp
-        src/CompOverlapOptimiz.h
-        src/ImgData.h
-        src/Testing.cpp
-        src/Testing.h
+        src/png_reader.cpp
+        src/png_reader.h
+        src/image_quilting.cpp
+        src/image_quilting.h
+        src/advance_alg_optimiz.cpp
+        src/advance_alg_optimiz.h
+        src/comp_overlap_optimiz.cpp
+        src/comp_overlap_optimiz.h
+        src/img_data.h
+        src/testing.cpp
+        src/testing.h
         src/benchmarking/tsc_x86.h
         src/benchmarking/timing.h
         src/benchmarking/timing.cpp
-        src/Blocking.h
-        src/Blocking.cpp)
+        src/blocking.h
+        src/blocking.cpp)
 
 # We can use different compiler flags
 set(CompileFlags "-g" "-O3" "-ffast-math" "-march=native")

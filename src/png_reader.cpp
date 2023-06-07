@@ -1,8 +1,8 @@
-#include "PngReader.h"
+#include "png_reader.h"
 #include <png.h>
 #include <cstdio>
 #include <cstdlib>
-#include "ImgData.h"
+#include "img_data.h"
 
 // Read a png file into data.data
 // modified code from: https://gist.github.com/niw/5963798

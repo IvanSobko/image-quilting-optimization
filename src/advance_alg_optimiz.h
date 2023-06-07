@@ -1,9 +1,9 @@
 #pragma once
 
-#include "ImgData.h"
+#include "img_data.h"
 
 class AdvanceAlgOptimiz {
-   public:
+public:
     AdvanceAlgOptimiz() = delete;
     AdvanceAlgOptimiz(ImgData* data) {
         mData = data;
@@ -11,8 +11,6 @@ class AdvanceAlgOptimiz {
         overlapWidth = mData->block_w / 6;
     }
 
-    // Seed the random number generator with the system time
-    static void SeedRandomNumberGenerator();
     // Seed the random number generator with a specified seed
     static void SeedRandomNumberGenerator(int seed);
     // Generate a random number in the range [min, max]
@@ -42,27 +40,20 @@ class AdvanceAlgOptimiz {
 
     int64_t calcFlops();
 
-   private:
-    // Keep a pointer to the input image data
-    ImgData* mData;
-    int overlapWidth = 0;
-    int overlapHeight = 0;
-    int64_t flopCount = 0;
-
-    // Write a block from the source data to the output data given their upper-left corners
-    void WriteBlock(int dstY, int dstX, int srcY, int srcX);
-
-    // Same as WriteBlockOverlap, but uses a minimum cut to write the new block
-    void WriteBlockOverlapWithMinCut(int overlapType, int dstY, int dstX, int srcY, int srcX);
+private:
+    // Enum representing the type of overlap between blocks
+    enum OverlapType { vertical = 0, horizontal = 1, both = 2 };
 
     // Struct to sort blocks by their l2 norm
     struct BlockValue {
         int y, x;
         int value = 0;
     };
+    // Write a block from the source data to the output data given their upper-left corners
+    void WriteBlock(int dstY, int dstX, int srcY, int srcX);
 
-    // Enum representing the type of overlap between blocks
-    enum OverlapType { vertical = 0, horizontal = 1, both = 2 };
+    // Same as WriteBlockOverlap, but uses a minimum cut to write the new block
+    void WriteBlockOverlapWithMinCut(int overlapType, int dstY, int dstX, int srcY, int srcX);
 
     // Std C, K unroll, and bounds refactoring optimizations
     void PlaceEdgeOverlapBlockWithMinCut_StdC_KUnroll_BoundsRefactor(int overlapType, int dstY, int dstX,
@@ -141,4 +132,10 @@ class AdvanceAlgOptimiz {
         int bHeight);
     void OverlapConstraintsWithMinCut_StdC_KSrc8Unroll_Vector_BoundsRefactor_LoopReorder_Blocking32();
 #endif
+
+    // Keep a pointer to the input image data
+    ImgData* mData;
+    int overlapWidth = 0;
+    int overlapHeight = 0;
+    int64_t flopCount = 0;
 };

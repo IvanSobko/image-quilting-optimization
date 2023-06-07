@@ -5,7 +5,7 @@
 #include <ctime>
 #include <random>
 
-#include "AdvanceAlgOptimiz.h"
+#include "advance_alg_optimiz.h"
 
 // Custom parameters for testing and tuning
 void AdvanceAlgOptimiz::CustomParameters(ImgData* imgData) {
@@ -38,8 +38,8 @@ int64_t AdvanceAlgOptimiz::calcFlops() {
         (2 * numBlocks + 3);
 
     flopCount += ((mData->output_w - mData->block_w) / wStep) * verticalFlops;
-    flopCount += ((mData->output_h - hStep - mData->block_h) / hStep)
-                 * (horizontalFlops + bothFlops + ((mData->output_w - mData->block_w) / wStep * bothFlops));
+    flopCount += ((mData->output_h - hStep - mData->block_h) / hStep) *
+                 (horizontalFlops + bothFlops + ((mData->output_w - mData->block_w) / wStep * bothFlops));
     flopCount += horizontalFlops;
     flopCount += bothFlops;
     flopCount += (mData->output_w - mData->block_w) / wStep * bothFlops;
@@ -111,7 +111,7 @@ double AdvanceAlgOptimiz::StdC_KSrc4Unroll_BoundsRefactor_LoopReorder_Blocking32
 
 #ifdef __AVX2__
 double AdvanceAlgOptimiz::StdC_KSrc2Unroll_Vector_BoundsRefactor_LoopReorder_Blocking32(ImgData* imgData,
-                                                                                      int seed) {
+                                                                                        int seed) {
     AdvanceAlgOptimiz imageQuilting(imgData);
     SeedRandomNumberGenerator(seed);
     imageQuilting
@@ -120,7 +120,7 @@ double AdvanceAlgOptimiz::StdC_KSrc2Unroll_Vector_BoundsRefactor_LoopReorder_Blo
 }
 
 double AdvanceAlgOptimiz::StdC_KSrc4Unroll_Vector_BoundsRefactor_LoopReorder_Blocking32(ImgData* imgData,
-                                                                                      int seed) {
+                                                                                        int seed) {
     AdvanceAlgOptimiz imageQuilting(imgData);
     SeedRandomNumberGenerator(seed);
     imageQuilting
@@ -129,7 +129,7 @@ double AdvanceAlgOptimiz::StdC_KSrc4Unroll_Vector_BoundsRefactor_LoopReorder_Blo
 }
 
 double AdvanceAlgOptimiz::StdC_KSrc8Unroll_Vector_BoundsRefactor_LoopReorder_Blocking32(ImgData* imgData,
-                                                                                      int seed) {
+                                                                                        int seed) {
     AdvanceAlgOptimiz imageQuilting(imgData);
     SeedRandomNumberGenerator(seed);
     imageQuilting
@@ -137,12 +137,6 @@ double AdvanceAlgOptimiz::StdC_KSrc8Unroll_Vector_BoundsRefactor_LoopReorder_Blo
     return static_cast<double>(imageQuilting.calcFlops());
 }
 #endif
-
-// Seed the random number generator with the system time
-void AdvanceAlgOptimiz::SeedRandomNumberGenerator() {
-    // https://stackoverflow.com/questions/1190870/i-need-to-generate-random-numbers-in-c
-    srand(time(0));
-}
 
 // Seed the random number generator with a specified seed
 void AdvanceAlgOptimiz::SeedRandomNumberGenerator(int seed) {

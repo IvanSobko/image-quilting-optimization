@@ -1,13 +1,13 @@
 #include <cstdlib>
 #include <string>
-#include "ImageQuilting.h"
-#include "PngReader.h"
+#include "image_quilting.h"
+#include "png_reader.h"
 
-#include "Testing.h"
-#include "src/CompOverlapOptimiz.h"
-#include "src/AdvanceAlgOptimiz.h"
+#include "blocking.h"
+#include "src/advance_alg_optimiz.h"
 #include "src/benchmarking/timing.h"
-#include "Blocking.h"
+#include "src/comp_overlap_optimiz.h"
+#include "testing.h"
 
 // input parameters
 std::string input_file = "./gallery/input0.png";
@@ -106,8 +106,10 @@ int main(int argc, char* argv[]) {
         testing.RegisterTestFunction(CompOverlapOptimiz::BasicOpt, "compBasic");
         testing.RegisterTestFunction(CompOverlapOptimiz::AlgOpt, "compBasic+AlgImpr");
         testing.RegisterTestFunction(CompOverlapOptimiz::UnrollOpt, "compBasic+AlgImpr+Unroll");
-        testing.RegisterTestFunction(AdvanceAlgOptimiz::StdC_KUnroll_BoundsRefactor, "Unroll+DividedFunctions");
-        testing.RegisterTestFunction(CompOverlapOptimiz::UnrollMaxOpt, "compBasic+AlgImpr+UnrollTheoreticalMax");
+        testing.RegisterTestFunction(AdvanceAlgOptimiz::StdC_KUnroll_BoundsRefactor,
+                                     "Unroll+DividedFunctions");
+        testing.RegisterTestFunction(CompOverlapOptimiz::UnrollMaxOpt,
+                                     "compBasic+AlgImpr+UnrollTheoreticalMax");
 #ifdef __AVX2__
         testing.RegisterTestFunction(CompOverlapOptimiz::VectorizeOpt, "compBasic+AlgImpr+Unroll+Vectorize");
 #endif
@@ -146,10 +148,13 @@ int main(int argc, char* argv[]) {
 
         testing.RegisterTestingComponentAdvisor(CompOverlapOptimiz::BaseComponent, "default");
         testing.RegisterTestingComponentAdvisor(CompOverlapOptimiz::BasicOptComponent, "compBasic");
-        testing.RegisterTestingComponentAdvisor(CompOverlapOptimiz::UnrollOptComponent, "compBasic+AlgImpr+Unroll");
-        testing.RegisterTestingComponentAdvisor(CompOverlapOptimiz::UnrollMaxOptComponent, "compBasic+AlgImpr+UnrollTheoreticalMax");
+        testing.RegisterTestingComponentAdvisor(CompOverlapOptimiz::UnrollOptComponent,
+                                                "compBasic+AlgImpr+Unroll");
+        testing.RegisterTestingComponentAdvisor(CompOverlapOptimiz::UnrollMaxOptComponent,
+                                                "compBasic+AlgImpr+UnrollTheoreticalMax");
 #ifdef __AVX2__
-        testing.RegisterTestingComponentAdvisor(CompOverlapOptimiz::VectorizeOptComponent, "compBasic+AlgImpr+Unroll+Vectorize");
+        testing.RegisterTestingComponentAdvisor(CompOverlapOptimiz::VectorizeOptComponent,
+                                                "compBasic+AlgImpr+Unroll+Vectorize");
 #endif
         testing.ComponentsTimingAdvisor();
     }
@@ -166,25 +171,34 @@ int main(int argc, char* argv[]) {
             {"StdC_KUnroll_BoundsRefactor", AdvanceAlgOptimiz::StdC_KUnroll_BoundsRefactor},
 
             // TODO: do we need to test all possible block sizes? Maybe we know that some of them are not beneficial?
-            {"StdC_KUnroll_BoundsRefactor_LoopReorder", AdvanceAlgOptimiz::StdC_KUnroll_BoundsRefactor_LoopReorder},
-            {"StdC_KUnroll_BoundsRefactor_LoopReorder_Blocking32", AdvanceAlgOptimiz::StdC_KUnroll_BoundsRefactor_LoopReorder_Blocking32},
-            {"StdC_KUnroll_BoundsRefactor_LoopReorder_Blocking48", AdvanceAlgOptimiz::StdC_KUnroll_BoundsRefactor_LoopReorder_Blocking48},
-            {"StdC_KUnroll_BoundsRefactor_LoopReorder_Blocking64", AdvanceAlgOptimiz::StdC_KUnroll_BoundsRefactor_LoopReorder_Blocking64},
-            {"StdC_KUnroll_BoundsRefactor_LoopReorder_Blocking96", AdvanceAlgOptimiz::StdC_KUnroll_BoundsRefactor_LoopReorder_Blocking96},
-            {"StdC_KUnroll_BoundsRefactor_LoopReorder_Blocking128", AdvanceAlgOptimiz::StdC_KUnroll_BoundsRefactor_LoopReorder_Blocking128},
-            {"StdC_KSrc2Unroll_BoundsRefactor_LoopReorder_Blocking32", AdvanceAlgOptimiz::StdC_KSrc2Unroll_BoundsRefactor_LoopReorder_Blocking32},
-            {"StdC_KSrc4Unroll_BoundsRefactor_LoopReorder_Blocking32", AdvanceAlgOptimiz::StdC_KSrc4Unroll_BoundsRefactor_LoopReorder_Blocking32},
+            {"StdC_KUnroll_BoundsRefactor_LoopReorder",
+             AdvanceAlgOptimiz::StdC_KUnroll_BoundsRefactor_LoopReorder},
+            {"StdC_KUnroll_BoundsRefactor_LoopReorder_Blocking32",
+             AdvanceAlgOptimiz::StdC_KUnroll_BoundsRefactor_LoopReorder_Blocking32},
+            {"StdC_KUnroll_BoundsRefactor_LoopReorder_Blocking48",
+             AdvanceAlgOptimiz::StdC_KUnroll_BoundsRefactor_LoopReorder_Blocking48},
+            {"StdC_KUnroll_BoundsRefactor_LoopReorder_Blocking64",
+             AdvanceAlgOptimiz::StdC_KUnroll_BoundsRefactor_LoopReorder_Blocking64},
+            {"StdC_KUnroll_BoundsRefactor_LoopReorder_Blocking96",
+             AdvanceAlgOptimiz::StdC_KUnroll_BoundsRefactor_LoopReorder_Blocking96},
+            {"StdC_KUnroll_BoundsRefactor_LoopReorder_Blocking128",
+             AdvanceAlgOptimiz::StdC_KUnroll_BoundsRefactor_LoopReorder_Blocking128},
+            {"StdC_KSrc2Unroll_BoundsRefactor_LoopReorder_Blocking32",
+             AdvanceAlgOptimiz::StdC_KSrc2Unroll_BoundsRefactor_LoopReorder_Blocking32},
+            {"StdC_KSrc4Unroll_BoundsRefactor_LoopReorder_Blocking32",
+             AdvanceAlgOptimiz::StdC_KSrc4Unroll_BoundsRefactor_LoopReorder_Blocking32},
 #ifdef __AVX2__
-            {"StdC_KSrc2Unroll_Vector_BoundsRefactor_LoopReorder_Blocking32", AdvanceAlgOptimiz::StdC_KSrc2Unroll_Vector_BoundsRefactor_LoopReorder_Blocking32},
-            {"StdC_KSrc4Unroll_Vector_BoundsRefactor_LoopReorder_Blocking32", AdvanceAlgOptimiz::StdC_KSrc4Unroll_Vector_BoundsRefactor_LoopReorder_Blocking32},
+            {"StdC_KSrc2Unroll_Vector_BoundsRefactor_LoopReorder_Blocking32",
+             AdvanceAlgOptimiz::StdC_KSrc2Unroll_Vector_BoundsRefactor_LoopReorder_Blocking32},
+            {"StdC_KSrc4Unroll_Vector_BoundsRefactor_LoopReorder_Blocking32",
+             AdvanceAlgOptimiz::StdC_KSrc4Unroll_Vector_BoundsRefactor_LoopReorder_Blocking32},
 #endif
         };
 
         // Run on the small - medium inputs; block divisor 4
-        for (const auto & pair : imageQuiltingFunctions) {
-            timing::run_timing_functional(
-                pair.first, "./timing/input", "input0", "./timing/results",
-                pair.second, 2, 4, 0);
+        for (const auto& pair : imageQuiltingFunctions) {
+            timing::run_timing_functional(pair.first, "./timing/input", "input0", "./timing/results",
+                                          pair.second, 2, 4, 0);
         }
     }
     // Main

@@ -16,14 +16,14 @@ struct ImgData {
 
     // Allocate memory for the input image
     void AllocateInput() {
-        data = (unsigned char **) malloc(sizeof(unsigned char *) * height);
+        data = (unsigned char**)malloc(sizeof(unsigned char*) * height);
         for (int y = 0; y < height; y++) {
-            data[y] = (unsigned char *) malloc(width * CHANNEL_NUM);
+            data[y] = (unsigned char*)malloc(width * CHANNEL_NUM);
         }
     }
 
     // Free memory for the input texture
-    void FreeInput(){
+    void FreeInput() {
         for (int y = 0; y < height; y++) {
             free(data[y]);
         }
@@ -40,8 +40,8 @@ struct ImgData {
     // Randomize the input image
     void RandomizeInput() {
         const unsigned char unsigned_char_max = std::numeric_limits<unsigned char>::max();
-        for (int i = 0; i < height; i++){
-            for (int j = 0; j < width; j++){
+        for (int i = 0; i < height; i++) {
+            for (int j = 0; j < width; j++) {
                 for (int k = 0; k < CHANNEL_NUM - 1; k++)
                     data[i][CHANNEL_NUM * (j) + k] = GetRandomInt(0, unsigned_char_max);
                 data[i][CHANNEL_NUM * (j) + 3] = unsigned_char_max;
@@ -50,17 +50,17 @@ struct ImgData {
     }
 
     // Allocate memory for the output texture and initialize it to black
-    void AllocateOutput(){
+    void AllocateOutput() {
         // Allocate memory for the output texture
-        output_d = (unsigned char **) malloc(sizeof(unsigned char *) * output_h);
-        for(int y = 0; y < output_h; y++){
-            output_d[y] = (unsigned char *) malloc(output_w * CHANNEL_NUM);
+        output_d = (unsigned char**)malloc(sizeof(unsigned char*) * output_h);
+        for (int y = 0; y < output_h; y++) {
+            output_d[y] = (unsigned char*)malloc(output_w * CHANNEL_NUM);
         }
 
         // Initialize the output texture to black
-        for (int i = 0; i < output_h; i++){
-            for (int j = 0; j < output_w; j++){
-                for (int k = 0; k < CHANNEL_NUM; k++){
+        for (int i = 0; i < output_h; i++) {
+            for (int j = 0; j < output_w; j++) {
+                for (int k = 0; k < CHANNEL_NUM; k++) {
                     output_d[i][CHANNEL_NUM * (j) + k] = 0;
                 }
             }
@@ -68,7 +68,7 @@ struct ImgData {
     }
 
     // Free memory for the output texture
-    void FreeOutput(){
+    void FreeOutput() {
         for (int y = 0; y < output_h; y++) {
             free(output_d[y]);
         }
