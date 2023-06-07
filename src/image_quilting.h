@@ -5,16 +5,14 @@
 class ImageQuilting {
 public:
     ImageQuilting() = delete;
-    ImageQuilting(ImgData* data) { mData = data; }
+    ImageQuilting(ImgData* data) {
+        mData = data;
+        overlapHeight = mData->block_h / 6;
+        overlapWidth = mData->block_w / 6;
+    }
 
     // Synthesize a new texture with the given seed
     void Synthesis(int seed = -1);
-
-    // Seed the random number generator with a specified seed
-    static void SeedRandomNumberGenerator(int seed);
-    // Generate a random number in the range [min, max]
-    static int GetRandomInt(int min, int max);
-
     int64_t getFlopCount() const;
 
 private:
@@ -26,6 +24,11 @@ private:
         int y, x;
         double value;
     };
+
+    // Seed the random number generator with a specified seed
+    void SeedRandomNumberGenerator(int seed);
+    // Generate a random number in the range [min, max]
+    int GetRandomInt(int min, int max);
 
     // Write a block from the source data to the output data given their upper-left corners
     void WriteBlock(int dstY, int dstX, int srcY, int srcX);

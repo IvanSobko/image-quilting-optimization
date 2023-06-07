@@ -11,6 +11,11 @@ public:
         overlapWidth = mData->block_w / 6;
     }
 
+    // Synthesize a new texture with the given seed
+    void Synthesis(int seed, int opt);
+
+    int64_t getFlopCount() const;
+
     // Algorithm test functions
     static double BasicOpt(ImgData* imgData, int seed);
     static double AlgOpt(ImgData* imgData, int seed);
@@ -33,18 +38,6 @@ public:
     volatile static void VectorizeOptComponent(ImgData* imgData, int seed);
 #endif
 
-    // Synthesize a new texture with the given seed
-    void Synthesis(int seed, int opt);
-
-    // Seed the random number generator with the system time
-    static void SeedRandomNumberGenerator();
-    // Seed the random number generator with a specified seed
-    static void SeedRandomNumberGenerator(int seed);
-    // Generate a random number in the range [min, max]
-    static int GetRandomInt(int min, int max);
-
-    int64_t getFlopCount() const;
-
 private:
     enum OptType {
         opt_indices = 0,
@@ -63,6 +56,11 @@ private:
 
     // Enum representing the type of overlap between blocks
     enum OverlapType { vertical = 0, horizontal = 1, both = 2 };
+
+    // Seed the random number generator with a specified seed
+    void SeedRandomNumberGenerator(int seed);
+    // Generate a random number in the range [min, max]
+    int GetRandomInt(int min, int max);
 
     // Write a block from the source data to the output data given their upper-left corners
     void WriteBlock(int dstY, int dstX, int srcY, int srcX);

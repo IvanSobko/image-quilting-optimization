@@ -1,11 +1,10 @@
+#include "advance_alg_optimiz.h"
 #include <immintrin.h>
 #include <algorithm>
 #include <climits>
 #include <cstdlib>
 #include <ctime>
 #include <random>
-
-#include "advance_alg_optimiz.h"
 
 // Custom parameters for testing and tuning
 void AdvanceAlgOptimiz::CustomParameters(ImgData* imgData) {
@@ -838,6 +837,8 @@ void AdvanceAlgOptimiz::OverlapConstraintsWithMinCut_StdC_KUnroll_BoundsRefactor
     // fill first row
     int dstX = mData->block_w;
     int dstY = mData->block_h;
+    //TODO: pass optimization enum to OverlapConstraintsWithMinCut_Std, based on this enum store function
+    // pointer. Then call this pointer instead of PlaceEdgeOverlapBlockWithMinCutBlocking
     for (; dstX < mData->output_w; dstX += wStep) {
         PlaceEdgeOverlapBlockWithMinCutBlocking_StdC_KUnroll_BoundsRefactor_LoopReorder(
             vertical, 0, dstX, maxBlockX, maxBlockY, 0.1, regBlockW, regBlockH);

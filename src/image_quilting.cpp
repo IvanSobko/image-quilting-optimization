@@ -504,10 +504,6 @@ void ImageQuilting::PlaceEdgeOverlapBlockWithMinCut(const int blockY, const int 
 
 // Synthesize a new texture by randomly choosing blocks satisfying constraints and applying minimum cuts
 void ImageQuilting::OverlapConstraintsWithMinCut() {
-
-    // Compute block parameters
-    overlapHeight = mData->block_h / 6;
-    overlapWidth = mData->block_w / 6;
     int hStep = mData->block_h - overlapHeight;
     int wStep = mData->block_w - overlapWidth;
 

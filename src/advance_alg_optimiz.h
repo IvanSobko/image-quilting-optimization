@@ -11,10 +11,7 @@ public:
         overlapWidth = mData->block_w / 6;
     }
 
-    // Seed the random number generator with a specified seed
-    static void SeedRandomNumberGenerator(int seed);
-    // Generate a random number in the range [min, max]
-    static int GetRandomInt(int min, int max);
+    int64_t calcFlops();
 
     static void CustomParameters(ImgData* imgData);
     static double StdC_KUnroll_BoundsRefactor(ImgData* imgData, int seed);
@@ -37,9 +34,6 @@ public:
     static double StdC_KSrc4Unroll_Vector_BoundsRefactor_LoopReorder_Blocking32(ImgData* imgData, int seed);
     static double StdC_KSrc8Unroll_Vector_BoundsRefactor_LoopReorder_Blocking32(ImgData* imgData, int seed);
 #endif
-
-    int64_t calcFlops();
-
 private:
     // Enum representing the type of overlap between blocks
     enum OverlapType { vertical = 0, horizontal = 1, both = 2 };
@@ -49,13 +43,22 @@ private:
         int y, x;
         int value = 0;
     };
+
+    // Seed the random number generator with a specified seed
+    //TODO: should not be static
+    static void SeedRandomNumberGenerator(int seed);
+    // Generate a random number in the range [min, max]
+    int GetRandomInt(int min, int max);
+
     // Write a block from the source data to the output data given their upper-left corners
     void WriteBlock(int dstY, int dstX, int srcY, int srcX);
 
     // Same as WriteBlockOverlap, but uses a minimum cut to write the new block
     void WriteBlockOverlapWithMinCut(int overlapType, int dstY, int dstX, int srcY, int srcX);
 
+
     // Std C, K unroll, and bounds refactoring optimizations
+    //TODO: extract error tolerance to class members
     void PlaceEdgeOverlapBlockWithMinCut_StdC_KUnroll_BoundsRefactor(int overlapType, int dstY, int dstX,
                                                                      int maxBlockX, int maxBlockY,
                                                                      double errorTolerance, int bWidth,
