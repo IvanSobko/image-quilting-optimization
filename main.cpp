@@ -16,7 +16,7 @@ ImgData img_data;
 
 bool runTiming = false;
 bool generate = false;
-bool test = false;
+bool test = true;
 bool testCorrectnessAndTiming = false;
 bool stabilize = false;
 bool advisor = false;
@@ -76,6 +76,49 @@ void set_default() {
     }
 }
 
+void test_all_optimizations() {
+    Testing testing = Testing(2);
+    testing.RegisterTestFunction(Testing::ImageQuiltingFunction, "default");
+    testing.RegisterTestFunction(CompOverlapOptimiz::BasicOpt, "basic");
+    testing.RegisterTestFunction(CompOverlapOptimiz::AlgOpt, "AlgImpr");
+    testing.RegisterTestFunction(CompOverlapOptimiz::UnrollOpt, "Unroll");
+    testing.RegisterTestFunction(CompOverlapOptimiz::UnrollMaxOpt, "UnrollMax");
+#ifdef __AVX2__
+    testing.RegisterTestFunction(CompOverlapOptimiz::VectorizeOpt, "Vectorize");
+#endif
+    testing.RegisterTestFunction(CompOverlapOptimiz::UnrollChnls, "unroll channels");
+
+    testing.RegisterTestFunction(AdvanceAlgOptimiz::StdC_KUnroll_BoundsRefactor, "unroll_bounds");
+    testing.RegisterTestFunction(AdvanceAlgOptimiz::StdC_KUnroll_BoundsRefactor_LoopReorder,
+                                 "unroll_bounds_loop");
+    testing.RegisterTestFunction(AdvanceAlgOptimiz::StdC_KUnroll_BoundsRefactor_LoopReorder_Blocking32,
+                                 "unroll_bounds_loop_block32");
+    testing.RegisterTestFunction(AdvanceAlgOptimiz::StdC_KUnroll_BoundsRefactor_LoopReorder_Blocking48,
+                                 "unroll_bounds_loop_block48");
+    testing.RegisterTestFunction(AdvanceAlgOptimiz::StdC_KUnroll_BoundsRefactor_LoopReorder_Blocking64,
+                                 "unroll_bounds_loop_block64");
+    testing.RegisterTestFunction(AdvanceAlgOptimiz::StdC_KUnroll_BoundsRefactor_LoopReorder_Blocking96,
+                                 "unroll_bounds_loop_block96");
+    testing.RegisterTestFunction(AdvanceAlgOptimiz::StdC_KUnroll_BoundsRefactor_LoopReorder_Blocking128,
+                                 "unroll_bounds_loop_block128");
+    testing.RegisterTestFunction(AdvanceAlgOptimiz::StdC_KSrc2Unroll_BoundsRefactor_LoopReorder_Blocking32,
+                                 "unroll2_bounds_loop_block32");
+    testing.RegisterTestFunction(AdvanceAlgOptimiz::StdC_KSrc4Unroll_BoundsRefactor_LoopReorder_Blocking32,
+                                 "unroll4_bounds_loop_block32");
+#ifdef __AVX2__
+    testing.RegisterTestFunction(
+        AdvanceAlgOptimiz::StdC_KSrc2Unroll_Vector_BoundsRefactor_LoopReorder_Blocking32,
+        "unroll2_bounds_loop_block32_simd");
+    testing.RegisterTestFunction(
+        AdvanceAlgOptimiz::StdC_KSrc4Unroll_Vector_BoundsRefactor_LoopReorder_Blocking32,
+        "unroll4_bounds_loop_block32_simd");
+    testing.RegisterTestFunction(
+        AdvanceAlgOptimiz::StdC_KSrc8Unroll_Vector_BoundsRefactor_LoopReorder_Blocking32,
+        "unroll8_bounds_loop_block32_simd");
+#endif
+    testing.TestCorrectness();
+}
+
 int main(int argc, char* argv[]) {
 
     // Parse the command line arguments
@@ -94,9 +137,7 @@ int main(int argc, char* argv[]) {
     }
     // Test the correctness of our base implementation
     else if (test) {
-        Testing testing = Testing(0);
-        testing.RegisterTestFunction(Testing::ImageQuiltingFunction, "default");
-        testing.TestCorrectness();
+        test_all_optimizations();
     }
     // Test the correctness and timing of the variants of our implementation
     else if (testCorrectnessAndTiming) {
