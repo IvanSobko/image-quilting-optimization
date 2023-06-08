@@ -172,7 +172,11 @@ timing::TimingData timing::rdtsc_functional(const ImageQuiltingFunction & imageQ
 std::string getCurrentDateTime() {
     std::time_t now = std::time(nullptr);
     std::tm timeinfo;
+#ifdef _WIN32
+    localtime_s(&timeinfo, &now);
+#else
     localtime_r(&now, &timeinfo);
+#endif
 
     char buffer[20];
     std::strftime(buffer, sizeof(buffer), "%m-%d-%H-%M-%S", &timeinfo);
