@@ -1,20 +1,15 @@
 #pragma once
 
+#include "image_quilting.h"
 #include "img_data.h"
 
-class CompOverlapOptimiz {
+class CompOverlapOptimiz : public ImageQuilting {
 public:
     CompOverlapOptimiz() = delete;
-    CompOverlapOptimiz(ImgData* data) {
-        mData = data;
-        overlapHeight = mData->block_h / 6;
-        overlapWidth = mData->block_w / 6;
-    }
+    CompOverlapOptimiz(ImgData* data) : ImageQuilting(data) {}
 
     // Synthesize a new texture with the given seed
     void Synthesis(int seed, int opt);
-
-    int64_t getFlopCount() const;
 
     // Algorithm test functions
     static double BasicOpt(ImgData* imgData, int seed);
@@ -48,28 +43,8 @@ private:
         opt_unroll_chnls = 5,
     };
 
-    // Struct to sort blocks by their l2 norm
-    struct BlockValue {
-        int y, x;
-        double value;
-    };
-
-    // Enum representing the type of overlap between blocks
-    enum OverlapType { vertical = 0, horizontal = 1, both = 2 };
-
-    // Seed the random number generator with a specified seed
-    void SeedRandomNumberGenerator(int seed);
-    // Generate a random number in the range [min, max]
-    int GetRandomInt(int min, int max);
-
-    // Write a block from the source data to the output data given their upper-left corners
-    void WriteBlock(int dstY, int dstX, int srcY, int srcX);
-
-    // Same as WriteBlock but leaves the half of the dst overlapping region untouched
-    void WriteBlockOverlap(int overlapType, int dstY, int dstX, int srcY, int srcX);
-
-    // Same as WriteBlockOverlap, but uses a minimum cut to write the new block
-    void WriteBlockOverlapWithMinCut(int overlapType, int dstY, int dstX, int srcY, int srcX);
+    // Synthesize a new texture by randomly choosing blocks satisfying constraints and applying minimum cuts
+    void OverlapConstraintsWithMinCut();
 
     // Base implementation of ComputeOverlap
     double ComputeOverlapBase(int overlapType, int dstY, int dstX, int srcY, int srcX);
@@ -95,15 +70,5 @@ private:
     void PlaceEdgeOverlapBlockWithMinCut(int blockY, int blockX, int maxBlockX, int maxBlockY,
                                          double errorTolerance);
 
-    // Synthesize a new texture by randomly choosing blocks satisfying constraints and applying minimum cuts
-    void OverlapConstraintsWithMinCut();
-
-    int overlapWidth = 0;
-    int overlapHeight = 0;
-
-    int64_t flopCount = 0;
     int opt_type = 0;
-
-    // Keep a pointer to the input image data
-    ImgData* mData;
 };

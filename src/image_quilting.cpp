@@ -134,10 +134,12 @@ void ImageQuilting::WriteBlockOverlapWithMinCut(const int overlapType, const int
                 double minError = dpTable[(i - 1) * overlapWidthLocal + j];
                 // Get the value to the left
                 if (j > 0) {
+                    flopCount++;
                     minError = std::min(minError, dpTable[(i - 1) * overlapWidthLocal + (j - 1)]);
                 }
                 // Get the value to the right
                 if (j < overlapWidthLocal - 1) {
+                    flopCount++;
                     minError = std::min(minError, dpTable[(i - 1) * overlapWidthLocal + (j + 1)]);
                 }
                 dpTable[i * overlapWidthLocal + j] = errorSurface[i * overlapWidthLocal + j] + minError;
@@ -167,6 +169,7 @@ void ImageQuilting::WriteBlockOverlapWithMinCut(const int overlapType, const int
                 double leftError = dpTable[i * overlapWidthLocal + j - 1];
                 flopCount++;
                 if (leftError < localError) {
+                    flopCount++;
                     localError = leftError;
                     verticalPath[i] = j - 1;
                 }
@@ -176,6 +179,7 @@ void ImageQuilting::WriteBlockOverlapWithMinCut(const int overlapType, const int
                 double rightError = dpTable[i * overlapWidthLocal + j + 1];
                 flopCount++;
                 if (rightError < localError) {
+                    flopCount++;
                     localError = rightError;
                     verticalPath[i] = j + 1;
                 }
@@ -215,10 +219,12 @@ void ImageQuilting::WriteBlockOverlapWithMinCut(const int overlapType, const int
                 double minError = dpTable[i * overlapWidthLocal + j - 1];
                 // Get the value to the left and up
                 if (i > 0) {
+                    flopCount++;
                     minError = std::min(minError, dpTable[(i - 1) * overlapWidthLocal + (j - 1)]);
                 }
                 // Get the value to the left and below
                 if (i < overlapHeightLocal - 1) {
+                    flopCount++;
                     minError = std::min(minError, dpTable[(i + 1) * overlapWidthLocal + (j - 1)]);
                 }
                 dpTable[i * overlapWidthLocal + j] = errorSurface[i * overlapWidthLocal + j] + minError;
@@ -230,6 +236,7 @@ void ImageQuilting::WriteBlockOverlapWithMinCut(const int overlapType, const int
         horizontalPath[overlapWidthLocal - 1] = 0;
         for (int i = 1; i < overlapHeightLocal; i++) {
             double error = dpTable[(i + 1) * overlapWidthLocal - 1];
+            flopCount++;
             if (error < minError) {
                 minError = error;
                 horizontalPath[overlapWidthLocal - 1] = i;
@@ -248,6 +255,7 @@ void ImageQuilting::WriteBlockOverlapWithMinCut(const int overlapType, const int
                 double leftError = dpTable[(i - 1) * overlapWidthLocal + j];
                 flopCount++;
                 if (leftError < localError) {
+                    flopCount++;
                     localError = leftError;
                     horizontalPath[j] = i - 1;
                 }
@@ -257,6 +265,7 @@ void ImageQuilting::WriteBlockOverlapWithMinCut(const int overlapType, const int
                 flopCount++;
                 double rightError = dpTable[(i + 1) * overlapWidthLocal + j];
                 if (rightError < localError) {
+                    flopCount++;
                     localError = rightError;
                     horizontalPath[j] = i + 1;
                 }
@@ -360,7 +369,7 @@ double ImageQuilting::ComputeOverlap(const int overlapType, const int dstY, cons
 
 // Place an edge overlap block with respect to the given block of the output image
 void ImageQuilting::PlaceEdgeOverlapBlock(const int blockY, const int blockX, const int maxBlockX,
-                                          const int maxBlockY, double errorTolerance) {
+                                          const int maxBlockY) {
     // Calculate the overlap start position and the offset from where to write the block to the output
     int overlapXStart = blockX, overlapYStart = blockY;
 
@@ -421,7 +430,7 @@ void ImageQuilting::PlaceEdgeOverlapBlock(const int blockY, const int blockX, co
 
 // Place an edge overlap block with respect to the given block of the output image
 void ImageQuilting::PlaceEdgeOverlapBlockWithMinCut(const int blockY, const int blockX, const int maxBlockX,
-                                                    const int maxBlockY, double errorTolerance) {
+                                                    const int maxBlockY) {
     // Calculate the overlap type
     int overlapType;
     if (blockY == 0)
