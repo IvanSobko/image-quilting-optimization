@@ -48,63 +48,63 @@ int64_t AdvanceAlgOptimiz::calcFlops() {
 double AdvanceAlgOptimiz::StdC_KUnroll_BoundsRefactor(ImgData* imgData, int seed) {
     AdvanceAlgOptimiz imageQuilting(imgData);
     SeedRandomNumberGenerator(seed);
-    imageQuilting.OverlapConstraintsWithMinCut_StdC_KUnroll_BoundsRefactor();
+    imageQuilting.OverlapConstraintsWithMinCut(opt_unroll_bounds);
     return static_cast<double>(imageQuilting.calcFlops());
 }
 
 double AdvanceAlgOptimiz::StdC_KUnroll_BoundsRefactor_LoopReorder(ImgData* imgData, int seed) {
     AdvanceAlgOptimiz imageQuilting(imgData);
     SeedRandomNumberGenerator(seed);
-    imageQuilting.OverlapConstraintsWithMinCut_StdC_KUnroll_BoundsRefactor_LoopReorder();
+    imageQuilting.OverlapConstraintsWithMinCut(opt_unroll_bounds_loop);
     return static_cast<double>(imageQuilting.calcFlops());
 }
 
 double AdvanceAlgOptimiz::StdC_KUnroll_BoundsRefactor_LoopReorder_Blocking32(ImgData* imgData, int seed) {
     AdvanceAlgOptimiz imageQuilting(imgData);
     SeedRandomNumberGenerator(seed);
-    imageQuilting.OverlapConstraintsWithMinCut_StdC_KUnroll_BoundsRefactor_LoopReorder_Blocking32();
+    imageQuilting.OverlapConstraintsWithMinCut(opt_unroll_bounds_loop_blocking32);
     return static_cast<double>(imageQuilting.calcFlops());
 }
 
 double AdvanceAlgOptimiz::StdC_KUnroll_BoundsRefactor_LoopReorder_Blocking48(ImgData* imgData, int seed) {
     AdvanceAlgOptimiz imageQuilting(imgData);
     SeedRandomNumberGenerator(seed);
-    imageQuilting.OverlapConstraintsWithMinCut_StdC_KUnroll_BoundsRefactor_LoopReorder_Blocking48();
+    imageQuilting.OverlapConstraintsWithMinCut(opt_unroll_bounds_loop_blocking48);
     return static_cast<double>(imageQuilting.calcFlops());
 }
 
 double AdvanceAlgOptimiz::StdC_KUnroll_BoundsRefactor_LoopReorder_Blocking64(ImgData* imgData, int seed) {
     AdvanceAlgOptimiz imageQuilting(imgData);
     SeedRandomNumberGenerator(seed);
-    imageQuilting.OverlapConstraintsWithMinCut_StdC_KUnroll_BoundsRefactor_LoopReorder_Blocking64();
+    imageQuilting.OverlapConstraintsWithMinCut(opt_unroll_bounds_loop_blocking64);
     return static_cast<double>(imageQuilting.calcFlops());
 }
 
 double AdvanceAlgOptimiz::StdC_KUnroll_BoundsRefactor_LoopReorder_Blocking96(ImgData* imgData, int seed) {
     AdvanceAlgOptimiz imageQuilting(imgData);
     SeedRandomNumberGenerator(seed);
-    imageQuilting.OverlapConstraintsWithMinCut_StdC_KUnroll_BoundsRefactor_LoopReorder_Blocking96();
+    imageQuilting.OverlapConstraintsWithMinCut(opt_unroll_bounds_loop_blocking96);
     return static_cast<double>(imageQuilting.calcFlops());
 }
 
 double AdvanceAlgOptimiz::StdC_KUnroll_BoundsRefactor_LoopReorder_Blocking128(ImgData* imgData, int seed) {
     AdvanceAlgOptimiz imageQuilting(imgData);
     SeedRandomNumberGenerator(seed);
-    imageQuilting.OverlapConstraintsWithMinCut_StdC_KUnroll_BoundsRefactor_LoopReorder_Blocking128();
+    imageQuilting.OverlapConstraintsWithMinCut(opt_unroll_bounds_loop_blocking128);
     return static_cast<double>(imageQuilting.calcFlops());
 }
 
 double AdvanceAlgOptimiz::StdC_KSrc2Unroll_BoundsRefactor_LoopReorder_Blocking32(ImgData* imgData, int seed) {
     AdvanceAlgOptimiz imageQuilting(imgData);
     SeedRandomNumberGenerator(seed);
-    imageQuilting.OverlapConstraintsWithMinCut_StdC_KSrc2Unroll_BoundsRefactor_LoopReorder_Blocking32();
+    imageQuilting.OverlapConstraintsWithMinCut(opt_unroll2_bounds_loop_blocking32);
     return static_cast<double>(imageQuilting.calcFlops());
 }
 
 double AdvanceAlgOptimiz::StdC_KSrc4Unroll_BoundsRefactor_LoopReorder_Blocking32(ImgData* imgData, int seed) {
     AdvanceAlgOptimiz imageQuilting(imgData);
     SeedRandomNumberGenerator(seed);
-    imageQuilting.OverlapConstraintsWithMinCut_StdC_KSrc4Unroll_BoundsRefactor_LoopReorder_Blocking32();
+    imageQuilting.OverlapConstraintsWithMinCut(opt_unroll4_bounds_loop_blocking32);
     return static_cast<double>(imageQuilting.calcFlops());
 }
 
@@ -113,8 +113,7 @@ double AdvanceAlgOptimiz::StdC_KSrc2Unroll_Vector_BoundsRefactor_LoopReorder_Blo
                                                                                         int seed) {
     AdvanceAlgOptimiz imageQuilting(imgData);
     SeedRandomNumberGenerator(seed);
-    imageQuilting
-        .OverlapConstraintsWithMinCut_StdC_KSrc2Unroll_Vector_BoundsRefactor_LoopReorder_Blocking32();
+    imageQuilting.OverlapConstraintsWithMinCut(opt_unroll2_simd_bounds_loop_blocking32);
     return static_cast<double>(imageQuilting.calcFlops());
 }
 
@@ -122,8 +121,7 @@ double AdvanceAlgOptimiz::StdC_KSrc4Unroll_Vector_BoundsRefactor_LoopReorder_Blo
                                                                                         int seed) {
     AdvanceAlgOptimiz imageQuilting(imgData);
     SeedRandomNumberGenerator(seed);
-    imageQuilting
-        .OverlapConstraintsWithMinCut_StdC_KSrc4Unroll_Vector_BoundsRefactor_LoopReorder_Blocking32();
+    imageQuilting.OverlapConstraintsWithMinCut(opt_unroll4_simd_bounds_loop_blocking32);
     return static_cast<double>(imageQuilting.calcFlops());
 }
 
@@ -131,8 +129,7 @@ double AdvanceAlgOptimiz::StdC_KSrc8Unroll_Vector_BoundsRefactor_LoopReorder_Blo
                                                                                         int seed) {
     AdvanceAlgOptimiz imageQuilting(imgData);
     SeedRandomNumberGenerator(seed);
-    imageQuilting
-        .OverlapConstraintsWithMinCut_StdC_KSrc8Unroll_Vector_BoundsRefactor_LoopReorder_Blocking32();
+    imageQuilting.OverlapConstraintsWithMinCut(opt_unroll8_simd_bounds_loop_blocking32);
     return static_cast<double>(imageQuilting.calcFlops());
 }
 #endif
@@ -386,10 +383,128 @@ void AdvanceAlgOptimiz::WriteBlockOverlapWithMinCut(const int overlapType, const
     }
 }
 
+void AdvanceAlgOptimiz::OverlapConstraintsWithMinCut(int opt_type) {
+    // Compute block parameters
+    const int hStep = mData->block_h - overlapHeight;
+    const int wStep = mData->block_w - overlapWidth;
+
+    const int maxBlockY = mData->height - mData->block_h;
+    const int maxBlockX = mData->width - mData->block_w;
+
+    const int regBlockW = mData->block_w;
+    const int regBlockH = mData->block_h - overlapHeight;
+
+    // Randomly choose the upper-left corner of a block
+    int srcY = GetRandomInt(0, maxBlockY - 1);
+    int srcX = GetRandomInt(0, maxBlockX - 1);
+
+    // Write the randomly chosen block to the output
+    WriteBlock(0, 0, srcY, srcX);
+
+    typedef void (AdvanceAlgOptimiz::*funcPtr)(int, int, int, int, int, int, int);
+    funcPtr func;
+
+    switch (opt_type) {
+        case opt_unroll_bounds:
+            func = &AdvanceAlgOptimiz::PlaceEdgeOverlapBlockWithMinCut_StdC_KUnroll_BoundsRefactor;
+            break;
+        case opt_unroll_bounds_loop:
+            func = &AdvanceAlgOptimiz::
+                       PlaceEdgeOverlapBlockWithMinCutBlocking_StdC_KUnroll_BoundsRefactor_LoopReorder;
+            break;
+        case opt_unroll_bounds_loop_blocking32:
+            func =
+                &AdvanceAlgOptimiz::
+                    PlaceEdgeOverlapBlockWithMinCutBlocking_StdC_KUnroll_BoundsRefactor_LoopReorder_Blocking32;
+            break;
+        case opt_unroll_bounds_loop_blocking48:
+            func =
+                &AdvanceAlgOptimiz::
+                    PlaceEdgeOverlapBlockWithMinCutBlocking_StdC_KUnroll_BoundsRefactor_LoopReorder_Blocking48;
+            break;
+        case opt_unroll_bounds_loop_blocking64:
+            func =
+                &AdvanceAlgOptimiz::
+                    PlaceEdgeOverlapBlockWithMinCutBlocking_StdC_KUnroll_BoundsRefactor_LoopReorder_Blocking64;
+            break;
+        case opt_unroll_bounds_loop_blocking96:
+            func =
+                &AdvanceAlgOptimiz::
+                    PlaceEdgeOverlapBlockWithMinCutBlocking_StdC_KUnroll_BoundsRefactor_LoopReorder_Blocking96;
+            break;
+        case opt_unroll_bounds_loop_blocking128:
+            func =
+                &AdvanceAlgOptimiz::
+                    PlaceEdgeOverlapBlockWithMinCutBlocking_StdC_KUnroll_BoundsRefactor_LoopReorder_Blocking128;
+            break;
+        case opt_unroll2_bounds_loop_blocking32:
+            func =
+                &AdvanceAlgOptimiz::
+                    PlaceEdgeOverlapBlockWithMinCutBlocking_StdC_KSrc2Unroll_BoundsRefactor_LoopReorder_Blocking32;
+            break;
+        case opt_unroll4_bounds_loop_blocking32:
+            func =
+                &AdvanceAlgOptimiz::
+                    PlaceEdgeOverlapBlockWithMinCutBlocking_StdC_KSrc4Unroll_BoundsRefactor_LoopReorder_Blocking32;
+            break;
+#ifdef __AVX2__
+        case opt_unroll2_simd_bounds_loop_blocking32:
+            func =
+                &AdvanceAlgOptimiz::
+                    PlaceEdgeOverlapBlockWithMinCutBlocking_StdC_KSrc2Unroll_Vector_BoundsRefactor_LoopReorder_Blocking32;
+            break;
+        case opt_unroll4_simd_bounds_loop_blocking32:
+            func =
+                &AdvanceAlgOptimiz::
+                    PlaceEdgeOverlapBlockWithMinCutBlocking_StdC_KSrc4Unroll_Vector_BoundsRefactor_LoopReorder_Blocking32;
+            break;
+        case opt_unroll8_simd_bounds_loop_blocking32:
+            func =
+                &AdvanceAlgOptimiz::
+                    PlaceEdgeOverlapBlockWithMinCutBlocking_StdC_KSrc8Unroll_Vector_BoundsRefactor_LoopReorder_Blocking32;
+            break;
+#endif
+        default:
+            break;
+    }
+
+    // fill first row
+    int dstX = mData->block_w;
+    int dstY = mData->block_h;
+    for (; dstX < mData->output_w; dstX += wStep) {
+        (this->*func)(vertical, 0, dstX, maxBlockX, maxBlockY, regBlockW, regBlockH);
+    }
+    int lastDstX = dstX - wStep;
+    int blockWidth = mData->output_w - (lastDstX - overlapWidth);
+
+    // fill all corner cases except borders
+    for (; dstY < mData->output_h - hStep; dstY += hStep) {
+        // fill first column
+        (this->*func)(horizontal, dstY, 0, maxBlockX, maxBlockY, regBlockW, regBlockH);
+        dstX = mData->block_w;
+        for (; dstX < mData->output_w - wStep; dstX += wStep) {
+            (this->*func)(both, dstY, dstX, maxBlockX, maxBlockY, regBlockW, regBlockH);
+        }
+        // fill last column
+        (this->*func)(both, dstY, dstX, maxBlockX, maxBlockY, blockWidth, regBlockH);
+    }
+
+    // fill last row
+    int blockHeight = mData->output_h - dstY;
+    (this->*func)(horizontal, dstY, 0, maxBlockX, maxBlockY, regBlockW, regBlockH);
+
+    dstX = mData->block_w;
+    for (; dstX < mData->output_w - wStep; dstX += wStep) {
+        (this->*func)(both, dstY, dstX, maxBlockX, maxBlockY, mData->block_w, blockHeight);
+    }
+    // bottom-right corner
+    (this->*func)(both, dstY, lastDstX, maxBlockX, maxBlockY, blockWidth, blockHeight);
+}
+
 // Std C, K unroll, and bounds refactoring optimizations
 void AdvanceAlgOptimiz::PlaceEdgeOverlapBlockWithMinCut_StdC_KUnroll_BoundsRefactor(
-    int overlapType, const int dstY, const int dstX, const int maxBlockX, const int maxBlockY,
-    double errorTolerance, int bWidth, int bHeight) {
+    int overlapType, const int dstY, const int dstX, const int maxBlockX, const int maxBlockY, int bWidth,
+    int bHeight) {
     int overlapXStart = (overlapType == horizontal) ? dstX : dstX - overlapWidth;
     int overlapYStart = (overlapType == vertical) ? dstY : dstY - overlapHeight;
 
@@ -562,69 +677,10 @@ void AdvanceAlgOptimiz::PlaceEdgeOverlapBlockWithMinCut_StdC_KUnroll_BoundsRefac
     free(blocks);
     free(suitableBlocks);
 }
-void AdvanceAlgOptimiz::OverlapConstraintsWithMinCut_StdC_KUnroll_BoundsRefactor() {
-
-    // Compute block parameters
-    const int hStep = mData->block_h - overlapHeight;
-    const int wStep = mData->block_w - overlapWidth;
-
-    const int maxBlockY = mData->height - mData->block_h;
-    const int maxBlockX = mData->width - mData->block_w;
-
-    const int regBlockW = mData->block_w;
-    const int regBlockH = mData->block_h - overlapHeight;
-
-    // Randomly choose the upper-left corner of a block
-    int srcY = GetRandomInt(0, maxBlockY - 1);
-    int srcX = GetRandomInt(0, maxBlockX - 1);
-
-    // Write the randomly chosen block to the output
-    WriteBlock(0, 0, srcY, srcX);
-
-    // fill first row
-    int dstX = mData->block_w;
-    int dstY = mData->block_h;
-    for (; dstX < mData->output_w; dstX += wStep) {
-        PlaceEdgeOverlapBlockWithMinCut_StdC_KUnroll_BoundsRefactor(vertical, 0, dstX, maxBlockX, maxBlockY,
-                                                                    0.1, regBlockW, regBlockH);
-    }
-    int lastDstX = dstX - wStep;
-    int blockWidth = mData->output_w - (lastDstX - overlapWidth);
-
-    // fill all corner cases except borders
-    for (; dstY < mData->output_h - hStep; dstY += hStep) {
-        // fill first column
-        PlaceEdgeOverlapBlockWithMinCut_StdC_KUnroll_BoundsRefactor(horizontal, dstY, 0, maxBlockX, maxBlockY,
-                                                                    0.1, regBlockW, regBlockH);
-        dstX = mData->block_w;
-        for (; dstX < mData->output_w - wStep; dstX += wStep) {
-            PlaceEdgeOverlapBlockWithMinCut_StdC_KUnroll_BoundsRefactor(both, dstY, dstX, maxBlockX,
-                                                                        maxBlockY, 0.1, regBlockW, regBlockH);
-        }
-        // fill last column
-        PlaceEdgeOverlapBlockWithMinCut_StdC_KUnroll_BoundsRefactor(both, dstY, dstX, maxBlockX, maxBlockY,
-                                                                    0.1, blockWidth, regBlockH);
-    }
-
-    // fill last row
-    int blockHeight = mData->output_h - dstY;
-    PlaceEdgeOverlapBlockWithMinCut_StdC_KUnroll_BoundsRefactor(horizontal, dstY, 0, maxBlockX, maxBlockY,
-                                                                0.1, regBlockW, regBlockH);
-
-    dstX = mData->block_w;
-    for (; dstX < mData->output_w - wStep; dstX += wStep) {
-        PlaceEdgeOverlapBlockWithMinCut_StdC_KUnroll_BoundsRefactor(both, dstY, dstX, maxBlockX, maxBlockY,
-                                                                    0.1, mData->block_w, blockHeight);
-    }
-    // bottom-right corner
-    PlaceEdgeOverlapBlockWithMinCut_StdC_KUnroll_BoundsRefactor(both, dstY, lastDstX, maxBlockX, maxBlockY,
-                                                                0.1, blockWidth, blockHeight);
-}
 
 // Std C, K unroll, bounds refactoring, and loop reorder optimizations
 void AdvanceAlgOptimiz::PlaceEdgeOverlapBlockWithMinCutBlocking_StdC_KUnroll_BoundsRefactor_LoopReorder(
-    int overlapType, int dstY, int dstX, int maxBlockX, int maxBlockY, double errorTolerance, int bWidth,
-    int bHeight) {
+    int overlapType, int dstY, int dstX, int maxBlockX, int maxBlockY, int bWidth, int bHeight) {
     int overlapXStart = (overlapType == horizontal) ? dstX : dstX - overlapWidth;
     int overlapYStart = (overlapType == vertical) ? dstY : dstY - overlapHeight;
 
@@ -816,71 +872,10 @@ void AdvanceAlgOptimiz::PlaceEdgeOverlapBlockWithMinCutBlocking_StdC_KUnroll_Bou
     free(blocks);
     free(suitableBlocks);
 }
-void AdvanceAlgOptimiz::OverlapConstraintsWithMinCut_StdC_KUnroll_BoundsRefactor_LoopReorder() {
-    // Compute block parameters
-    int hStep = mData->block_h - overlapHeight;
-    int wStep = mData->block_w - overlapWidth;
-
-    int maxBlockY = mData->height - mData->block_h;
-    int maxBlockX = mData->width - mData->block_w;
-
-    int regBlockW = mData->block_w;
-    int regBlockH = mData->block_h - overlapHeight;
-
-    // Randomly choose the upper-left corner of a block
-    int srcY = GetRandomInt(0, maxBlockY - 1);
-    int srcX = GetRandomInt(0, maxBlockX - 1);
-
-    // Write the randomly chosen block to the output
-    WriteBlock(0, 0, srcY, srcX);
-
-    // fill first row
-    int dstX = mData->block_w;
-    int dstY = mData->block_h;
-    //TODO: pass optimization enum to OverlapConstraintsWithMinCut_Std, based on this enum store function
-    // pointer. Then call this pointer instead of PlaceEdgeOverlapBlockWithMinCutBlocking
-    for (; dstX < mData->output_w; dstX += wStep) {
-        PlaceEdgeOverlapBlockWithMinCutBlocking_StdC_KUnroll_BoundsRefactor_LoopReorder(
-            vertical, 0, dstX, maxBlockX, maxBlockY, 0.1, regBlockW, regBlockH);
-    }
-    int lastDstX = dstX - wStep;
-    int blockWidth = mData->output_w - (lastDstX - overlapWidth);
-
-    // fill all corner cases except borders
-    for (; dstY < mData->output_h - hStep; dstY += hStep) {
-        // fill first column
-        PlaceEdgeOverlapBlockWithMinCutBlocking_StdC_KUnroll_BoundsRefactor_LoopReorder(
-            horizontal, dstY, 0, maxBlockX, maxBlockY, 0.1, regBlockW, regBlockH);
-        dstX = mData->block_w;
-        for (; dstX < mData->output_w - wStep; dstX += wStep) {
-            PlaceEdgeOverlapBlockWithMinCutBlocking_StdC_KUnroll_BoundsRefactor_LoopReorder(
-                both, dstY, dstX, maxBlockX, maxBlockY, 0.1, regBlockW, regBlockH);
-        }
-
-        // fill last column
-        PlaceEdgeOverlapBlockWithMinCutBlocking_StdC_KUnroll_BoundsRefactor_LoopReorder(
-            both, dstY, dstX, maxBlockX, maxBlockY, 0.1, blockWidth, regBlockH);
-    }
-
-    // fill last row
-    int blockHeight = mData->output_h - dstY;
-    PlaceEdgeOverlapBlockWithMinCutBlocking_StdC_KUnroll_BoundsRefactor_LoopReorder(
-        horizontal, dstY, 0, maxBlockX, maxBlockY, 0.1, regBlockW, regBlockH);
-    dstX = mData->block_w;
-    for (; dstX < mData->output_w - wStep; dstX += wStep) {
-        PlaceEdgeOverlapBlockWithMinCutBlocking_StdC_KUnroll_BoundsRefactor_LoopReorder(
-            both, dstY, dstX, maxBlockX, maxBlockY, 0.1, mData->block_w, blockHeight);
-    }
-    // bottom-right corner
-    PlaceEdgeOverlapBlockWithMinCutBlocking_StdC_KUnroll_BoundsRefactor_LoopReorder(
-        both, dstY, lastDstX, maxBlockX, maxBlockY, 0.1, blockWidth, blockHeight);
-}
-
 // Std C, K unroll, bounds refactoring, loop reorder optimizations, and blocking with 32x32 blocks
 void AdvanceAlgOptimiz::
     PlaceEdgeOverlapBlockWithMinCutBlocking_StdC_KUnroll_BoundsRefactor_LoopReorder_Blocking32(
-        int overlapType, int dstY, int dstX, int maxBlockX, int maxBlockY, double errorTolerance, int bWidth,
-        int bHeight) {
+        int overlapType, int dstY, int dstX, int maxBlockX, int maxBlockY, int bWidth, int bHeight) {
     int overlapXStart = (overlapType == horizontal) ? dstX : dstX - overlapWidth;
     int overlapYStart = (overlapType == vertical) ? dstY : dstY - overlapHeight;
 
@@ -1098,69 +1093,10 @@ void AdvanceAlgOptimiz::
     free(blocks);
     free(suitableBlocks);
 }
-void AdvanceAlgOptimiz::OverlapConstraintsWithMinCut_StdC_KUnroll_BoundsRefactor_LoopReorder_Blocking32() {
-    // Compute block parameters
-    int hStep = mData->block_h - overlapHeight;
-    int wStep = mData->block_w - overlapWidth;
-
-    int maxBlockY = mData->height - mData->block_h;
-    int maxBlockX = mData->width - mData->block_w;
-
-    int regBlockW = mData->block_w;
-    int regBlockH = mData->block_h - overlapHeight;
-
-    // Randomly choose the upper-left corner of a block
-    int srcY = GetRandomInt(0, maxBlockY - 1);
-    int srcX = GetRandomInt(0, maxBlockX - 1);
-
-    // Write the randomly chosen block to the output
-    WriteBlock(0, 0, srcY, srcX);
-
-    // fill first row
-    int dstX = mData->block_w;
-    int dstY = mData->block_h;
-    for (; dstX < mData->output_w; dstX += wStep) {
-        PlaceEdgeOverlapBlockWithMinCutBlocking_StdC_KUnroll_BoundsRefactor_LoopReorder_Blocking32(
-            vertical, 0, dstX, maxBlockX, maxBlockY, 0.1, regBlockW, regBlockH);
-    }
-    int lastDstX = dstX - wStep;
-    int blockWidth = mData->output_w - (lastDstX - overlapWidth);
-
-    // fill all corner cases except borders
-    for (; dstY < mData->output_h - hStep; dstY += hStep) {
-        // fill first column
-        PlaceEdgeOverlapBlockWithMinCutBlocking_StdC_KUnroll_BoundsRefactor_LoopReorder_Blocking32(
-            horizontal, dstY, 0, maxBlockX, maxBlockY, 0.1, regBlockW, regBlockH);
-        dstX = mData->block_w;
-        for (; dstX < mData->output_w - wStep; dstX += wStep) {
-            PlaceEdgeOverlapBlockWithMinCutBlocking_StdC_KUnroll_BoundsRefactor_LoopReorder_Blocking32(
-                both, dstY, dstX, maxBlockX, maxBlockY, 0.1, regBlockW, regBlockH);
-        }
-
-        // fill last column
-        PlaceEdgeOverlapBlockWithMinCutBlocking_StdC_KUnroll_BoundsRefactor_LoopReorder_Blocking32(
-            both, dstY, dstX, maxBlockX, maxBlockY, 0.1, blockWidth, regBlockH);
-    }
-
-    // fill last row
-    int blockHeight = mData->output_h - dstY;
-    PlaceEdgeOverlapBlockWithMinCutBlocking_StdC_KUnroll_BoundsRefactor_LoopReorder_Blocking32(
-        horizontal, dstY, 0, maxBlockX, maxBlockY, 0.1, regBlockW, regBlockH);
-    dstX = mData->block_w;
-    for (; dstX < mData->output_w - wStep; dstX += wStep) {
-        PlaceEdgeOverlapBlockWithMinCutBlocking_StdC_KUnroll_BoundsRefactor_LoopReorder_Blocking32(
-            both, dstY, dstX, maxBlockX, maxBlockY, 0.1, mData->block_w, blockHeight);
-    }
-    // bottom-right corner
-    PlaceEdgeOverlapBlockWithMinCutBlocking_StdC_KUnroll_BoundsRefactor_LoopReorder_Blocking32(
-        both, dstY, lastDstX, maxBlockX, maxBlockY, 0.1, blockWidth, blockHeight);
-}
-
 // Std C, K unroll, bounds refactoring, loop reorder optimizations, and blocking with 48x48 blocks
 void AdvanceAlgOptimiz::
     PlaceEdgeOverlapBlockWithMinCutBlocking_StdC_KUnroll_BoundsRefactor_LoopReorder_Blocking48(
-        int overlapType, int dstY, int dstX, int maxBlockX, int maxBlockY, double errorTolerance, int bWidth,
-        int bHeight) {
+        int overlapType, int dstY, int dstX, int maxBlockX, int maxBlockY, int bWidth, int bHeight) {
     int overlapXStart = (overlapType == horizontal) ? dstX : dstX - overlapWidth;
     int overlapYStart = (overlapType == vertical) ? dstY : dstY - overlapHeight;
 
@@ -1378,69 +1314,10 @@ void AdvanceAlgOptimiz::
     free(blocks);
     free(suitableBlocks);
 }
-void AdvanceAlgOptimiz::OverlapConstraintsWithMinCut_StdC_KUnroll_BoundsRefactor_LoopReorder_Blocking48() {
-    // Compute block parameters
-    int hStep = mData->block_h - overlapHeight;
-    int wStep = mData->block_w - overlapWidth;
-
-    int maxBlockY = mData->height - mData->block_h;
-    int maxBlockX = mData->width - mData->block_w;
-
-    int regBlockW = mData->block_w;
-    int regBlockH = mData->block_h - overlapHeight;
-
-    // Randomly choose the upper-left corner of a block
-    int srcY = GetRandomInt(0, maxBlockY - 1);
-    int srcX = GetRandomInt(0, maxBlockX - 1);
-
-    // Write the randomly chosen block to the output
-    WriteBlock(0, 0, srcY, srcX);
-
-    // fill first row
-    int dstX = mData->block_w;
-    int dstY = mData->block_h;
-    for (; dstX < mData->output_w; dstX += wStep) {
-        PlaceEdgeOverlapBlockWithMinCutBlocking_StdC_KUnroll_BoundsRefactor_LoopReorder_Blocking48(
-            vertical, 0, dstX, maxBlockX, maxBlockY, 0.1, regBlockW, regBlockH);
-    }
-    int lastDstX = dstX - wStep;
-    int blockWidth = mData->output_w - (lastDstX - overlapWidth);
-
-    // fill all corner cases except borders
-    for (; dstY < mData->output_h - hStep; dstY += hStep) {
-        // fill first column
-        PlaceEdgeOverlapBlockWithMinCutBlocking_StdC_KUnroll_BoundsRefactor_LoopReorder_Blocking48(
-            horizontal, dstY, 0, maxBlockX, maxBlockY, 0.1, regBlockW, regBlockH);
-        dstX = mData->block_w;
-        for (; dstX < mData->output_w - wStep; dstX += wStep) {
-            PlaceEdgeOverlapBlockWithMinCutBlocking_StdC_KUnroll_BoundsRefactor_LoopReorder_Blocking48(
-                both, dstY, dstX, maxBlockX, maxBlockY, 0.1, regBlockW, regBlockH);
-        }
-
-        // fill last column
-        PlaceEdgeOverlapBlockWithMinCutBlocking_StdC_KUnroll_BoundsRefactor_LoopReorder_Blocking48(
-            both, dstY, dstX, maxBlockX, maxBlockY, 0.1, blockWidth, regBlockH);
-    }
-
-    // fill last row
-    int blockHeight = mData->output_h - dstY;
-    PlaceEdgeOverlapBlockWithMinCutBlocking_StdC_KUnroll_BoundsRefactor_LoopReorder_Blocking48(
-        horizontal, dstY, 0, maxBlockX, maxBlockY, 0.1, regBlockW, regBlockH);
-    dstX = mData->block_w;
-    for (; dstX < mData->output_w - wStep; dstX += wStep) {
-        PlaceEdgeOverlapBlockWithMinCutBlocking_StdC_KUnroll_BoundsRefactor_LoopReorder_Blocking48(
-            both, dstY, dstX, maxBlockX, maxBlockY, 0.1, mData->block_w, blockHeight);
-    }
-    // bottom-right corner
-    PlaceEdgeOverlapBlockWithMinCutBlocking_StdC_KUnroll_BoundsRefactor_LoopReorder_Blocking48(
-        both, dstY, lastDstX, maxBlockX, maxBlockY, 0.1, blockWidth, blockHeight);
-}
-
 // Std C, K unroll, bounds refactoring, loop reorder optimizations, and blocking with 64x64 blocks
 void AdvanceAlgOptimiz::
     PlaceEdgeOverlapBlockWithMinCutBlocking_StdC_KUnroll_BoundsRefactor_LoopReorder_Blocking64(
-        int overlapType, int dstY, int dstX, int maxBlockX, int maxBlockY, double errorTolerance, int bWidth,
-        int bHeight) {
+        int overlapType, int dstY, int dstX, int maxBlockX, int maxBlockY, int bWidth, int bHeight) {
     int overlapXStart = (overlapType == horizontal) ? dstX : dstX - overlapWidth;
     int overlapYStart = (overlapType == vertical) ? dstY : dstY - overlapHeight;
 
@@ -1658,69 +1535,10 @@ void AdvanceAlgOptimiz::
     free(blocks);
     free(suitableBlocks);
 }
-void AdvanceAlgOptimiz::OverlapConstraintsWithMinCut_StdC_KUnroll_BoundsRefactor_LoopReorder_Blocking64() {
-    // Compute block parameters
-    int hStep = mData->block_h - overlapHeight;
-    int wStep = mData->block_w - overlapWidth;
-
-    int maxBlockY = mData->height - mData->block_h;
-    int maxBlockX = mData->width - mData->block_w;
-
-    int regBlockW = mData->block_w;
-    int regBlockH = mData->block_h - overlapHeight;
-
-    // Randomly choose the upper-left corner of a block
-    int srcY = GetRandomInt(0, maxBlockY - 1);
-    int srcX = GetRandomInt(0, maxBlockX - 1);
-
-    // Write the randomly chosen block to the output
-    WriteBlock(0, 0, srcY, srcX);
-
-    // fill first row
-    int dstX = mData->block_w;
-    int dstY = mData->block_h;
-    for (; dstX < mData->output_w; dstX += wStep) {
-        PlaceEdgeOverlapBlockWithMinCutBlocking_StdC_KUnroll_BoundsRefactor_LoopReorder_Blocking64(
-            vertical, 0, dstX, maxBlockX, maxBlockY, 0.1, regBlockW, regBlockH);
-    }
-    int lastDstX = dstX - wStep;
-    int blockWidth = mData->output_w - (lastDstX - overlapWidth);
-
-    // fill all corner cases except borders
-    for (; dstY < mData->output_h - hStep; dstY += hStep) {
-        // fill first column
-        PlaceEdgeOverlapBlockWithMinCutBlocking_StdC_KUnroll_BoundsRefactor_LoopReorder_Blocking64(
-            horizontal, dstY, 0, maxBlockX, maxBlockY, 0.1, regBlockW, regBlockH);
-        dstX = mData->block_w;
-        for (; dstX < mData->output_w - wStep; dstX += wStep) {
-            PlaceEdgeOverlapBlockWithMinCutBlocking_StdC_KUnroll_BoundsRefactor_LoopReorder_Blocking64(
-                both, dstY, dstX, maxBlockX, maxBlockY, 0.1, regBlockW, regBlockH);
-        }
-
-        // fill last column
-        PlaceEdgeOverlapBlockWithMinCutBlocking_StdC_KUnroll_BoundsRefactor_LoopReorder_Blocking64(
-            both, dstY, dstX, maxBlockX, maxBlockY, 0.1, blockWidth, regBlockH);
-    }
-
-    // fill last row
-    int blockHeight = mData->output_h - dstY;
-    PlaceEdgeOverlapBlockWithMinCutBlocking_StdC_KUnroll_BoundsRefactor_LoopReorder_Blocking64(
-        horizontal, dstY, 0, maxBlockX, maxBlockY, 0.1, regBlockW, regBlockH);
-    dstX = mData->block_w;
-    for (; dstX < mData->output_w - wStep; dstX += wStep) {
-        PlaceEdgeOverlapBlockWithMinCutBlocking_StdC_KUnroll_BoundsRefactor_LoopReorder_Blocking64(
-            both, dstY, dstX, maxBlockX, maxBlockY, 0.1, mData->block_w, blockHeight);
-    }
-    // bottom-right corner
-    PlaceEdgeOverlapBlockWithMinCutBlocking_StdC_KUnroll_BoundsRefactor_LoopReorder_Blocking64(
-        both, dstY, lastDstX, maxBlockX, maxBlockY, 0.1, blockWidth, blockHeight);
-}
-
 // Std C, K unroll, bounds refactoring, loop reorder optimizations, and blocking with 96x96 blocks
 void AdvanceAlgOptimiz::
     PlaceEdgeOverlapBlockWithMinCutBlocking_StdC_KUnroll_BoundsRefactor_LoopReorder_Blocking96(
-        int overlapType, int dstY, int dstX, int maxBlockX, int maxBlockY, double errorTolerance, int bWidth,
-        int bHeight) {
+        int overlapType, int dstY, int dstX, int maxBlockX, int maxBlockY, int bWidth, int bHeight) {
     int overlapXStart = (overlapType == horizontal) ? dstX : dstX - overlapWidth;
     int overlapYStart = (overlapType == vertical) ? dstY : dstY - overlapHeight;
 
@@ -1938,69 +1756,10 @@ void AdvanceAlgOptimiz::
     free(blocks);
     free(suitableBlocks);
 }
-void AdvanceAlgOptimiz::OverlapConstraintsWithMinCut_StdC_KUnroll_BoundsRefactor_LoopReorder_Blocking96() {
-    // Compute block parameters
-    int hStep = mData->block_h - overlapHeight;
-    int wStep = mData->block_w - overlapWidth;
-
-    int maxBlockY = mData->height - mData->block_h;
-    int maxBlockX = mData->width - mData->block_w;
-
-    int regBlockW = mData->block_w;
-    int regBlockH = mData->block_h - overlapHeight;
-
-    // Randomly choose the upper-left corner of a block
-    int srcY = GetRandomInt(0, maxBlockY - 1);
-    int srcX = GetRandomInt(0, maxBlockX - 1);
-
-    // Write the randomly chosen block to the output
-    WriteBlock(0, 0, srcY, srcX);
-
-    // fill first row
-    int dstX = mData->block_w;
-    int dstY = mData->block_h;
-    for (; dstX < mData->output_w; dstX += wStep) {
-        PlaceEdgeOverlapBlockWithMinCutBlocking_StdC_KUnroll_BoundsRefactor_LoopReorder_Blocking96(
-            vertical, 0, dstX, maxBlockX, maxBlockY, 0.1, regBlockW, regBlockH);
-    }
-    int lastDstX = dstX - wStep;
-    int blockWidth = mData->output_w - (lastDstX - overlapWidth);
-
-    // fill all corner cases except borders
-    for (; dstY < mData->output_h - hStep; dstY += hStep) {
-        // fill first column
-        PlaceEdgeOverlapBlockWithMinCutBlocking_StdC_KUnroll_BoundsRefactor_LoopReorder_Blocking96(
-            horizontal, dstY, 0, maxBlockX, maxBlockY, 0.1, regBlockW, regBlockH);
-        dstX = mData->block_w;
-        for (; dstX < mData->output_w - wStep; dstX += wStep) {
-            PlaceEdgeOverlapBlockWithMinCutBlocking_StdC_KUnroll_BoundsRefactor_LoopReorder_Blocking96(
-                both, dstY, dstX, maxBlockX, maxBlockY, 0.1, regBlockW, regBlockH);
-        }
-
-        // fill last column
-        PlaceEdgeOverlapBlockWithMinCutBlocking_StdC_KUnroll_BoundsRefactor_LoopReorder_Blocking96(
-            both, dstY, dstX, maxBlockX, maxBlockY, 0.1, blockWidth, regBlockH);
-    }
-
-    // fill last row
-    int blockHeight = mData->output_h - dstY;
-    PlaceEdgeOverlapBlockWithMinCutBlocking_StdC_KUnroll_BoundsRefactor_LoopReorder_Blocking96(
-        horizontal, dstY, 0, maxBlockX, maxBlockY, 0.1, regBlockW, regBlockH);
-    dstX = mData->block_w;
-    for (; dstX < mData->output_w - wStep; dstX += wStep) {
-        PlaceEdgeOverlapBlockWithMinCutBlocking_StdC_KUnroll_BoundsRefactor_LoopReorder_Blocking96(
-            both, dstY, dstX, maxBlockX, maxBlockY, 0.1, mData->block_w, blockHeight);
-    }
-    // bottom-right corner
-    PlaceEdgeOverlapBlockWithMinCutBlocking_StdC_KUnroll_BoundsRefactor_LoopReorder_Blocking96(
-        both, dstY, lastDstX, maxBlockX, maxBlockY, 0.1, blockWidth, blockHeight);
-}
-
 // Std C, K unroll, bounds refactoring, loop reorder optimizations, and blocking with 128x128 blocks
 void AdvanceAlgOptimiz::
     PlaceEdgeOverlapBlockWithMinCutBlocking_StdC_KUnroll_BoundsRefactor_LoopReorder_Blocking128(
-        int overlapType, int dstY, int dstX, int maxBlockX, int maxBlockY, double errorTolerance, int bWidth,
-        int bHeight) {
+        int overlapType, int dstY, int dstX, int maxBlockX, int maxBlockY, int bWidth, int bHeight) {
     int overlapXStart = (overlapType == horizontal) ? dstX : dstX - overlapWidth;
     int overlapYStart = (overlapType == vertical) ? dstY : dstY - overlapHeight;
 
@@ -2218,64 +1977,6 @@ void AdvanceAlgOptimiz::
     free(blocks);
     free(suitableBlocks);
 }
-void AdvanceAlgOptimiz::OverlapConstraintsWithMinCut_StdC_KUnroll_BoundsRefactor_LoopReorder_Blocking128() {
-    // Compute block parameters
-    int hStep = mData->block_h - overlapHeight;
-    int wStep = mData->block_w - overlapWidth;
-
-    int maxBlockY = mData->height - mData->block_h;
-    int maxBlockX = mData->width - mData->block_w;
-
-    int regBlockW = mData->block_w;
-    int regBlockH = mData->block_h - overlapHeight;
-
-    // Randomly choose the upper-left corner of a block
-    int srcY = GetRandomInt(0, maxBlockY - 1);
-    int srcX = GetRandomInt(0, maxBlockX - 1);
-
-    // Write the randomly chosen block to the output
-    WriteBlock(0, 0, srcY, srcX);
-
-    // fill first row
-    int dstX = mData->block_w;
-    int dstY = mData->block_h;
-    for (; dstX < mData->output_w; dstX += wStep) {
-        PlaceEdgeOverlapBlockWithMinCutBlocking_StdC_KUnroll_BoundsRefactor_LoopReorder_Blocking128(
-            vertical, 0, dstX, maxBlockX, maxBlockY, 0.1, regBlockW, regBlockH);
-    }
-    int lastDstX = dstX - wStep;
-    int blockWidth = mData->output_w - (lastDstX - overlapWidth);
-
-    // fill all corner cases except borders
-    for (; dstY < mData->output_h - hStep; dstY += hStep) {
-        // fill first column
-        PlaceEdgeOverlapBlockWithMinCutBlocking_StdC_KUnroll_BoundsRefactor_LoopReorder_Blocking128(
-            horizontal, dstY, 0, maxBlockX, maxBlockY, 0.1, regBlockW, regBlockH);
-        dstX = mData->block_w;
-        for (; dstX < mData->output_w - wStep; dstX += wStep) {
-            PlaceEdgeOverlapBlockWithMinCutBlocking_StdC_KUnroll_BoundsRefactor_LoopReorder_Blocking128(
-                both, dstY, dstX, maxBlockX, maxBlockY, 0.1, regBlockW, regBlockH);
-        }
-
-        // fill last column
-        PlaceEdgeOverlapBlockWithMinCutBlocking_StdC_KUnroll_BoundsRefactor_LoopReorder_Blocking128(
-            both, dstY, dstX, maxBlockX, maxBlockY, 0.1, blockWidth, regBlockH);
-    }
-
-    // fill last row
-    int blockHeight = mData->output_h - dstY;
-    PlaceEdgeOverlapBlockWithMinCutBlocking_StdC_KUnroll_BoundsRefactor_LoopReorder_Blocking128(
-        horizontal, dstY, 0, maxBlockX, maxBlockY, 0.1, regBlockW, regBlockH);
-    dstX = mData->block_w;
-    for (; dstX < mData->output_w - wStep; dstX += wStep) {
-        PlaceEdgeOverlapBlockWithMinCutBlocking_StdC_KUnroll_BoundsRefactor_LoopReorder_Blocking128(
-            both, dstY, dstX, maxBlockX, maxBlockY, 0.1, mData->block_w, blockHeight);
-    }
-    // bottom-right corner
-    PlaceEdgeOverlapBlockWithMinCutBlocking_StdC_KUnroll_BoundsRefactor_LoopReorder_Blocking128(
-        both, dstY, lastDstX, maxBlockX, maxBlockY, 0.1, blockWidth, blockHeight);
-}
-
 #include <iostream>
 template <class T>
 inline void print_mm256(const __m256i& value) {
@@ -2302,8 +2003,7 @@ inline void print_mm128(const __m128i& value) {
 // Std C, bounds refactoring, loop reorder, blocking 32x32, and unrolling channels loop and srcX by 2
 void AdvanceAlgOptimiz::
     PlaceEdgeOverlapBlockWithMinCutBlocking_StdC_KSrc2Unroll_BoundsRefactor_LoopReorder_Blocking32(
-        int overlapType, int dstY, int dstX, int maxBlockX, int maxBlockY, double errorTolerance, int bWidth,
-        int bHeight) {
+        int overlapType, int dstY, int dstX, int maxBlockX, int maxBlockY, int bWidth, int bHeight) {
     int overlapXStart = (overlapType == horizontal) ? dstX : dstX - overlapWidth;
     int overlapYStart = (overlapType == vertical) ? dstY : dstY - overlapHeight;
 
@@ -2685,72 +2385,12 @@ void AdvanceAlgOptimiz::
     // Clean up
     free(blocks);
     free(suitableBlocks);
-}
-
-void AdvanceAlgOptimiz::
-    OverlapConstraintsWithMinCut_StdC_KSrc2Unroll_BoundsRefactor_LoopReorder_Blocking32() {
-    // Compute block parameters
-    int hStep = mData->block_h - overlapHeight;
-    int wStep = mData->block_w - overlapWidth;
-
-    int maxBlockY = mData->height - mData->block_h;
-    int maxBlockX = mData->width - mData->block_w;
-
-    int regBlockW = mData->block_w;
-    int regBlockH = mData->block_h - overlapHeight;
-
-    // Randomly choose the upper-left corner of a block
-    int srcY = GetRandomInt(0, maxBlockY - 1);
-    int srcX = GetRandomInt(0, maxBlockX - 1);
-
-    // Write the randomly chosen block to the output
-    WriteBlock(0, 0, srcY, srcX);
-
-    // fill first row
-    int dstX = mData->block_w;
-    int dstY = mData->block_h;
-    for (; dstX < mData->output_w; dstX += wStep) {
-        PlaceEdgeOverlapBlockWithMinCutBlocking_StdC_KSrc2Unroll_BoundsRefactor_LoopReorder_Blocking32(
-            vertical, 0, dstX, maxBlockX, maxBlockY, 0.1, regBlockW, regBlockH);
-    }
-    int lastDstX = dstX - wStep;
-    int blockWidth = mData->output_w - (lastDstX - overlapWidth);
-
-    // fill all corner cases except borders
-    for (; dstY < mData->output_h - hStep; dstY += hStep) {
-        // fill first column
-        PlaceEdgeOverlapBlockWithMinCutBlocking_StdC_KSrc2Unroll_BoundsRefactor_LoopReorder_Blocking32(
-            horizontal, dstY, 0, maxBlockX, maxBlockY, 0.1, regBlockW, regBlockH);
-        dstX = mData->block_w;
-        for (; dstX < mData->output_w - wStep; dstX += wStep) {
-            PlaceEdgeOverlapBlockWithMinCutBlocking_StdC_KSrc2Unroll_BoundsRefactor_LoopReorder_Blocking32(
-                both, dstY, dstX, maxBlockX, maxBlockY, 0.1, regBlockW, regBlockH);
-        }
-
-        // fill last column
-        PlaceEdgeOverlapBlockWithMinCutBlocking_StdC_KSrc2Unroll_BoundsRefactor_LoopReorder_Blocking32(
-            both, dstY, dstX, maxBlockX, maxBlockY, 0.1, blockWidth, regBlockH);
-    }
-
-    // fill last row
-    int blockHeight = mData->output_h - dstY;
-    PlaceEdgeOverlapBlockWithMinCutBlocking_StdC_KSrc2Unroll_BoundsRefactor_LoopReorder_Blocking32(
-        horizontal, dstY, 0, maxBlockX, maxBlockY, 0.1, regBlockW, regBlockH);
-    dstX = mData->block_w;
-    for (; dstX < mData->output_w - wStep; dstX += wStep) {
-        PlaceEdgeOverlapBlockWithMinCutBlocking_StdC_KSrc2Unroll_BoundsRefactor_LoopReorder_Blocking32(
-            both, dstY, dstX, maxBlockX, maxBlockY, 0.1, mData->block_w, blockHeight);
-    }
-    // bottom-right corner
-    PlaceEdgeOverlapBlockWithMinCutBlocking_StdC_KSrc2Unroll_BoundsRefactor_LoopReorder_Blocking32(
-        both, dstY, lastDstX, maxBlockX, maxBlockY, 0.1, blockWidth, blockHeight);
 }
 
 // Std C, bounds refactoring, loop reorder, blocking 32x32, and unrolling channels loop and srcX by 2
 void AdvanceAlgOptimiz::
     PlaceEdgeOverlapBlockWithMinCutBlocking_StdC_KSrc4Unroll_BoundsRefactor_LoopReorder_Blocking32(
-        int overlapType, int dstY, int dstX, int maxBlockX, int maxBlockY, double errorTolerance, int bWidth,
-        int bHeight) {
+        int overlapType, int dstY, int dstX, int maxBlockX, int maxBlockY, int bWidth, int bHeight) {
     int overlapXStart = (overlapType == horizontal) ? dstX : dstX - overlapWidth;
     int overlapYStart = (overlapType == vertical) ? dstY : dstY - overlapHeight;
 
@@ -3274,70 +2914,10 @@ void AdvanceAlgOptimiz::
     free(suitableBlocks);
 }
 
-void AdvanceAlgOptimiz::
-    OverlapConstraintsWithMinCut_StdC_KSrc4Unroll_BoundsRefactor_LoopReorder_Blocking32() {
-    // Compute block parameters
-    int hStep = mData->block_h - overlapHeight;
-    int wStep = mData->block_w - overlapWidth;
-
-    int maxBlockY = mData->height - mData->block_h;
-    int maxBlockX = mData->width - mData->block_w;
-
-    int regBlockW = mData->block_w;
-    int regBlockH = mData->block_h - overlapHeight;
-
-    // Randomly choose the upper-left corner of a block
-    int srcY = GetRandomInt(0, maxBlockY - 1);
-    int srcX = GetRandomInt(0, maxBlockX - 1);
-
-    // Write the randomly chosen block to the output
-    WriteBlock(0, 0, srcY, srcX);
-
-    // fill first row
-    int dstX = mData->block_w;
-    int dstY = mData->block_h;
-    for (; dstX < mData->output_w; dstX += wStep) {
-        PlaceEdgeOverlapBlockWithMinCutBlocking_StdC_KSrc4Unroll_BoundsRefactor_LoopReorder_Blocking32(
-            vertical, 0, dstX, maxBlockX, maxBlockY, 0.1, regBlockW, regBlockH);
-    }
-    int lastDstX = dstX - wStep;
-    int blockWidth = mData->output_w - (lastDstX - overlapWidth);
-
-    // fill all corner cases except borders
-    for (; dstY < mData->output_h - hStep; dstY += hStep) {
-        // fill first column
-        PlaceEdgeOverlapBlockWithMinCutBlocking_StdC_KSrc4Unroll_BoundsRefactor_LoopReorder_Blocking32(
-            horizontal, dstY, 0, maxBlockX, maxBlockY, 0.1, regBlockW, regBlockH);
-        dstX = mData->block_w;
-        for (; dstX < mData->output_w - wStep; dstX += wStep) {
-            PlaceEdgeOverlapBlockWithMinCutBlocking_StdC_KSrc4Unroll_BoundsRefactor_LoopReorder_Blocking32(
-                both, dstY, dstX, maxBlockX, maxBlockY, 0.1, regBlockW, regBlockH);
-        }
-
-        // fill last column
-        PlaceEdgeOverlapBlockWithMinCutBlocking_StdC_KSrc4Unroll_BoundsRefactor_LoopReorder_Blocking32(
-            both, dstY, dstX, maxBlockX, maxBlockY, 0.1, blockWidth, regBlockH);
-    }
-
-    // fill last row
-    int blockHeight = mData->output_h - dstY;
-    PlaceEdgeOverlapBlockWithMinCutBlocking_StdC_KSrc4Unroll_BoundsRefactor_LoopReorder_Blocking32(
-        horizontal, dstY, 0, maxBlockX, maxBlockY, 0.1, regBlockW, regBlockH);
-    dstX = mData->block_w;
-    for (; dstX < mData->output_w - wStep; dstX += wStep) {
-        PlaceEdgeOverlapBlockWithMinCutBlocking_StdC_KSrc4Unroll_BoundsRefactor_LoopReorder_Blocking32(
-            both, dstY, dstX, maxBlockX, maxBlockY, 0.1, mData->block_w, blockHeight);
-    }
-    // bottom-right corner
-    PlaceEdgeOverlapBlockWithMinCutBlocking_StdC_KSrc4Unroll_BoundsRefactor_LoopReorder_Blocking32(
-        both, dstY, lastDstX, maxBlockX, maxBlockY, 0.1, blockWidth, blockHeight);
-}
-
 #ifdef __AVX2__
 void AdvanceAlgOptimiz::
     PlaceEdgeOverlapBlockWithMinCutBlocking_StdC_KSrc2Unroll_Vector_BoundsRefactor_LoopReorder_Blocking32(
-        int overlapType, int dstY, int dstX, int maxBlockX, int maxBlockY, double errorTolerance, int bWidth,
-        int bHeight) {
+        int overlapType, int dstY, int dstX, int maxBlockX, int maxBlockY, int bWidth, int bHeight) {
     int overlapXStart = (overlapType == horizontal) ? dstX : dstX - overlapWidth;
     int overlapYStart = (overlapType == vertical) ? dstY : dstY - overlapHeight;
 
@@ -3548,69 +3128,9 @@ void AdvanceAlgOptimiz::
     free(suitableBlocks);
 }
 
-void AdvanceAlgOptimiz::
-    OverlapConstraintsWithMinCut_StdC_KSrc2Unroll_Vector_BoundsRefactor_LoopReorder_Blocking32() {
-    // Compute block parameters
-    int hStep = mData->block_h - overlapHeight;
-    int wStep = mData->block_w - overlapWidth;
-
-    int maxBlockY = mData->height - mData->block_h;
-    int maxBlockX = mData->width - mData->block_w;
-
-    int regBlockW = mData->block_w;
-    int regBlockH = mData->block_h - overlapHeight;
-
-    // Randomly choose the upper-left corner of a block
-    int srcY = GetRandomInt(0, maxBlockY - 1);
-    int srcX = GetRandomInt(0, maxBlockX - 1);
-
-    // Write the randomly chosen block to the output
-    WriteBlock(0, 0, srcY, srcX);
-
-    // fill first row
-    int dstX = mData->block_w;
-    int dstY = mData->block_h;
-    for (; dstX < mData->output_w; dstX += wStep) {
-        PlaceEdgeOverlapBlockWithMinCutBlocking_StdC_KSrc2Unroll_Vector_BoundsRefactor_LoopReorder_Blocking32(
-            vertical, 0, dstX, maxBlockX, maxBlockY, 0.1, regBlockW, regBlockH);
-    }
-    int lastDstX = dstX - wStep;
-    int blockWidth = mData->output_w - (lastDstX - overlapWidth);
-
-    // fill all corner cases except borders
-    for (; dstY < mData->output_h - hStep; dstY += hStep) {
-        // fill first column
-        PlaceEdgeOverlapBlockWithMinCutBlocking_StdC_KSrc2Unroll_Vector_BoundsRefactor_LoopReorder_Blocking32(
-            horizontal, dstY, 0, maxBlockX, maxBlockY, 0.1, regBlockW, regBlockH);
-        dstX = mData->block_w;
-        for (; dstX < mData->output_w - wStep; dstX += wStep) {
-            PlaceEdgeOverlapBlockWithMinCutBlocking_StdC_KSrc2Unroll_Vector_BoundsRefactor_LoopReorder_Blocking32(
-                both, dstY, dstX, maxBlockX, maxBlockY, 0.1, regBlockW, regBlockH);
-        }
-
-        // fill last column
-        PlaceEdgeOverlapBlockWithMinCutBlocking_StdC_KSrc2Unroll_Vector_BoundsRefactor_LoopReorder_Blocking32(
-            both, dstY, dstX, maxBlockX, maxBlockY, 0.1, blockWidth, regBlockH);
-    }
-
-    // fill last row
-    int blockHeight = mData->output_h - dstY;
-    PlaceEdgeOverlapBlockWithMinCutBlocking_StdC_KSrc2Unroll_Vector_BoundsRefactor_LoopReorder_Blocking32(
-        horizontal, dstY, 0, maxBlockX, maxBlockY, 0.1, regBlockW, regBlockH);
-    dstX = mData->block_w;
-    for (; dstX < mData->output_w - wStep; dstX += wStep) {
-        PlaceEdgeOverlapBlockWithMinCutBlocking_StdC_KSrc2Unroll_Vector_BoundsRefactor_LoopReorder_Blocking32(
-            both, dstY, dstX, maxBlockX, maxBlockY, 0.1, mData->block_w, blockHeight);
-    }
-    // bottom-right corner
-    PlaceEdgeOverlapBlockWithMinCutBlocking_StdC_KSrc2Unroll_Vector_BoundsRefactor_LoopReorder_Blocking32(
-        both, dstY, lastDstX, maxBlockX, maxBlockY, 0.1, blockWidth, blockHeight);
-}
-
 void AdvanceAlgOptimiz ::
     PlaceEdgeOverlapBlockWithMinCutBlocking_StdC_KSrc8Unroll_Vector_BoundsRefactor_LoopReorder_Blocking32(
-        int overlapType, int dstY, int dstX, int maxBlockX, int maxBlockY, double errorTolerance, int bWidth,
-        int bHeight) {
+        int overlapType, int dstY, int dstX, int maxBlockX, int maxBlockY, int bWidth, int bHeight) {
     int overlapXStart = (overlapType == horizontal) ? dstX : dstX - overlapWidth;
     int overlapYStart = (overlapType == vertical) ? dstY : dstY - overlapHeight;
 
@@ -3890,8 +3410,7 @@ void AdvanceAlgOptimiz ::
 
 void AdvanceAlgOptimiz ::
     PlaceEdgeOverlapBlockWithMinCutBlocking_StdC_KSrc4Unroll_Vector_BoundsRefactor_LoopReorder_Blocking32(
-        int overlapType, int dstY, int dstX, int maxBlockX, int maxBlockY, double errorTolerance, int bWidth,
-        int bHeight) {
+        int overlapType, int dstY, int dstX, int maxBlockX, int maxBlockY, int bWidth, int bHeight) {
     int overlapXStart = (overlapType == horizontal) ? dstX : dstX - overlapWidth;
     int overlapYStart = (overlapType == vertical) ? dstY : dstY - overlapHeight;
 
@@ -4125,121 +3644,4 @@ void AdvanceAlgOptimiz ::
     free(suitableBlocks);
 }
 
-void AdvanceAlgOptimiz ::
-    OverlapConstraintsWithMinCut_StdC_KSrc4Unroll_Vector_BoundsRefactor_LoopReorder_Blocking32() {
-    // Compute block parameters
-    int hStep = mData->block_h - overlapHeight;
-    int wStep = mData->block_w - overlapWidth;
-
-    int maxBlockY = mData->height - mData->block_h;
-    int maxBlockX = mData->width - mData->block_w;
-
-    int regBlockW = mData->block_w;
-    int regBlockH = mData->block_h - overlapHeight;
-
-    // Randomly choose the upper-left corner of a block
-    int srcY = GetRandomInt(0, maxBlockY - 1);
-    int srcX = GetRandomInt(0, maxBlockX - 1);
-
-    // Write the randomly chosen block to the output
-    WriteBlock(0, 0, srcY, srcX);
-
-    // fill first row
-    int dstX = mData->block_w;
-    int dstY = mData->block_h;
-    for (; dstX < mData->output_w; dstX += wStep) {
-        PlaceEdgeOverlapBlockWithMinCutBlocking_StdC_KSrc4Unroll_Vector_BoundsRefactor_LoopReorder_Blocking32(
-            vertical, 0, dstX, maxBlockX, maxBlockY, 0.1, regBlockW, regBlockH);
-    }
-    int lastDstX = dstX - wStep;
-    int blockWidth = mData->output_w - (lastDstX - overlapWidth);
-
-    // fill all corner cases except borders
-    for (; dstY < mData->output_h - hStep; dstY += hStep) {
-        // fill first column
-        PlaceEdgeOverlapBlockWithMinCutBlocking_StdC_KSrc4Unroll_Vector_BoundsRefactor_LoopReorder_Blocking32(
-            horizontal, dstY, 0, maxBlockX, maxBlockY, 0.1, regBlockW, regBlockH);
-        dstX = mData->block_w;
-        for (; dstX < mData->output_w - wStep; dstX += wStep) {
-            PlaceEdgeOverlapBlockWithMinCutBlocking_StdC_KSrc4Unroll_Vector_BoundsRefactor_LoopReorder_Blocking32(
-                both, dstY, dstX, maxBlockX, maxBlockY, 0.1, regBlockW, regBlockH);
-        }
-
-        // fill last column
-        PlaceEdgeOverlapBlockWithMinCutBlocking_StdC_KSrc4Unroll_Vector_BoundsRefactor_LoopReorder_Blocking32(
-            both, dstY, dstX, maxBlockX, maxBlockY, 0.1, blockWidth, regBlockH);
-    }
-
-    // fill last row
-    int blockHeight = mData->output_h - dstY;
-    PlaceEdgeOverlapBlockWithMinCutBlocking_StdC_KSrc4Unroll_Vector_BoundsRefactor_LoopReorder_Blocking32(
-        horizontal, dstY, 0, maxBlockX, maxBlockY, 0.1, regBlockW, regBlockH);
-    dstX = mData->block_w;
-    for (; dstX < mData->output_w - wStep; dstX += wStep) {
-        PlaceEdgeOverlapBlockWithMinCutBlocking_StdC_KSrc4Unroll_Vector_BoundsRefactor_LoopReorder_Blocking32(
-            both, dstY, dstX, maxBlockX, maxBlockY, 0.1, mData->block_w, blockHeight);
-    }
-    // bottom-right corner
-    PlaceEdgeOverlapBlockWithMinCutBlocking_StdC_KSrc4Unroll_Vector_BoundsRefactor_LoopReorder_Blocking32(
-        both, dstY, lastDstX, maxBlockX, maxBlockY, 0.1, blockWidth, blockHeight);
-}
-
-void AdvanceAlgOptimiz ::
-    OverlapConstraintsWithMinCut_StdC_KSrc8Unroll_Vector_BoundsRefactor_LoopReorder_Blocking32() {
-    // Compute block parameters
-    int hStep = mData->block_h - overlapHeight;
-    int wStep = mData->block_w - overlapWidth;
-
-    int maxBlockY = mData->height - mData->block_h;
-    int maxBlockX = mData->width - mData->block_w;
-
-    int regBlockW = mData->block_w;
-    int regBlockH = mData->block_h - overlapHeight;
-
-    // Randomly choose the upper-left corner of a block
-    int srcY = GetRandomInt(0, maxBlockY - 1);
-    int srcX = GetRandomInt(0, maxBlockX - 1);
-
-    // Write the randomly chosen block to the output
-    WriteBlock(0, 0, srcY, srcX);
-
-    // fill first row
-    int dstX = mData->block_w;
-    int dstY = mData->block_h;
-    for (; dstX < mData->output_w; dstX += wStep) {
-        PlaceEdgeOverlapBlockWithMinCutBlocking_StdC_KSrc8Unroll_Vector_BoundsRefactor_LoopReorder_Blocking32(
-            vertical, 0, dstX, maxBlockX, maxBlockY, 0.1, regBlockW, regBlockH);
-    }
-    int lastDstX = dstX - wStep;
-    int blockWidth = mData->output_w - (lastDstX - overlapWidth);
-
-    // fill all corner cases except borders
-    for (; dstY < mData->output_h - hStep; dstY += hStep) {
-        // fill first column
-        PlaceEdgeOverlapBlockWithMinCutBlocking_StdC_KSrc8Unroll_Vector_BoundsRefactor_LoopReorder_Blocking32(
-            horizontal, dstY, 0, maxBlockX, maxBlockY, 0.1, regBlockW, regBlockH);
-        dstX = mData->block_w;
-        for (; dstX < mData->output_w - wStep; dstX += wStep) {
-            PlaceEdgeOverlapBlockWithMinCutBlocking_StdC_KSrc8Unroll_Vector_BoundsRefactor_LoopReorder_Blocking32(
-                both, dstY, dstX, maxBlockX, maxBlockY, 0.1, regBlockW, regBlockH);
-        }
-
-        // fill last column
-        PlaceEdgeOverlapBlockWithMinCutBlocking_StdC_KSrc8Unroll_Vector_BoundsRefactor_LoopReorder_Blocking32(
-            both, dstY, dstX, maxBlockX, maxBlockY, 0.1, blockWidth, regBlockH);
-    }
-
-    // fill last row
-    int blockHeight = mData->output_h - dstY;
-    PlaceEdgeOverlapBlockWithMinCutBlocking_StdC_KSrc8Unroll_Vector_BoundsRefactor_LoopReorder_Blocking32(
-        horizontal, dstY, 0, maxBlockX, maxBlockY, 0.1, regBlockW, regBlockH);
-    dstX = mData->block_w;
-    for (; dstX < mData->output_w - wStep; dstX += wStep) {
-        PlaceEdgeOverlapBlockWithMinCutBlocking_StdC_KSrc8Unroll_Vector_BoundsRefactor_LoopReorder_Blocking32(
-            both, dstY, dstX, maxBlockX, maxBlockY, 0.1, mData->block_w, blockHeight);
-    }
-    // bottom-right corner
-    PlaceEdgeOverlapBlockWithMinCutBlocking_StdC_KSrc8Unroll_Vector_BoundsRefactor_LoopReorder_Blocking32(
-        both, dstY, lastDstX, maxBlockX, maxBlockY, 0.1, blockWidth, blockHeight);
-}
 #endif

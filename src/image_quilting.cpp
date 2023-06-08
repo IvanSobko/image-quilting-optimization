@@ -543,7 +543,7 @@ void ImageQuilting::OverlapConstraintsWithMinCut() {
                 // Write the randomly chosen block to the output
                 WriteBlock(dstY, dstX, srcY, srcX);
             } else {
-                PlaceEdgeOverlapBlockWithMinCut(dstY, dstX, maxBlockX, maxBlockY, 0.1);
+                PlaceEdgeOverlapBlockWithMinCut(dstY, dstX, maxBlockX, maxBlockY);
             }
         }
     }
@@ -587,7 +587,7 @@ void ImageQuilting::OverlapConstraints() {
             }
             // Otherwise place a block according to the overlap constraints
             else {
-                PlaceEdgeOverlapBlock(dstY, dstX, maxBlockX, maxBlockY, 0.1);
+                PlaceEdgeOverlapBlock(dstY, dstX, maxBlockX, maxBlockY);
             }
         }
     }
