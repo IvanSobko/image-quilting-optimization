@@ -16,7 +16,7 @@ ImgData img_data;
 
 bool runTiming = false;
 bool generate = false;
-bool test = true;
+bool test = false;
 bool testCorrectnessAndTiming = false;
 bool stabilize = false;
 bool advisor = false;
