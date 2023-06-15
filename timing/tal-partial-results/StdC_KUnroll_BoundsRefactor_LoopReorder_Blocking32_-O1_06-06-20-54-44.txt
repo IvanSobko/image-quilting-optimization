@@ -1,5 +1,0 @@
-label=StdC_KUnroll_BoundsRefactor_LoopReorder_Blocking32, compileFlags=-O1, time=06-06-20-54-44, outputScale=2, blockDivisor=4, seed=0
-size=277x277, n=76729, performance=0.607753, flops=58543041193, cycles=9.6327e+10
-size=72x72, n=5184, performance=0.633289, flops=280892945, cycles=4.43546e+08
-size=212x212, n=44944, performance=0.648657, flops=19193532445, cycles=2.95896e+10
-size=162x162, n=26244, performance=0.583297, flops=6401792139, cycles=1.09752e+10
