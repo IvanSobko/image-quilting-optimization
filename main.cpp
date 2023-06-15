@@ -236,10 +236,22 @@ int main(int argc, char* argv[]) {
 #endif
         };
 
-        // Run on the small - medium inputs; block divisor 4
+        // Block divisor 2
+        for (const auto& pair : imageQuiltingFunctions) {
+            timing::run_timing_functional(pair.first, "./timing/input", "input0", "./timing/results",
+                                          pair.second, 2, 2, 0);
+        }
+
+        // Block divisor 4
         for (const auto& pair : imageQuiltingFunctions) {
             timing::run_timing_functional(pair.first, "./timing/input", "input0", "./timing/results",
                                           pair.second, 2, 4, 0);
+        }
+
+        // Block divisor 8
+        for (const auto& pair : imageQuiltingFunctions) {
+            timing::run_timing_functional(pair.first, "./timing/input", "input0", "./timing/results",
+                                          pair.second, 2, 8, 0);
         }
     }
     // Main
