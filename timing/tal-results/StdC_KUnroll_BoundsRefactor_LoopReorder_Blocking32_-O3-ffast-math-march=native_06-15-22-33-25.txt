@@ -1,0 +1,11 @@
+label=StdC_KUnroll_BoundsRefactor_LoopReorder_Blocking32, compileFlags=-O3-ffast-math-march=native, time=06-15-22-33-25, outputScale=2, blockDivisor=4, seed=0
+size=277x277, n=76729, performance=4.05826, flops=58543041193, cycles=1.44256e+10
+size=72x72, n=5184, performance=4.2222, flops=280892945, cycles=6.65276e+07
+size=212x212, n=44944, performance=4.26082, flops=19193532445, cycles=4.50466e+09
+size=162x162, n=26244, performance=4.1648, flops=6401792139, cycles=1.53712e+09
+size=363x363, n=131769, performance=4.19426, flops=178722042639, cycles=4.26111e+10
+size=55x55, n=3025, performance=3.58094, flops=82654009, cycles=2.30817e+07
+size=42x42, n=1764, performance=3.89443, flops=19177600, cycles=4.92437e+06
+size=95x95, n=9025, performance=3.9362, flops=648558409, cycles=1.64768e+08
+size=124x124, n=15376, performance=4.18762, flops=2390793933, cycles=5.70919e+08
+size=32x32, n=1024, performance=4.48331, flops=8591355, cycles=1.9163e+06

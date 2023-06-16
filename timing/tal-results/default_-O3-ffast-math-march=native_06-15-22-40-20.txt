@@ -1,0 +1,11 @@
+label=default, compileFlags=-O3-ffast-math-march=native, time=06-15-22-40-20, outputScale=2, blockDivisor=8, seed=0
+size=277x277, n=76729, performance=2.44405, flops=88199744435, cycles=3.60876e+10
+size=72x72, n=5184, performance=1.44044, flops=280044397, cycles=1.94415e+08
+size=212x212, n=44944, performance=2.34469, flops=35254045707, cycles=1.50357e+10
+size=162x162, n=26244, performance=2.23148, flops=10658335897, cycles=4.77636e+09
+size=363x363, n=131769, performance=2.64191, flops=280835884776, cycles=1.063e+11
+size=55x55, n=3025, performance=1.40775, flops=175988422, cycles=1.25014e+08
+size=42x42, n=1764, performance=0.146505, flops=1205125, cycles=8.22585e+06
+size=95x95, n=9025, performance=1.51759, flops=672289538, cycles=4.42998e+08
+size=124x124, n=15376, performance=2.01427, flops=3123512393, cycles=1.5507e+09
+size=32x32, n=1024, performance=0.156043, flops=689593, cycles=4.41926e+06

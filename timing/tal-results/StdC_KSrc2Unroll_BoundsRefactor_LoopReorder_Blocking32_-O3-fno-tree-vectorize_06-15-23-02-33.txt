@@ -1,0 +1,11 @@
+label=StdC_KSrc2Unroll_BoundsRefactor_LoopReorder_Blocking32, compileFlags=-O3-fno-tree-vectorize, time=06-15-23-02-33, outputScale=2, blockDivisor=2, seed=0
+size=277x277, n=76729, performance=2.74636, flops=20614011407, cycles=7.50595e+09
+size=72x72, n=5184, performance=2.75255, flops=94659325, cycles=3.43897e+07
+size=212x212, n=44944, performance=2.89408, flops=6826626619, cycles=2.35882e+09
+size=162x162, n=26244, performance=2.84918, flops=2330514976, cycles=8.1796e+08
+size=363x363, n=131769, performance=2.8752, flops=60473156792, cycles=2.10327e+10
+size=55x55, n=3025, performance=2.6878, flops=29015348, cycles=1.07952e+07
+size=42x42, n=1764, performance=2.57374, flops=9633106, cycles=3.74285e+06
+size=95x95, n=9025, performance=2.79563, flops=257654602, cycles=9.21634e+07
+size=124x124, n=15376, performance=2.9135, flops=804408114, cycles=2.76097e+08
+size=32x32, n=1024, performance=2.36957, flops=2918677, cycles=1.23173e+06
