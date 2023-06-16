@@ -4,6 +4,8 @@
 *.cmake
 .idea
 .vscode
+/report/report*
+!/report/report.tex
 /cmake-build*
 output*.png
 /testing/output/
