@@ -87,18 +87,8 @@ The minimum value in the last row of the table represents the end of the best st
 
 \section{Your Proposed Method}\label{sec:yourmethod}
 
-Now comes the ``beef'' of the paper, where you explain what you
-did. Again, organize it in paragraphs with titles. As in every section
-you start with a very brief overview of the section.
-
-For this course, explain all the optimizations you performed. This mean, you first very briefly
-explain the baseline implementation, then go through locality and other optimizations, and finally SSE (every project will be slightly different of course). Show or mention relevant analysis or assumptions. A few examples: 1) Profiling may lead you to optimize one part first; 2) bandwidth plus data transfer analysis may show that it is memory bound; 3) it may be too hard to implement the algorithm in full generality: make assumptions and state them (e.g., we assume $n$ is divisible by 4; or, we consider only one type of input image); 4) explain how certain data accesses have poor locality. Generally, any type of analysis adds value to your work.
-
-As important as the final results is to show that you took a structured, organized approach to the optimization and that you explain why you did what you did.
-
-Mention and cite any external resources including library or other code.
-
-Good visuals or even brief code snippets to illustrate what you did are good. Pasting large amounts of code to fill the space is not good.
+\mypar{Optimization plan} 
+To formulate our optimization plan, we initially classified the potential optimizations for our algorithm into two distinct subcategories: basic and advanced. The basic optimizations are general techniques that are applicable to a wide range of algorithms, usually yielding consistent improvements in speed. These optimizations involve precomputations of indices and bounds to enhance temporal locality, inlining function calls, replacing computationally expensive operations with more optimal alternatives whenever feasible, rewriting the code in a C-style fashion, and replacing library functions by our own to eliminate unnecessary computations inside.
 
 \section{Experimental Results}\label{sec:exp}
 
