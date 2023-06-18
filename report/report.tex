@@ -68,9 +68,15 @@ you do to make now precisely clear what your contribution is.
 
 \section{Background on Image Quilting}\label{sec:background}
 
-Within this section, our objective is to present a formal definition of Image Quilting, introduce the essential components of the algorithm alongside our implementation, conduct a cost analysis,  and outline the asymptotic complexity of the problem.
+Within this section, our objective is to present a formal definition of Image Quilting, introduce the essential components of the algorithm alongside our implementation, conduct a cost analysis, and outline the asymptotic complexity of the problem.
 
 \mypar{Image Quilting}
+Texture synthesis refers to the process of generating new, realistic textures based on a given input texture or a set of exemplar textures. The goal is to create a larger texture that captures the visual characteristics and patterns present in the input textures.
+Image Quilting is a common approach of patch-based synthesis, where small patches of the input texture are used to iteratively reconstruct the larger texture. These patches are selected based on their similarity to the surrounding context, ensuring that they fit seamlessly into the overall texture. The algorithm consists of three key components that progressively enhance both the algorithm itself and the resulting output texture.
+
+We can define \textit{$B_{i}$} as a synthesis unit, which is a square block of user-specified size extracted from the set \textit{$S_{B}$} containing all overlapping blocks in the input texture image. The most straightforward approach to generating a larger texture involves randomly sampling blocks from \textit{$S_{B}$}. Although this method produces textures of the desired size, they exhibit noticeable flaws due to the lack of correspondence between selected blocks, resulting in clearly visible seams.
+
+To address this imperfection, a solution is to randomly sample only the top-left corner block. For all other positions, we would search for a block in \textit{$S_{B}$} that agrees with its neighboring blocks in the output texture. The agreement between the chosen \textit{$B_{i}$} from \textit{$S_{B}$} and its neighboring blocks is typically evaluated using the L2 loss function on the overlap regions. In the Image Quilting algorithm, the overlap region is commonly defined as one-sixth of the block size, with the blocks stitched in the middle of this overlap region. The stitching process can be categorized into three separate cases: vertical stitching for the first row, horizontal stitching for the first column, and corner stitching for all other blocks.
 
 \mypar{Cost Analysis}
 
