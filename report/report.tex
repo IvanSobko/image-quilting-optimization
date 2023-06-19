@@ -88,7 +88,21 @@ The minimum value in the last row of the table represents the end of the best st
 \section{Your Proposed Method}\label{sec:yourmethod}
 
 \mypar{Optimization plan} 
-To formulate our optimization plan, we initially classified the potential optimizations for our algorithm into two distinct subcategories: basic and advanced. The basic optimizations are general techniques that are applicable to a wide range of algorithms, usually yielding consistent improvements in speed. These optimizations involve precomputations of indices and bounds to enhance temporal locality, inlining function calls, replacing computationally expensive operations with more optimal alternatives whenever feasible, rewriting the code in a C-style fashion, and replacing library functions by our own to eliminate unnecessary computations inside.
+To formulate our optimization plan, we initially classified the potential optimizations for our algorithm into two distinct subcategories: basic and advanced. The basic optimizations are general techniques that are applicable to a wide range of algorithms, usually yielding consistent improvements in speed. These optimizations involve precomputations of indices and bounds to enhance temporal locality, inlining function calls, replacing computationally expensive operations with more optimal alternatives whenever feasible, rewriting the code in a C-style fashion, and replacing library functions by our own to eliminate unnecessary computations inside. Certain optimizations in this list may lead to a marginal reduction in the number of operations. Additionally, these optimizations typically simplify the code, which can aid the compiler in optimizing the algorithm more effectively - this will be discussed further in the Results section.
+
+
+Advanced optimizations require significant analysis of the algorithm. In our implementation, we have identified two general functions: L2 loss calculation between two blocks and Minimum Error Boundary Cut to estimate the optimal path. Upon careful examination, we have identified several potential optimizations for these functions:
+
+\begin{enumerate}
+\item Applying loop unrolling with scalar replacement and optimizing dependencies.
+\item Refactoring the functions into separate case-specific implementations for different overlap scenarios, including variations with and without boundary checks.
+\item Implementing a simple optimization for spatial locality without introducing blocking.
+\item Introducing blocking in the L2 loss function to enable data reuse and load data into the cache only once.
+\item Enhancing the algorithm by excluding calculations of the best matching block in regions where analytical measurement is possible.
+\item Performing manual vectorization of computations.
+\end{enumerate}
+
+These optimizations will be further explored in this section.
 
 \section{Experimental Results}\label{sec:exp}
 
