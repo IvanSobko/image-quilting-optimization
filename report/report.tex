@@ -4,7 +4,7 @@
 % --------------------------------------------------------------------------
 
 \documentclass[letterpaper]{article}
-\usepackage{spconf,amsmath,amssymb,graphicx}
+\usepackage{spconf,amsmath,amssymb,graphicx,bm}
 
 % Example definitions.
 % --------------------
@@ -85,10 +85,35 @@ The minimum value in the last row of the table represents the end of the best st
 
 \mypar{Cost Analysis} Our definition of the cost measure is informed by our initial profiling of our baseline implementation. In particular, generating a flame graph (made using CLion's DTtrace-based CPU profiler on MacOS) revealed that about 85\% of the runtime of the algorithm was devoted to computing the $\ell ^2$-norm between block overlap regions. About only 3\% of the runtime was devoted to computing the minimum cut and writing the block. Because the computation of the $\ell ^2$-norm dominates the runtime of the algorithm, we decided to define our cost measure in terms of the operations required to compute the $\ell ^2$-norm.
 
-TODO:
-Explain why we use integer operations
-Write out the cost measure just like from the slides
-Make a small table discussing the latency and gap of each of these operations.
+Because the input to our algorithm is an image, which are most commonly encoded as two-dimensional arrays of packed 1-byte wide red, green, blue, and alpha channels, we decided to focus our implementation and cost measure on integer operations. CPUs are designed to have many more integer ALUs than Floating Point execution units because integer arithmetic is much more common than floating point arithmetic. Furthermore, using the narrowest numeric type appropriate would allow higher performance when applying applying SIMD intrinsics.
+
+To define our cost measure let's derive the number of operations needed to compute the $\ell ^2$-norm between two pixels. Let's assume that each pixel $\bm{p}_i$ has 4 channels, namely the RGBA channels. We then have that
+\begin{align*}
+  |\bm{p}_i - \bm{p}_j| ^2 & = (r_i - r_j)^2 + (g_i - g_j)^2 \\
+  & + (b_i - b_j)^2 + (a_i - a_j)^2.
+\end{align*}
+We would lastly take the square root, but because we are interested in the minimum among all $\ell ^2$-norms, we can find the minimum squared $\ell ^2$-norm and get rid of the square root entirely. For $n$ pixels we can then define the following integer cost measure:
+\[
+  C(n) = C _\text{int add / sub} \cdot N _\text{int add / sub} + C_\text{int mul} \cdot N _\text{int mul}.
+\]
+We have $4n$ subtractions, $3n$ additions, $4n$ multiplications, and $n-1$ additions from adding the resulting squared $\ell ^2$-norms together. This means our cost measure is
+\[
+  C(n) = C _\text{int add / sub} \cdot (8n - 1) + C_\text{int mul} \cdot 4n.
+\]
+
+It is important to note that addition and subtraction usually have smaller latency and gap than multiplication. According to Agner Fog's Instruction tables, we have that for the Intel Skylake microarchitecture, the Add, Sub, and Mul integer instructions have the following latencies and throughputs:
+
+\begin{center}
+  \begin{tabular}{c|c|c}
+    & Latency & Throughput \\
+    \hline
+    Add, Sub & 1 cycle & 4 per cycle \\
+    \hline
+    Mul & 3-4 cycles & 1 per cycle \\
+  \end{tabular}
+\end{center}
+
+This means that the cost of an integer multiplication is greater than the cost of an integer addition or subtraction.
 
 An asysmptotic analysis of the image quilting algorithm further justifies our choice of cost measure. The original image quilting paper \cite{Efros:01} does not perform an asymptotic analysis and so we provide one here. For the purpose of the asymptotic analysis, assume that the input image is square and has $n \in \N$ pixels. Then, it has a width and height of $I_w = I_h := \sqrt{n} \in \N$ pixels. Further assume that the output image is also square and linearly proportional to the dimensions of the input image. Then, the ouput image has a width and height of $O_w = O_h := a \sqrt{n} \in \N$ pixels (for some valid $a \ge 1$ with $a \in \R$). Further assume that the blocks are square and their dimensions are linearly proportional to the dimensions of the input image. Then, the block size has a width and height of $B_w = B_h := b \sqrt{n} \in \N$ pixels (for some valid $0 < b < 1$ with $b \in \R$). Each block then consists of $b^2 n \in \N$ pixels.
 
@@ -114,9 +139,11 @@ Performing the minimum cut requires computing the error surface, filling up a dy
 
 Putting it all together, the image quilting algorithm selects a constant number of $c_0$ blocks. To select each of those blocks, it must iterate over every $c_1 n$ potential source blocks. For each source block, it must iterate over $c_2 n$ pixels to compute the $\ell ^2$-norm. Next, a randomly block is sampled by iterating over the $c_1 n$ $\ell ^2$-norms. Lastly, the algorithm computes the minimum cut and writes the block iterating over $c_3 n$ pixels. This means the algorithm iterates over
 \[
-  c_0 \big [(c_1 n)(c_2 n) + c_1 n + c_3 n \big ] \approx n^2 + O(n)
+  c_0 \big [(c_1 n)(c_2 n) + c_1 n + c_3 n \big ] \approx n^2 + O(n).
 \]
 Thus the image quilting algorithm is quadratic in the number of input pixels $n$ and we say that image quilting $ \in \Theta(n^2)$.
+
+This asymptotic analysis further justifies our choice of cost measure because the highest order $n^2$ term comes from having to compute the $\ell ^2$-norm of the overlap region with respect to ever potential source block.
 
 \section{Your Proposed Method}\label{sec:yourmethod}
 
