@@ -137,11 +137,11 @@ Randomly sampling a block within a threshold of the lowest $\ell ^2$-norm can be
 
 Performing the minimum cut requires computing the error surface, filling up a dynamic programming table, and traversing the dynamic programming table to retrieve the cut. Each of these steps in the worst case iterates over every pixel of an overlap region. So computing the minimum cut and writing the block together achieve a linear complexity $c_3 n$ for some constant $c_3 \in \R$.
 
-Putting it all together, the image quilting algorithm selects a constant number of $c_0$ blocks. To select each of those blocks, it must iterate over every $c_1 n$ potential source blocks. For each source block, it must iterate over $c_2 n$ pixels to compute the $\ell ^2$-norm. Next, a randomly block is sampled by iterating over the $c_1 n$ $\ell ^2$-norms. Lastly, the algorithm computes the minimum cut and writes the block iterating over $c_3 n$ pixels. This means the algorithm iterates over
+Putting it all together, the image quilting algorithm selects a constant number of $c_0$ blocks. To select each of those blocks, it must iterate over every $c_1 n$ potential source block. For each source block, it must iterate over $c_2 n$ pixels to compute the $\ell ^2$-norm. Next, a random block is sampled within a specified threshold of the minimum by linearly iterating over the $c_1 n$ $\ell ^2$-norms. Lastly, the algorithm computes the minimum cut and writes the block iterating over $c_3 n$ pixels. This means the algorithm iterates over
 \[
-  c_0 \big [(c_1 n)(c_2 n) + c_1 n + c_3 n \big ] \approx n^2 + O(n).
+  c_0 \big [(c_1 n)(c_2 n) + c_1 n + c_3 n \big ] \approx n^2 + O(n) \; \text{pixels}.
 \]
-Thus the image quilting algorithm is quadratic in the number of input pixels $n$ and we say that image quilting $ \in \Theta(n^2)$.
+Thus the image quilting algorithm is quadratic in the number of input pixels $n$ and we say that image quilting $ \in O(n^2)$.
 
 This asymptotic analysis further justifies our choice of cost measure because the highest order $n^2$ term comes from having to compute the $\ell ^2$-norm of the overlap region with respect to ever potential source block.
 
