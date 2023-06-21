@@ -132,11 +132,13 @@ Thus the image quilting algorithm is quadratic in the number of input pixels $n$
 
 This asymptotic analysis further justifies our choice of cost measure because the highest order $n^2$ term comes from having to compute the $\ell ^2$-norm of the overlap region with respect to ever potential source block.
 
-\section{Your Proposed Method}\label{sec:yourmethod}
+\section{Optimization Strategies}\label{sec:yourmethod}
+
+[TODO: short description]
+
 
 \mypar{Optimization plan} 
-To formulate our optimization plan, we initially classified the potential optimizations for our algorithm into two distinct subcategories: basic and advanced. The basic optimizations are general techniques that are applicable to a wide range of algorithms, usually yielding consistent improvements in speed. These optimizations involve precomputations of indices and bounds to enhance temporal locality, inlining function calls, replacing computationally expensive operations with more optimal alternatives whenever feasible, rewriting the code in a C-style fashion, and replacing library functions by our own to eliminate unnecessary computations inside. Certain optimizations in this list may lead to a marginal reduction in the number of operations. Additionally, these optimizations typically simplify the code, which can aid the compiler in optimizing the algorithm more effectively - this will be discussed further in the Results section.
-
+To formulate our optimization plan, we initially classified the potential optimizations for our algorithm into two distinct subcategories: basic and advanced. The basic optimizations are general techniques that are applicable to a wide range of algorithms, usually yielding light but consistent improvements in speed. These optimizations involve precomputations of indices and bounds to enhance temporal locality, inlining function calls, replacing computationally expensive operations with more optimal alternatives whenever feasible, rewriting the code in a C-style fashion, and replacing library functions by our own to eliminate unnecessary computations inside. Certain optimizations in this list may lead to a marginal reduction in the number of operations. Additionally, these optimizations typically simplify the code, which can aid the compiler in optimizing the algorithm more effectively - this will be discussed further in the Results section.
 
 Advanced optimizations require significant analysis of the algorithm. In our implementation, we have identified two general functions: $\ell ^2$-norm calculation between two blocks and Minimum Error Boundary Cut to estimate the optimal path. Upon careful examination, we have identified several potential optimizations for these functions:
 
@@ -156,12 +158,32 @@ As previously mentioned, these optimizations involved removing library function 
 
 Another optimization in this context involves reducing the number of square root operations. In the original paper [TODO: add ref], the squared sum of pixel differences in the overlap region for each block is computed. The minimum value among these sums determines the best matching block. A set of blocks within 0.1 times the error of this best matching block is then considered suitable for pasting into the desired output texture.
 
-However, since we only require the square root computations to establish the range of suitable blocks and not their actual values, we can simplify the algorithm. As the square root function is monotonically increasing, finding the minimum sum of squared differences suffices to identify the best matching block. To ensure consistency in the set of suitable blocks, we calculate the square root solely for the minimum value. To ensure that the set of suitable blocks remains the same, we can obtain the square root only for the minimum value, multiply it by the error tolerance to determine the threshold, and then square it again. With this approach the resulting value is proportional to the calculated sum of squared differences for all other blocks. [TODO: simple analysis]
+However, since we only require the square root computations to establish the range of suitable blocks and not their actual values, we can simplify the algorithm. As the square root function is monotonically increasing, finding the minimum sum of squared differences suffices to identify the best matching block. To ensure consistency in the set of suitable blocks, we calculate the square root solely for the minimum value. To ensure that the set of suitable blocks remains the same, we can obtain the square root only for the minimum value, multiply it by the error tolerance to determine the threshold, and then square it again. With this approach the resulting value is proportional to the calculated sum of squared differences for all other blocks. 
 
 \mypar{Loop Unrolling} 
-Another optimization that we implemented is loop unrolling with separate accumulators. The main objective of loop unrolling is to enhance Instruction Level Parallelism by parallelizing operations. To achieve this, we introduced multiple accumulators to ensure independence among operations and improve the computational efficiency of the algorithm. It is crucial to emphasize that one of the main challenges in this optimization lies in determining the appropriate unroll factor and the number of accumulators to use. 
-In accordance with the cost analysis detailed in the second section, it was discussed that the $\ell^2$-norm estimation function is responsible for approximately 85\% of the total runtime. Consequently, we prioritized the majority of our analysis and optimization efforts on this specific aspect of the algorithm. Moving forward, our analysis of loop unrolling will be conducted with a foundation based on this function.
+Another optimization that we implemented is loop unrolling with separate accumulators. The main objective of loop unrolling is to enhance Instruction Level Parallelism. To achieve maximum operation parallelization, we introduced multiple accumulators to ensure independence among operations and improve the computational efficiency of the algorithm. It is crucial to emphasize that one of the main challenges in this optimization lies in determining the appropriate unroll factor and the number of accumulators to use. 
+In accordance with the cost analysis detailed in the second section, it was discussed that the $\ell^2$-norm estimation function is responsible for approximately 85\% of the total runtime. Consequently, we prioritized the majority of our analysis and optimization efforts on this specific aspect of the algorithm. Moving forward, our analysis of loop unrolling will be conducted based on this function.
 
+In the $\ell^2$-norm estimation function, each pixel in the overlap region involves the following integer operations: 4 independent subtractions, 4 multiplications, and 4 final additions per iteration. When considering the Intel Skylake microarchitecture, it is possible to execute additions (subtractions are considered to be additions as well) on a maximum of 4 ports, while multiplications can only be performed on 1 of these 4 ports. As a result, the computation is primarily bottlenecked by the multiplication operation.
+
+Assuming no dependencies are taken into account and we do not wait for any computations to finish, for these set of the operations the optimal runtime per iteration can be calculated as follows:
+\[ max(4 \text{ \{1 mults/cycle\}}, \frac{8}{3} \text{ \{3 adds/cycle\}}) = 4 \text{ cycle/pixel}. \]
+
+Now that we have determined the most optimal theoretical runtime for the given machine, let's proceed with calculating the runtime of the $\ell^2$-loss between two pixels, taking into account the dependencies present in the code. It is assumed that we have already unrolled the innermost loop, which iterates through the channels. As you can see in the dependency graph shown in Fig.~\ref{dg}, due to the presence of dependencies we require 2.5 times more cycles per iteration. The main problems arise from the delay caused by multiplication, where the machine has to wait for instructions to finish, and from not fully utilizing the machine's integer addition ports to their maximum capacity.
+
+\begin{figure}[htbp]
+\centering
+  \includegraphics[scale=0.4]{DependencyGraph.pdf}
+  \caption{Dependency graph of the $\ell^2$-loss function between two pixels, considering Intel Skylake microarchitecture. Channels {$r_{1}, r_{2}, g_{1}, g_{2}, ...$} correspond to the respective pixel channels.\label{dg}}
+\end{figure}
+
+To optimize the algorithm, let us determine the ideal unrolling factor that can effectively address these limitations. Within the algorithm, the number of additions outweighs the number of multiplications by a factor of two. Furthermore, the throughput of additions surpasses that of multiplications by a factor of four. Consequently, under optimal circumstances, it becomes feasible to parallelize slightly over half of all multiplications. Considering this, an unroll factor of 4 should suffice since it allows for parallelization of half of the multiplications. Specifically, for the first set of pixel pairs, the multiplication of differences can be executed in parallel with the subtractions of RGBA channel values from the subsequent 3 pairs. Similarly, for the final pixel pair, the multiplication can occur concurrently with the final additions. This assertion can be substantiated by examining the dependency graph provided in Fig.~\ref{unroll}. By employing this unrolling technique, we successfully minimized the number of cycles required per pixel to a mere 5.25. This value is only slightly larger than the best possible scenario for this algorithm. It serves as a favorable compromise since higher unrolling factors lead to increased code complexity and potential memory-related challenges arising from a larger number of accumulators.
+
+\begin{figure}[htbp]
+\centering
+  \includegraphics[scale=0.17]{Unrolling.pdf}
+  \caption{Dependency graph of the $\ell^2$-loss function between two pixels with an unroll factor of 4, considering Intel Skylake microarchitecture.\label{unroll}}
+\end{figure}
 \mypar{Basic spatial locality} 
 
 \mypar{Blocking} 
@@ -253,7 +275,8 @@ Fig.~\ref{fftperf} is an example plot that I used in a lecture. Note that the fo
   \includegraphics[scale=0.33]{dft-performance.pdf}
   \caption{Performance of four single-precision implementations of the
   discrete Fourier transform. The operations count is roughly the
-  same. {\em The labels in this plot are about the smallest you should go.}\label{fftperf}}
+  same. {\em The labels in this plot are about the smallest you should go.}
+  \label{fftperf}}
 \end{figure}
 
 \bigskip
