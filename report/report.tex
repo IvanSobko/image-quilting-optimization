@@ -41,27 +41,14 @@ should write the abstract last.
 
 \section{Introduction}\label{sec:intro}
 
-Do not start the introduction with the abstract or a slightly modified
-version. What follows is a possible structure of the introduction.
-This structure can be modified, but the content should be the same. The introduction should definitely end on the first page.
+Image quilting algorithms have become indispensable tools in various image processing applications, providing solutions for texture synthesis, seamless image stitching, and image inpainting. However, with the ever-increasing demand for real-time performance and the handling of large-scale textures, there is a growing need for high-performance versions of image quilting algorithms that can efficiently and effectively process images, while maintaining visual quality. The objective of this paper is to introduce and evaluate a high-performance version of the image quilting algorithm that addresses the computational challenges and improves overall efficiency. 
 
-\mypar{Motivation} The first task is to motivate what you do.  You can
-start general and zoom in one the specific problem you consider.  In
-the process you should have explained to the reader: what you are doing,
-why you are doing, why it is important (order is usually reversed).
-
-For example, if my result is the fastest DFT implementation ever, one
-could roughly go as follows. First explain why the DFT is important
-(used everywhere with a few examples) and why performance matters (large datasets,
-realtime). Then explain that fast implementations are very hard and
-expensive to get (memory hierarchy, vector, parallel).
+\mypar{Motivation} The motivation behind this research arises from the limitations of traditional image quilting algorithms in meeting the demands of modern applications. Standard approaches often struggle to handle high-resolution images hindering their usability in areas such as video games, virtual reality, and live video processing. Additionally, the computational complexity associated with large-scale textures poses challenges in terms of memory consumption and processing time. Therefore, a high-performance version of the image quilting algorithm is crucial to overcome these limitations and unlock its full potential in various domains.
 
 \mypar{Contribution}
-Now you state what you do in this paper. In our example:
-presenting a DFT implementation that is
-faster for some sizes than all the other ones.
+In this paper we will introduce and evaluate different optimization techniques that we used and compare their efficiency on different images.
 
-\mypar{Related work} Next, you have to give a brief overview of
+\mypar{Related work} \textbf{TODO}: Next, you have to give a brief overview of
 related work. For a paper like this, anywhere between 2 and 8
 references. Briefly explain what they do. In the end contrast to what
 you do to make now precisely clear what your contribution is.
@@ -77,7 +64,7 @@ Image Quilting is a common approach of patch-based synthesis, where small patche
 
 We can define \textit{$B_{i}$} as a synthesis unit, which is a square block of user-specified size extracted from the set \textit{$S_{B}$} containing all overlapping blocks in the input texture image. The most straightforward approach to generating a larger texture involves randomly sampling blocks from \textit{$S_{B}$}. Although this method produces textures of the desired size, they exhibit noticeable flaws due to the lack of correspondence between selected blocks, resulting in clearly visible seams.
 
-To address this imperfection, a solution is to randomly sample only the top-left corner block. For all other positions, we would search for a block in \textit{$S_{B}$} that agrees with its neighboring blocks in the output texture. The agreement between the chosen \textit{$B_{i}$} from \textit{$S_{B}$} and its neighboring blocks is typically evaluated using the L2 norm function on the overlap regions. In the Image Quilting algorithm, the overlap region is commonly defined as one-sixth of the block size, with the blocks stitched in the middle of this overlap region. The error tolerance was set to be within 0.1 times the error of the best matching block. The stitching process can be categorized into three separate cases: vertical stitching for the first row, horizontal stitching for the first column, and corner stitching for all other blocks.
+To address this imperfection, a solution is to randomly sample only the top-left corner block. For all other positions, we would search for a block in \textit{$S_{B}$} that agrees with its neighboring blocks in the output texture. The agreement between the chosen \textit{$B_{i}$} from \textit{$S_{B}$} and its neighboring blocks is typically evaluated using the L2 loss function on the overlap regions. In the Image Quilting algorithm, the overlap region is commonly defined as one-sixth of the block size, with the blocks stitched in the middle of this overlap region. The error tolerance was set to be within 0.1 times the error of the best matching block. The stitching process can be categorized into three separate cases: vertical stitching for the first row, horizontal stitching for the first column, and corner stitching for all other blocks.
 
 While the previous approach has significantly improved the output, there are still instances where the seams remain noticeable. This is because the blocks are stitched together using straight lines, which can be easily detected by the human eye. Therefore, in the next component of the algorithm, we aim to further reduce this problem by identifying a minimum cost path through the error surface within the overlap region. To perform the Minimum Error Boundary Cut using dynamic programming, we define the error surface as ${e = (B^{ov}_{1} - B^{ov}_{2})^{2}}$, where ${B^{ov}_{1}}$ and ${B^{ov}_{2}}$ represent the overlap regions of two blocks. The goal is to compute the cumulative minimum error, E, for all possible paths as:
 \[ E = e_{i,j} + min(E_{i-1,j-1}, E_{i-1,j}, E_{i-1,j+1}). \]
@@ -148,30 +135,21 @@ This asymptotic analysis further justifies our choice of cost measure because th
 \section{Your Proposed Method}\label{sec:yourmethod}
 
 \mypar{Optimization plan} 
-To formulate our optimization plan, we initially classified the potential optimizations for our algorithm into two distinct subcategories: basic and advanced. The basic optimizations are general techniques that are applicable to a wide range of algorithms, usually yielding slight but consistent improvements in speed. These optimizations involve precomputations of indices and bounds to enhance temporal locality, inlining function calls, replacing computationally expensive operations with more optimal alternatives whenever feasible, rewriting the code in a C-style fashion, and replacing library functions by our own to eliminate unnecessary computations inside. Certain optimizations in this list may lead to a marginal reduction in the number of operations. Additionally, these optimizations typically simplify the code, which can aid the compiler in optimizing the algorithm more effectively - this will be discussed further in the Results section.
+To formulate our optimization plan, we initially classified the potential optimizations for our algorithm into two distinct subcategories: basic and advanced. The basic optimizations are general techniques that are applicable to a wide range of algorithms, usually yielding consistent improvements in speed. These optimizations involve precomputations of indices and bounds to enhance temporal locality, inlining function calls, replacing computationally expensive operations with more optimal alternatives whenever feasible, rewriting the code in a C-style fashion, and replacing library functions by our own to eliminate unnecessary computations inside. Certain optimizations in this list may lead to a marginal reduction in the number of operations. Additionally, these optimizations typically simplify the code, which can aid the compiler in optimizing the algorithm more effectively - this will be discussed further in the Results section.
 
 
-Advanced optimizations require significant analysis of the algorithm. In our implementation, we have identified two general functions: L2 norm calculation between two blocks and Minimum Error Boundary Cut to estimate the optimal path. Upon careful examination, we have identified several potential optimizations for these functions:
+Advanced optimizations require significant analysis of the algorithm. In our implementation, we have identified two general functions: L2 loss calculation between two blocks and Minimum Error Boundary Cut to estimate the optimal path. Upon careful examination, we have identified several potential optimizations for these functions:
 
 \begin{enumerate}
 \item Applying loop unrolling with scalar replacement and optimizing dependencies.
 \item Refactoring the functions into separate case-specific implementations for different overlap scenarios, including variations with and without boundary checks.
 \item Implementing a simple optimization for spatial locality without introducing blocking.
-\item Introducing blocking in the L2 norm function to enable data reuse and load data into the cache only once.
+\item Introducing blocking in the L2 loss function to enable data reuse and load data into the cache only once.
 \item Enhancing the algorithm by excluding calculations of the best matching block in regions where analytical measurement is possible.
 \item Performing manual vectorization of computations.
 \end{enumerate}
 
 These optimizations will be further explored in this section.
-
-\mypar{Basic optimizations} 
-As previously mentioned, these optimizations involved removing library function calls, replacing STD structures with C-style arrays, and minimizing dependencies on classes and structures. Additionally, Image Quilting algorithm requires numerous index computations to access specific parts of the output texture and the blocks from the set \textit{$S_{B}$} to determine overlap regions. To optimize this process, we precomputed various values, such as row and column shifts to align with the beginning of overlap regions. Moreover, we stored pointers to the start of these rows for both the output texture and the blocks, enabling us to easily increment the pointers while iterating over the columns and efficiently calculate the error between the overlapping blocks. [TODO: simple analysis]
-
-Another optimization in this context involves reducing the number of square root operations. In the original paper [TODO: add ref], the squared sum of pixel differences in the overlap region for each block is computed. The minimum value among these sums determines the best matching block. A set of blocks within 0.1 times the error of this best matching block is then considered suitable for pasting into the desired output texture.
-
-However, since we only require the square root computations to establish the range of suitable blocks and not their actual values, we can simplify the algorithm. As the square root function is monotonically increasing, finding the minimum sum of squared differences suffices to identify the best matching block. To ensure consistency in the set of suitable blocks, we calculate the square root solely for the minimum value. To ensure that the set of suitable blocks remains the same, we can obtain the square root only for the minimum value, multiply it by the error tolerance to determine the threshold, and then square it again. With this approach the resulting value is proportional to the calculated sum of squared differences for all other blocks. [TODO: simple analysis]
-
-\mypar{Loop Unrolling} 
 
 \section{Experimental Results}\label{sec:exp}
 
