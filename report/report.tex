@@ -251,7 +251,13 @@ This loop reordering allows now (1) reads the output overlap region exactly once
 
 \textit{(2) Performing the Minimum Cut}
 
-\mypar{Blocking} 
+While we did not spend much time optimizing performing the minimum cut, we still provide a brief locality analysis.
+
+In the case of the vertical minimum cut, we have spatial locality since we are iterating over pixels of the overlap region; the baseline implementation already takes advantage of the spatial locality since we iterate through the overlap region row-by-row. We also have a small amount of temporal locality since we construct the vertical path by traversing the dynamic programming table from the last row to the first row.
+
+In the case of the horizontal minimum cut, we have spatial since we are iterating over pixels of the overlap region; however, the baseline implementation does not take advantage of the spatial locality since we iterate through the overlap region column-by-column. We also have a small amount of temporal locality since we construct the horizontal path by traversing the dynamic programming table from the last column to the first column.
+
+\mypar{Blocking}
 
 \mypar{Vectorization} When utilizing SIMD (Single Instruction, Multiple Data) vectorization, there are several considerations to keep in mind to maximize performance and efficiency: \\ 
 \textit{Data alignment}: SIMD operations typically require data to be aligned on specific boundaries. We ensure that data is aligned by using \texttt{malloc}, which is guaranteed to be properly aligned for objects of any type. Maximum alignment size of \texttt{malloc} is determined by \texttt{max\_align\_t} which usually equals to size of \texttt{long double} (16 bytes). Maximum alignment will influence vector width selection.  \\
