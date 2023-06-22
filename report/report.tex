@@ -188,7 +188,13 @@ To optimize the algorithm, let us determine the ideal unrolling factor that can 
 
 \mypar{Blocking} 
 
-\mypar{Vectorization} 
+\mypar{Vectorization} When utilizing SIMD (Single Instruction, Multiple Data) vectorization, there are several considerations to keep in mind to maximize performance and efficiency: \\ 
+\textit{Data alignment}: SIMD operations typically require data to be aligned on specific boundaries. We ensure that data is aligned by using \texttt{malloc}, which is guaranteed to be properly aligned for objects of any type. \\
+\textit{Data dependency}: Minimizing data dependencies within vectorized code is crucial for enabling parallel execution and fully utilizing SIMD capabilities. To achieve this, we apply insights discussed in the loop unrolling section, reducing idle CPU time. \\
+\textit{Vector width}: In our case, we represent each pixel value as a 16-bit value with four components, each occupying one byte. To perform operations correctly, we load 16 8-bit values into a 128-bit integer variable and convert it into a 256-bit variable of 16-bit integers. This approach prevents overflow during multiplication and addition and maximizes performance by utilizing the available memory in the vector.\\
+The majority of our vectorization efforts are dedicated to computing the $\ell^2$-loss function, as it is the most computationally expensive operation in our code. By optimizing this function, we can achieve significant performance improvements. \\
+Through our experiments, we found that the "madd" (multiply-add) function is well-suited for our specific purpose of calculating the norm and performing horizontal component addition.
+Furthermore, to mitigate data dependencies, we employed a loop unroll with a factor of x2 of the vector width. This approach allowed us to effectively reorder operations and minimize periods of idle CPU time. 
 
 \section{Experimental Results}\label{sec:exp}
 
