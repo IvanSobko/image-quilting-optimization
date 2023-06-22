@@ -214,7 +214,7 @@ Understanding the temporal and spatial locality of memory access patterns is a c
 
 \textit{(1) Selecting a Block.}
 
-Recall that selecting a block consists of iterating over every potential source block in $S_b$, computing its $\ell ^2$-norm with respect to the overlap region in the output texture, and randomly sampling a block within a threshold of the lowest $\ell ^2$-norm. In our baseline implementation, we created a function called \inline{ComputeOverlap} whose sole purpose was to compute the $\ell ^2$-norm between the overlap region of the output texture and the overlap region of an individual source block. A single call to this function exhibits no temporal locality because each pixel in the output and input overlap regions is accessed exactly once. However, because our images are stored as two-dimensional arrays of packed 1-byte wide red, green, blue, and alpha channels, this function exhibits spatial locality, since pixels of the same row are stored contiguously in memory. In the baseline implementation we already took advantage of the spatial locality since we iterate through the overlap region row-by-row. Therefore, because the CPU reads contiguous cache blocks into the L1 and L2 caches, for a cache block size of $B$ we will have on average 1 compulsory cache miss to $B-1$ cache hits.
+Recall that selecting a block consists of iterating over every potential source block in $S_b$, computing its $\ell ^2$-norm with respect to the overlap region in the output texture, and randomly sampling a block within a threshold of the lowest $\ell ^2$-norm. In our baseline implementation, we created a function called \inline{ComputeOverlap} whose sole purpose was to compute the $\ell ^2$-norm between the overlap region of the output texture and the overlap region of an individual source block. A single call to this function exhibits no temporal locality because each pixel in the output and input overlap regions is accessed exactly once. However, because our images are stored as two-dimensional arrays of 4-byte, this function exhibits spatial locality, since pixels of the same row are stored contiguously in memory. In the baseline implementation we already took advantage of the spatial locality since we iterate through the overlap region row-by-row. Therefore, because the CPU reads contiguous cache blocks into the L1 and L2 caches, for a cache block size of $B$ we will have on average 1 compulsory cache miss to $B-1$ cache hits.
 
 We then implemented selecting a block by calling the \inline{ComputeOverlap} function once for each potential source block in $S_b$. Although this approach results in readable and practical code, it leads to an enourmous amount of temporal locality. Firstly, each call to the \inline{ComputeOverlap} function iterates over every pixel of the the overlap region in the output texture, and so the overlap region in the output texture is read $|S_b|$ times. Secondly, although each call to the \inline{ComputeOverlap} function iterates over the overlap region of a different source block, consecutive source blocks often differ by a one-pixel-shift to the right, and hence their overlap regions admit a considerable amount of the same pixels. Non-consecutive source blocks that differ by horizontal or vertical shifts similarly admit overlap regions that share a substantial number of pixels.
 
@@ -234,35 +234,19 @@ We can address the temporal locality of iterating over the overlap region in the
 
 Here $|S_b| =$ maxBlockY $ * $ maxBlockX; hence the outer two loops iterate over every potential source block and the inner two loops iterate over the pixels of the overlap region. The output pixel \inline{op} depends only on its position within the overlap region, determined by \inline{k} and \inline{l}. The input pixel \inline{ip} depends on its position within the overlap region as well as which source block it comes from, determined by \inline{i} and \inline{j}. Fixing \inline{k} and \inline{l}, the output pixel \inline{op = output(k, l)} is read $|S_b|$ times, and the input pixel \inline{ip = input(i, j, k, l)} iterates over almost every pixel of the input texture. Letting \inline{k} and \inline{l} vary we have that the input pixel \inline{ip = input(i, j, k, l)} iterates over almost every pixel of the input texture multiple times. 
 
-The above pseudocode analysis tells us that (1) the output overlap region is read multiple times and (2) the input texture is read multiple times. In an ideal world, both the output overlap region and input texture should fit into cache. Similar to the asymptotic analysis, for the purpose of the cache miss analysis, assume that the input image is square and has width $I_w$ pixels. Further assume that the blocks are square and that their width and height are linearly proportional to the dimensions of the input image. Then we have that the block height and width are given by $B_w = b I_w$ pixels (for some valid $0 < b < 1$ with $b \in \R$).
-
-In the worst and most common case we have a corner overlap, and because the overlap size is 1/6 of the block size, we know the overlap region contains
-\[
-  \frac{1}{6} B_w ^2 + \frac{1}{6} B_w ^2 - \frac{1}{6}^2 B_w ^2 = \frac{11}{36} B_w ^2 \; \text{pixels}.
-\]
-Recall that each pixel consists of 4 bytes. To avoid capacity misses, the output overlap region and input texture must fit into cache, meaning the cache must fit
-\[
-  \frac{11}{9} b ^2 I_w ^2 + 4 I_w^2 \; \text{bytes}
-\]
-To get a practical sense of this quantity, let's use our common block width multiplier of $b = \frac{1}{4}$ and suppose the input texture is large (with respect to the baseline implementation runtime), say $I_w = 2^{16}$. Then, the output overlap region and input texture take consist of
-\[
-  \frac{11}{9*16} (2^{16}) ^2 + 4(2^{16}) ^2 \approx 1.75 e 7 \text{KiB}
-\]
-
-
-By reordering the inner and outer two loops, we can iterate over the pixels of the overlap region exactly once:
+The above pseudocode analysis tells us that (1) the output overlap region is read multiple times and (2) the input texture is read multiple times. In an ideal world, both the output overlap region and input texture should fit into cache. However, by reordering the two inner and outer two, we can iterate over the pixels of the overlap region exactly once:
 
 \begin{lstlisting}[style=cppstyle]
   for k = 0 to overlapHeight - 1:
     for l = 0 to overlapWidth - 1:
-      dst = output(k, l)
+      op = output(k, l)
       for i = 0 to maxBlockY - 1:
         for j = 0 to maxBlockX - 1:
-          src = input(i, j, k, l)
-          l2(i, j) += |dst - src|^2
+          ip = input(i, j, k, l)
+          l2(i, j) += |op - ip|^2
 \end{lstlisting}
 
-This loop reordering further allows us to block both iterating over the pixels of the overlap region as well as block iterating over pixels of the source texture, as we will discuss in the blocking subsection.
+This loop reordering allows now (1) reads the output overlap region exactly once and (2) still reads the input texture multiple times. Furthermore, this loop reordering makes it easier to block the innermost two loops that iterate over the input texture multiple times.
 
 \textit{(2) Performing the Minimum Cut}
 
