@@ -31,7 +31,7 @@
   breakatwhitespace=true,
   tabsize=4,
   numbers=left,
-  numbersep=5pt,
+  numbersep=0pt,
 }
 
 % Title.
@@ -178,7 +178,7 @@ Some of these optimizations will be further explored in this section.
 \mypar{Basic optimizations}
 This optimization block involves introducing precomputations to improve temporal locality, inlining function calls, replacing computationally expensive operations with more optimal alternatives, rewriting the code in a C-style fashion, and replacing library functions with our own implementations to eliminate unnecessary computations. Now, let's examine the most noteworthy optimizations from this list within the context of the Image Quilting algorithm.
 
-Our initial implementarion of texture synthesis required numerous index computations to access specific parts of the output texture and the blocks from the set \textit{$S_{B}$} to determine overlap regions. To optimize this process, we precomputed various values, such as row and column shifts to align with the beginning of overlap regions. Moreover, we stored pointers to the start of these rows for both the output texture and the blocks, enabling us to easily increment the pointers while iterating over the columns to efficiently calculate the error between the overlapping blocks. By implementing this modification, we removed a total of 20 integer additions per pixel. However, the impact was even more substantial due to the removal of 8 multiplications and the elimination of various operational dependencies. These changes are particularly significant as they mitigate high latency and enhance performance through improved parallelization.
+Our initial implementation of texture synthesis required numerous index computations to access specific parts of the output texture and the blocks from the set \textit{$S_{B}$} to determine overlap regions. To optimize this process, we precomputed various values, such as row and column shifts to align with the beginning of overlap regions. Moreover, we stored pointers to the start of these rows for both the output texture and the blocks, enabling us to easily increment the pointers while iterating over the columns to efficiently calculate the error between the overlapping blocks. By implementing this modification, we removed a total of 20 integer additions per pixel. However, the impact was even more substantial due to the removal of 8 multiplications and the elimination of various operational dependencies. These changes are particularly significant as they mitigate high latency and enhance performance through improved parallelization.
 
 Another optimization in this context involves reducing the number of square root operations. In the original paper [TODO: add ref], the squared sum of pixel differences in the overlap region for each block is computed. The minimum value among these sums determines the best matching block. A set of blocks within 0.1 times the error of this best matching block is then considered suitable for pasting into the desired output texture.
 
@@ -209,9 +209,9 @@ To optimize the algorithm, let us determine the ideal unrolling factor that can 
   \caption{Dependency graph of the $\ell^2$-loss function between two pixels with an unroll factor of 4, considering Intel Skylake microarchitecture.\label{unroll}}
 \end{figure}
 
-\mypar{Locality}
+\mypar{Locality and Blocking}
 
-Understanding the temporal and spatial locality of memory access patterns is a crucial step in improving performance and efficiency by reducing the number of cache misses outside of the last level cache (LLC). We perform a temporal and spatial locality analysis of (1) selecting a new block and (2) performing the minimum cut.
+Understanding the temporal and spatial locality of memory access patterns is a crucial step in improving performance and efficiency by reducing the number of cache misses outside of the last level cache (LLC). We perform a temporal and spatial locality analysis, informing our optimization plan, of (1) selecting a new block and (2) performing the minimum cut. 
 
 \textit{(1) Selecting a Block.}
 
@@ -224,10 +224,10 @@ TODO create diagrams illustrating the temporal locality.
 We can address the temporal locality of iterating over the overlap region in the output texture $|S_b|$ times with a loop reordering. The baseline implementation calls the \inline{ComputeOverlap} function once for each potential source block in $S_b$, which gives us the following pseudo code:
 
 \begin{lstlisting}[style=cppstyle]
-  for i = 0 to maxBlockY - 1:
-    for j = 0 to maxBlockX - 1:
-      for k = 0 to overlapHeight - 1:
-        for l = 0 to overlapWidth - 1:
+  for i = 0 to maxBlockY:
+    for j = 0 to maxBlockX:
+      for k = 0 to overlapHeight:
+        for l = 0 to overlapWidth:
           op = output(k, l)
           ip = input(i, j, k, l)
           l2(i, j) += |op - ip|^2
@@ -235,19 +235,37 @@ We can address the temporal locality of iterating over the overlap region in the
 
 Here $|S_b| =$ maxBlockY $ * $ maxBlockX; hence the outer two loops iterate over every potential source block and the inner two loops iterate over the pixels of the overlap region. The output pixel \inline{op} depends only on its position within the overlap region, determined by \inline{k} and \inline{l}. The input pixel \inline{ip} depends on its position within the overlap region as well as which source block it comes from, determined by \inline{i} and \inline{j}. Fixing \inline{k} and \inline{l}, the output pixel \inline{op = output(k, l)} is read $|S_b|$ times, and the input pixel \inline{ip = input(i, j, k, l)} iterates over almost every pixel of the input texture. Letting \inline{k} and \inline{l} vary we have that the input pixel \inline{ip = input(i, j, k, l)} iterates over almost every pixel of the input texture multiple times. 
 
-The above pseudocode analysis tells us that (1) the output overlap region is read multiple times and (2) the input texture is read multiple times. In an ideal world, both the output overlap region and input texture should fit into cache. However, by reordering the two inner and outer two, we can iterate over the pixels of the overlap region exactly once:
+The above pseudocode analysis tells us that (1) the output overlap region is read multiple times and (2) the input texture is read multiple times. Ideally, both the output overlap region and input texture need to fit into cache. However, by reordering the inner two and outer two, we can iterate over the pixels of the overlap region exactly once:
 
 \begin{lstlisting}[style=cppstyle]
-  for k = 0 to overlapHeight - 1:
-    for l = 0 to overlapWidth - 1:
+  for k = 0 to overlapHeight:
+    for l = 0 to overlapWidth:
       op = output(k, l)
-      for i = 0 to maxBlockY - 1:
-        for j = 0 to maxBlockX - 1:
+      for i = 0 to maxBlockY:
+        for j = 0 to maxBlockX:
           ip = input(i, j, k, l)
           l2(i, j) += |op - ip|^2
 \end{lstlisting}
 
-This loop reordering allows now (1) reads the output overlap region exactly once and (2) still reads the input texture multiple times. Furthermore, this loop reordering makes it easier to block the innermost two loops that iterate over the input texture multiple times.
+This loop reordering allows now (1) reads the output overlap region exactly once and (2) still reads the input texture multiple times. It is important to note that performing this loop reordering requires us to now keep track of an array of the $|S_b|$ $\ell ^2$-norms, since we no longer compute the norms one at a time. This means that ideally only a single cache block of the output overlap region, the entirety of the input texture, and the entire array of $|S_b|$ $\ell ^2$-norms should fit into cache. The size of the array of $|S_b|$ $\ell ^2$-norms is the same of the size of the input texture since the $\ell ^2$-norms are stored with integers and each pixel of the input texture uses 4 bytes. It is unlikely that the input texture and array of $\ell ^2$-norms will fit into the LLC; with 4 bytes-per-pixel, the 64 KB L1 cache of the Intel Skylake microarchitecture can only fit a square input texture with width just under $2^7$ pixels.
+
+Hence, the next logical step is to block the inner two loops so that a smaller subset of the input texture remains in the LLC. We perform a blocking that aims to keep one row of the output overlap region and a rectangular sub-region of the input texture in cache. We compromised to keep an entire row of the output overlap region as opposed to a single cache block since (1) keeping a row of the overlap region's pixels in cache is feasible, (2) it allowed us to focus on  blocking the inner two loops, and (3) since it vastly simplified the implementation. Let \inline{B} be our block size; we then block the our pseudocode as follows:
+
+\begin{lstlisting}[style=cppstyle]
+  for k = 0 to overlapHeight:
+    for m = 0 to maxBlockY by B:
+      for n = 0 to maxBlockX by B:
+        for l = 0 to overlapWidth:
+          op = output(k, l)
+          for i = m to m + B:
+            for j = n to n + B:
+              ip = input(i, j, k, l)
+              l2(i, j) += |op - ip|^2
+\end{lstlisting}
+
+The algorithm block width is at most the input texture width, and so only a single row of the output overlap region, a \inline{B} by \inline {B} block of the input texture, and the entire array of $|S_b|$ $\ell ^2$-norms should fit into cache. We run into the same issue as before that the 64 KB L1 cache of the Intel Skylake microarchitecture can only fit the array of $|S_b|$  $\ell ^2$-norms for a square input texture with width just under $2^7$ pixels. We have essentially traded fitting the entire input texture for fitting the entire array of $\ell ^2$-norms into LLC.
+
+Nonetheless, because of the standard use of the least recently used (LRU) replacement policy, our blocking might decrease the number of LLC hits and incur higher level cache misses. The access pattern for the multiple reads of the array of $\ell ^2$-norms is different than the access pattern for the multiple reads of the input texture, and there is a chance it will lead to less cache hits.
 
 \textit{(2) Performing the Minimum Cut}
 
@@ -256,8 +274,6 @@ While we did not spend much time optimizing performing the minimum cut, we still
 In the case of the vertical minimum cut, we have spatial locality since we are iterating over pixels of the overlap region; the baseline implementation already takes advantage of the spatial locality since we iterate through the overlap region row-by-row. We also have a small amount of temporal locality since we construct the vertical path by traversing the dynamic programming table from the last row to the first row.
 
 In the case of the horizontal minimum cut, we have spatial since we are iterating over pixels of the overlap region; however, the baseline implementation does not take advantage of the spatial locality since we iterate through the overlap region column-by-column. We also have a small amount of temporal locality since we construct the horizontal path by traversing the dynamic programming table from the last column to the first column.
-
-\mypar{Blocking}
 
 \mypar{Vectorization} When utilizing SIMD (Single Instruction, Multiple Data) vectorization, there are several considerations to keep in mind to maximize performance and efficiency: \\ 
 \textit{Data alignment}: SIMD operations typically require data to be aligned on specific boundaries. We ensure that data is aligned by using \texttt{malloc}, which is guaranteed to be properly aligned for objects of any type. Maximum alignment size of \texttt{malloc} is determined by \texttt{max\_align\_t} which usually equals to size of \texttt{long double} (16 bytes). Maximum alignment will influence vector width selection.  \\
