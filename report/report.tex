@@ -139,7 +139,7 @@ for some constant $c_0 \in N$. Selecting a block consists of iterating over ever
 \end{align*}
 for some constant $c_1 \in N$. The overlap region between a potential source block and the output texture will always consist of one or two rectangular sub-regions. The original image quilting paper chooses the overlap width to be one sixth of the block width; we chose the same value in our implementation. Hence, the dimensions of the rectangular sub-regions are linear in the dimensions of the block width. In the worst case we have a corner overlap, and so the overlap region will consist of
 \begin{align*}
-  B_h \frac{1}{6} B_w + B_w \frac{1}{6} B_h - \frac{1}{6} B_w \frac{1}{6} B_h & = \frac{b^2}{6} n + \frac{b^2}{6} n + \frac{b^2}{36} n \\ & = c_2 n \; \text{pixels}.
+  B_h \frac{1}{6} B_w + B_w \frac{1}{6} B_h - \frac{1}{6} B_w \frac{1}{6} B_h & = \frac{b^2}{6} n + \frac{b^2}{6} n - \frac{b^2}{36} n \\ & = c_2 n \; \text{pixels}.
 \end{align*}
 for some constant $c_2 \in \N$.
 
@@ -223,21 +223,43 @@ TODO create diagrams illustrating the temporal locality.
 We can address the temporal locality of iterating over the overlap region in the output texture $|S_b|$ times with a loop reordering. The baseline implementation calls the \inline{ComputeOverlap} function once for each potential source block in $S_b$, which gives us the following pseudo code:
 
 \begin{lstlisting}[style=cppstyle]
-  for i = 0 to maxBlockY - 1
-    for j = 0 to maxBlockX - 1
-      for k = 0 to overlapHeight - 1
-        for l = 0 to overlapWidth - 1
-          // Compute the l2 norm
+  for i = 0 to maxBlockY - 1:
+    for j = 0 to maxBlockX - 1:
+      for k = 0 to overlapHeight - 1:
+        for l = 0 to overlapWidth - 1:
+          op = output(k, l)
+          ip = input(i, j, k, l)
+          l2(i, j) += |op - ip|^2
 \end{lstlisting}
 
-Here the two inner loops iterate over the pixels of the overlap region and the outer two loops iterate over every potential source block. By reordering the inner and outer two loops, we can iterate over the pixels of the overlap region exactly once:
+Here $|S_b| =$ maxBlockY $ * $ maxBlockX; hence the outer two loops iterate over every potential source block and the inner two loops iterate over the pixels of the overlap region. The output pixel \inline{op} depends only on its position within the overlap region, determined by \inline{k} and \inline{l}. The input pixel \inline{ip} depends on its position within the overlap region as well as which source block it comes from, determined by \inline{i} and \inline{j}. Fixing \inline{k} and \inline{l}, the output pixel \inline{op = output(k, l)} is read $|S_b|$ times, and the input pixel \inline{ip = input(i, j, k, l)} iterates over almost every pixel of the input texture. Letting \inline{k} and \inline{l} vary we have that the input pixel \inline{ip = input(i, j, k, l)} iterates over almost every pixel of the input texture multiple times. 
+
+The above pseudocode analysis tells us that (1) the output overlap region is read multiple times and (2) the input texture is read multiple times. In an ideal world, both the output overlap region and input texture should fit into cache. Similar to the asymptotic analysis, for the purpose of the cache miss analysis, assume that the input image is square and has width $I_w$ pixels. Further assume that the blocks are square and that their width and height are linearly proportional to the dimensions of the input image. Then we have that the block height and width are given by $B_w = b I_w$ pixels (for some valid $0 < b < 1$ with $b \in \R$).
+
+In the worst and most common case we have a corner overlap, and because the overlap size is 1/6 of the block size, we know the overlap region contains
+\[
+  \frac{1}{6} B_w ^2 + \frac{1}{6} B_w ^2 - \frac{1}{6}^2 B_w ^2 = \frac{11}{36} B_w ^2 \; \text{pixels}.
+\]
+Recall that each pixel consists of 4 bytes. To avoid capacity misses, the output overlap region and input texture must fit into cache, meaning the cache must fit
+\[
+  \frac{11}{9} b ^2 I_w ^2 + 4 I_w^2 \; \text{bytes}
+\]
+To get a practical sense of this quantity, let's use our common block width multiplier of $b = \frac{1}{4}$ and suppose the input texture is large (with respect to the baseline implementation runtime), say $I_w = 2^{16}$. Then, the output overlap region and input texture take consist of
+\[
+  \frac{11}{9*16} (2^{16}) ^2 + 4(2^{16}) ^2 \approx 1.75 e 7 \text{KiB}
+\]
+
+
+By reordering the inner and outer two loops, we can iterate over the pixels of the overlap region exactly once:
 
 \begin{lstlisting}[style=cppstyle]
-  for k = 0 to overlapHeight - 1
-    for l = 0 to overlapWidth - 1
-      for i = 0 to maxBlockY - 1
-        for j = 0 to maxBlockX - 1
-          // Compute the l2 norm
+  for k = 0 to overlapHeight - 1:
+    for l = 0 to overlapWidth - 1:
+      dst = output(k, l)
+      for i = 0 to maxBlockY - 1:
+        for j = 0 to maxBlockX - 1:
+          src = input(i, j, k, l)
+          l2(i, j) += |dst - src|^2
 \end{lstlisting}
 
 This loop reordering further allows us to block both iterating over the pixels of the overlap region as well as block iterating over pixels of the source texture, as we will discuss in the blocking subsection.
