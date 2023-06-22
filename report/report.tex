@@ -189,7 +189,16 @@ To optimize the algorithm, let us determine the ideal unrolling factor that can 
   \includegraphics[scale=0.18]{Unrolling.pdf}
   \caption{Dependency graph of the $\ell^2$-loss function between two pixels with an unroll factor of 4, considering Intel Skylake microarchitecture.\label{unroll}}
 \end{figure}
-\mypar{Basic spatial locality} 
+
+\mypar{Locality}
+
+Understanding the temporal and spatial locality of memory access patterns is a crucial step in improving performance and efficiency by reducing the number of cache misses outside of the last level cache (LLC). We perform a temporal and spatial locality analysis of (1) selecting a new block and (2) performing the minimum cut.
+
+\textit{(1) Selecting a Block.}
+
+Recall that selecting a block consists of iterating over every potential source block in $S_b$, computing its $\ell ^2$-norm with respect to the overlap region in the output texture, and randomly sampling a block within a threshold of the lowest $\ell ^2$-norm. In our baseline implementation, we created a function called \texttt{ComputeOverlap} whose sole purpose was to compute the $\ell ^2$-norm between the overlap region of the output texture and the overlap region of an individual source block. A single call to this function exhibits no temporal locality because each pixel in the output and input overlap regions is accessed exactly once. However, because our images are stored as two-dimensional arrays of packed 1-byte wide red, green, blue, and alpha channels, this function exhibits spatial locality, since pixels of the same row are stored contiguously in memory. In the baseline implementation we already took advantage of the spatial locality since we iterate through the overlap region row-by-row. Therefore, because the CPU reads contiguous cache blocks into the L1 and L2 caches, for a cache block size of $B$ we will have on average 1 compulsory miss to $B-1$ hits.
+
+\textit{(2) Performing the Minimum Cut}
 
 \mypar{Blocking} 
 
