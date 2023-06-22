@@ -4,7 +4,7 @@
 % --------------------------------------------------------------------------
 
 \documentclass[letterpaper]{article}
-\usepackage{spconf,amsmath,amssymb,graphicx,bm}
+\usepackage{spconf,amsmath,amssymb,graphicx,bm,xcolor,listings}
 
 % Example definitions.
 % --------------------
@@ -15,6 +15,24 @@
 
 % bold paragraph titles
 \newcommand{\mypar}[1]{{\bf #1.}}
+
+% inline
+\newcommand{\inline}[1]{{\ttfamily\hyphenchar\font=45 #1}}
+
+% listings style for c++ code
+\lstdefinestyle{cppstyle}{
+  language=C++,
+  basicstyle=\small\ttfamily,
+  keywordstyle=\color{blue},
+  commentstyle=\color{green!60!black},
+  stringstyle=\color{red},
+  showstringspaces=false,
+  breaklines=true,
+  breakatwhitespace=true,
+  tabsize=4,
+  numbers=left,
+  numbersep=5pt,
+}
 
 % Title.
 % ------
@@ -107,7 +125,7 @@ It is important to note that addition and subtraction usually have smaller laten
 
 This means that the cost of an integer multiplication is greater than the cost of an integer addition or subtraction.
 
-An asysmptotic analysis of the image quilting algorithm further justifies our choice of cost measure. The original image quilting paper \cite{Efros:01} does not perform an asymptotic analysis and so we provide one here. For the purpose of the asymptotic analysis, assume that the input image is square and has $n \in \N$ pixels. Then, it has a width and height of $I_w = I_h := \sqrt{n} \in \N$ pixels. Further assume that the output image is also square and linearly proportional to the dimensions of the input image. Then, the ouput image has a width and height of $O_w = O_h := a \sqrt{n} \in \N$ pixels (for some valid $a \ge 1$ with $a \in \R$). Further assume that the blocks are square and their dimensions are linearly proportional to the dimensions of the input image. Then, the block size has a width and height of $B_w = B_h := b \sqrt{n} \in \N$ pixels (for some valid $0 < b < 1$ with $b \in \R$). Each block then consists of $b^2 n \in \N$ pixels.
+An asymptotic analysis of the image quilting algorithm further justifies our choice of cost measure. The original image quilting paper \cite{Efros:01} does not perform an asymptotic analysis and so we provide one here. For the purpose of the asymptotic analysis, assume that the input image is square and has $n \in \N$ pixels. Then, it has a width and height of $I_w = I_h := \sqrt{n} \in \N$ pixels. Further assume that the output image is also square and linearly proportional to the dimensions of the input image. Then, the ouput image has a width and height of $O_w = O_h := a \sqrt{n} \in \N$ pixels (for some valid $a \ge 1$ with $a \in \R$). Further assume that the blocks are square and their dimensions are linearly proportional to the dimensions of the input image. Then, the block size has a width and height of $B_w = B_h := b \sqrt{n} \in \N$ pixels (for some valid $0 < b < 1$ with $b \in \R$). Each block then consists of $b^2 n \in \N$ pixels.
 
 The image quilting algorithm will then need to select
 \[
@@ -196,7 +214,33 @@ Understanding the temporal and spatial locality of memory access patterns is a c
 
 \textit{(1) Selecting a Block.}
 
-Recall that selecting a block consists of iterating over every potential source block in $S_b$, computing its $\ell ^2$-norm with respect to the overlap region in the output texture, and randomly sampling a block within a threshold of the lowest $\ell ^2$-norm. In our baseline implementation, we created a function called \texttt{ComputeOverlap} whose sole purpose was to compute the $\ell ^2$-norm between the overlap region of the output texture and the overlap region of an individual source block. A single call to this function exhibits no temporal locality because each pixel in the output and input overlap regions is accessed exactly once. However, because our images are stored as two-dimensional arrays of packed 1-byte wide red, green, blue, and alpha channels, this function exhibits spatial locality, since pixels of the same row are stored contiguously in memory. In the baseline implementation we already took advantage of the spatial locality since we iterate through the overlap region row-by-row. Therefore, because the CPU reads contiguous cache blocks into the L1 and L2 caches, for a cache block size of $B$ we will have on average 1 compulsory miss to $B-1$ hits.
+Recall that selecting a block consists of iterating over every potential source block in $S_b$, computing its $\ell ^2$-norm with respect to the overlap region in the output texture, and randomly sampling a block within a threshold of the lowest $\ell ^2$-norm. In our baseline implementation, we created a function called \inline{ComputeOverlap} whose sole purpose was to compute the $\ell ^2$-norm between the overlap region of the output texture and the overlap region of an individual source block. A single call to this function exhibits no temporal locality because each pixel in the output and input overlap regions is accessed exactly once. However, because our images are stored as two-dimensional arrays of packed 1-byte wide red, green, blue, and alpha channels, this function exhibits spatial locality, since pixels of the same row are stored contiguously in memory. In the baseline implementation we already took advantage of the spatial locality since we iterate through the overlap region row-by-row. Therefore, because the CPU reads contiguous cache blocks into the L1 and L2 caches, for a cache block size of $B$ we will have on average 1 compulsory miss to $B-1$ hits.
+
+We then implemented selecting a block by calling the \inline{ComputeOverlap} function once for each potential source block in $S_b$. Although this approach results in readable and practical code, it leads to an enourmous amount of temporal locality. Firstly, each call to the \inline{ComputeOverlap}function iterates over every pixel of the the overlap region in the output texture, and so the overlap region in the output texture is read $|S_b|$ times. Secondly, although each call to the \inline{ComputeOverlap} function iterates over the overlap region of a different source block, consecutive source blocks often differ by a one-pixel-shift to the right, and hence their overlap regions admit a considerable amount of the same pixels. Non-consecutive source blocks that differ by horizontal or vertical shifts similarly admit overlap regions that share a substantial number of pixels.
+
+TODO create diagrams illustrating the temporal locality.
+
+We can address the temporal locality of iterating over the overlap region in the output texture $|S_b|$ times with a loop reordering. The baseline implementation calls the \inline{ComputeOverlap} function once for each potential source block in $S_b$, which gives us the following pseudo code:
+
+\begin{lstlisting}[style=cppstyle]
+  for i = 0 to maxBlockY - 1
+    for j = 0 to maxBlockX - 1
+      for k = 0 to overlapHeight - 1
+          for l = 0 to overlapWidth - 1
+              ComputeOverlap(i, j, k, l)
+\end{lstlisting}
+
+Here the two inner loops iterate over the pixels of the overlap region and the outer two loops iterate over every potential source block. By reordering the inner and outer two loops, we can iterate over the pixels of the overlap region exactly once:
+
+\begin{lstlisting}[style=cppstyle]
+  for k = 0 to overlapHeight - 1
+    for l = 0 to overlapWidth - 1
+      for i = 0 to maxBlockY - 1
+        for j = 0 to maxBlockX - 1
+          ComputeOverlap(i, j, k, l)
+\end{lstlisting}
+
+This loop reordering further allows us to block both iterating over the pixels of the overlap region as well as block iterating over pixels of the source texture, as we will discuss later.
 
 \textit{(2) Performing the Minimum Cut}
 
