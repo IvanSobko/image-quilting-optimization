@@ -161,23 +161,24 @@ This asymptotic analysis further justifies our choice of cost measure because th
 
 
 \mypar{Optimization plan} 
-To formulate our optimization plan, we initially classified the potential optimizations for our algorithm into two distinct subcategories: basic and advanced. The basic optimizations are general techniques that are applicable to a wide range of algorithms, usually yielding light but consistent improvements in speed. These optimizations involve precomputations of indices and bounds to enhance temporal locality, inlining function calls, replacing computationally expensive operations with more optimal alternatives whenever feasible, rewriting the code in a C-style fashion, and replacing library functions by our own to eliminate unnecessary computations inside. Certain optimizations in this list may lead to a marginal reduction in the number of operations. Additionally, these optimizations typically simplify the code, which can aid the compiler in optimizing the algorithm more effectively - this will be discussed further in the Results section.
+To formulate our optimization plan, we initially classified the potential optimizations for our algorithm into two subcategories: basic and advanced. The basic optimizations are general techniques that are applicable to a wide range of algorithms, usually yielding light but consistent improvements in speed. These optimizations may lead to a marginal reduction in the number of operations. Additionally, these optimizations typically simplify the code, which can aid the compiler in optimizing the algorithm more effectively.
 
-Advanced optimizations require significant analysis of the algorithm. In our implementation, we have identified two general functions: $\ell ^2$-norm calculation between two blocks and Minimum Error Boundary Cut to estimate the optimal path. Upon careful examination, we have identified several potential optimizations for these functions:
+Advanced optimizations require significant analysis of the algorithm. Upon careful examination, we have identified several potential optimizations in this block:
 
 \begin{enumerate}
 \item Applying loop unrolling with scalar replacement and optimizing dependencies.
 \item Refactoring the functions into separate case-specific implementations for different overlap scenarios, including variations with and without boundary checks.
 \item Implementing a simple optimization for spatial locality without introducing blocking.
 \item Introducing blocking in the $\ell ^2$-norm function to enable data reuse and load data into the cache only once.
-\item Enhancing the algorithm by excluding calculations of the best matching block in regions where analytical measurement is possible.
 \item Performing manual vectorization of computations.
 \end{enumerate}
 
 Some of these optimizations will be further explored in this section.
 
 \mypar{Basic optimizations}
-As previously mentioned, these optimizations involved removing library function calls, replacing STD structures with C-style arrays, and minimizing dependencies on classes and structures. Additionally, Image Quilting algorithm requires numerous index computations to access specific parts of the output texture and the blocks from the set \textit{$S_{B}$} to determine overlap regions. To optimize this process, we precomputed various values, such as row and column shifts to align with the beginning of overlap regions. Moreover, we stored pointers to the start of these rows for both the output texture and the blocks, enabling us to easily increment the pointers while iterating over the columns and efficiently calculate the error between the overlapping blocks. Although integer additions are highly efficient and may not pose a significant concern, the removal of 8 multiplications was particularly beneficial. Multiplications typically exhibit high latency and low throughput, making them a potential bottleneck in performance. Additionally, by removing dependencies among operations, we further enhanced the overall efficiency and performance of the algorithm.
+This optimization block involves introducing precomputations to improve temporal locality, inlining function calls, replacing computationally expensive operations with more optimal alternatives, rewriting the code in a C-style fashion, and replacing library functions with our own implementations to eliminate unnecessary computations. Now, let's examine the most noteworthy optimizations from this list within the context of the Image Quilting algorithm.
+
+Our initial implementarion of texture synthesis required numerous index computations to access specific parts of the output texture and the blocks from the set \textit{$S_{B}$} to determine overlap regions. To optimize this process, we precomputed various values, such as row and column shifts to align with the beginning of overlap regions. Moreover, we stored pointers to the start of these rows for both the output texture and the blocks, enabling us to easily increment the pointers while iterating over the columns to efficiently calculate the error between the overlapping blocks. By implementing this modification, we removed a total of 20 integer additions per pixel. However, the impact was even more substantial due to the removal of 8 multiplications and the elimination of various operational dependencies. These changes are particularly significant as they mitigate high latency and enhance performance through improved parallelization.
 
 Another optimization in this context involves reducing the number of square root operations. In the original paper [TODO: add ref], the squared sum of pixel differences in the overlap region for each block is computed. The minimum value among these sums determines the best matching block. A set of blocks within 0.1 times the error of this best matching block is then considered suitable for pasting into the desired output texture.
 
@@ -262,30 +263,12 @@ Furthermore, to mitigate data dependencies, we employed a loop unroll with a fac
 
 \section{Experimental Results}\label{sec:exp}
 
-Here you evaluate your work using experiments. You start again with a
-very short summary of the section. The typical structure follows.
+[TODO: short description]
 
-\mypar{Experimental setup} Specify the platform (processor, frequency, cache sizes)
-as well as the compiler, version, and flags used. I strongly recommend that you play with optimization flags and consider also icc for additional potential speedup.
-
-Then explain what input you used and what range of sizes. The idea is to give enough information so the experiments are reproducible by somebody else on his or her code.
+\mypar{Experimental setup} 
 
 \mypar{Results}
-Next divide the experiments into classes, one paragraph for each. In the simplest case you have one plot that has the size on the x-axis and the performance on the y-axis. The plot will contain several lines, one for each relevant code version. Discuss the plot and extract the overall performance gain from baseline to best code. Also state the percentage of peak performance for the best code. Note that the peak may change depending on the situation. For example, if you only do additions it would be 12 Gflop/s
-on one core with 3 Ghz and SSE and single precision floating point.
 
-Do not put two performance lines into the same plot if the operations count changed significantly (that's apples and oranges). In that case first perform the optimizations that reduce op count and report the runtime gain in a plot. Then continue to optimize the best version and show performance plots.
-
-{\bf You should}
-\begin{itemize}
-\item Follow to a reasonable extent the guide to benchmarking presented in class, in particular
-\item very readable, attractive plots (do 1 column, not 2 column plots
-for this class), proper readable font size. An example is below (of course you can have a different style),
-\item every plot answers a question, which you pose and extract the
-answer from the plot in its discussion
-\end{itemize}
-Every plot should be referenced and discussed (what does it show, which statements do
-you extract).
 
 \section{Conclusions}
 
@@ -298,56 +281,6 @@ important results and say the things you really want to get across
 Even though we only considered the DFT, our optimization
 techniques should be also applicable ....) You can also formulate next
 steps if you want. Be brief.
-
-\section{Further comments}
-
-Here we provide some further tips.
-
-\mypar{Further general guidelines}
-
-\begin{itemize}
-\item For short papers, to save space, I use paragraph titles instead of
-subsections, as shown in the introduction.
-
-\item It is generally a good idea to break sections into such smaller
-units for readability and since it helps you to (visually) structure the story.
-
-\item The above section titles should be adapted to more precisely
-reflect what you do.
-
-\item Each section should be started with a very
-short summary of what the reader can expect in this section. Nothing
-more awkward as when the story starts and one does not know what the
-direction is or the goal.
-
-\item Do not use subsubsections.
-
-\item Make sure you define every acronym you use, no matter how
-convinced you are the reader knows it.
-
-\item Always spell-check before you submit.
-
-\item Be picky. When writing a paper you should always strive for 
-high quality. Many people may read it and the quality makes a big difference.
-In this class, the quality contributes to the grade.
-
-\item Books helping you to write better: \cite{Higham:98} and \cite{Strunk:00}.
-\end{itemize}
-
-\mypar{Graphics} For plots that are not images {\em never} generate (even as intermediate step)
-jpeg, gif, bmp, tif. Use eps, which means encapsulate postscript, or pdf. This way it is
-scalable since it is a vector graphic description of your graph. E.g.,
-from Matlab, you can export to eps or pdf.
-
-Fig.~\ref{fftperf} is an example plot that I used in a lecture. Note that the fontsize in the plot should not be any smaller. On the other hand it is also a good rule that the font size in the plot is not larger than the one in the caption (otherwise it looks ugly).
-
-\begin{figure}\centering
-  \includegraphics[scale=0.33]{dft-performance.pdf}
-  \caption{Performance of four single-precision implementations of the
-  discrete Fourier transform. The operations count is roughly the
-  same. {\em The labels in this plot are about the smallest you should go.}
-  \label{fftperf}}
-\end{figure}
 
 \bigskip
 {\bf Up to here you have 8 pages.}
