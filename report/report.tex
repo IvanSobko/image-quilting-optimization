@@ -71,12 +71,6 @@ Image quilting algorithms have become indispensable tools in various image proce
 \mypar{Contribution}
 In this study, we present an optimized implementation of the image quilting algorithm, focusing on key areas such as enhancements to a straightforward algorithm, loop unrolling, block processing and SIMD vectorization. We explore innovative approaches that leverage modern hardware architectures, including Central Processing Units (CPUs), to accelerate the algorithm's execution time. By harnessing the knowledge of modern CPU's execution units, we aim to significantly improve the overall performance of the algorithm while maintaining the quality of generated textures
 
-\mypar{Related work} \textbf{TODO}: Next, you have to give a brief overview of
-related work. For a paper like this, anywhere between 2 and 8
-references. Briefly explain what they do. In the end contrast to what
-you do to make now precisely clear what your contribution is.
-
-
 \section{Background on Image Quilting}\label{sec:background}
 
 Within this section, our objective is to present a formal definition of Image Quilting, introduce the essential components of the algorithm alongside our implementation, conduct a cost analysis, and outline the asymptotic complexity of the problem.
@@ -157,8 +151,7 @@ This asymptotic analysis further justifies our choice of cost measure because th
 
 \section{Optimization Strategies}\label{sec:yourmethod}
 
-[TODO: short description]
-
+ This section will delve into the specific optimization strategies implemented during the study, providing a comprehensive overview of the methods used and their corresponding rationale. The results and impact of each optimization strategy will be discussed in the next section, showcasing the effectiveness and benefits they brought to performance improvement.
 
 \mypar{Optimization plan} 
 To formulate our optimization plan, we initially classified the potential optimizations for our algorithm into two subcategories: basic and advanced. The basic optimizations are general techniques that are applicable to a wide range of algorithms, usually yielding light but consistent improvements in speed. These optimizations may lead to a marginal reduction in the number of operations. Additionally, these optimizations typically simplify the code, which can aid the compiler in optimizing the algorithm more effectively.
@@ -180,7 +173,7 @@ This optimization block involves introducing precomputations to improve temporal
 
 Our initial implementation of texture synthesis required numerous index computations to access specific parts of the output texture and the blocks from the set \textit{$S_{B}$} to determine overlap regions. To optimize this process, we precomputed various values, such as row and column shifts to align with the beginning of overlap regions. Moreover, we stored pointers to the start of these rows for both the output texture and the blocks, enabling us to easily increment the pointers while iterating over the columns to efficiently calculate the error between the overlapping blocks. By implementing this modification, we removed a total of 20 integer additions per pixel. However, the impact was even more substantial due to the removal of 8 multiplications and the elimination of various operational dependencies. These changes are particularly significant as they mitigate high latency and enhance performance through improved parallelization.
 
-Another optimization in this context involves reducing the number of square root operations. In the original paper [TODO: add ref], the squared root of sum differences for each block is computed. The minimum value among these values then determines the best matching block, and a set of blocks within 0.1 times the error of this block is considered suitable for pasting into the desired output texture.
+Another optimization in this context involves reducing the number of square root operations. In the original paper \cite{Efros:01}, the squared root of sum differences for each block is computed. The minimum value among these values then determines the best matching block, and a set of blocks within 0.1 times the error of this block is considered suitable for pasting into the desired output texture.
 
 However, we can simplify the algorithm since we do not need squared root actual values. As the square root function is monotonically increasing, finding the minimum sum of squared differences suffices to identify the best matching block. To ensure consistency in the set of suitable blocks, we calculate the square root solely for the minimum value. To ensure that the set of suitable blocks remains the same, we can obtain the square root only for the minimum value, multiply it by the error tolerance to determine the threshold, and then square it again. With this approach the resulting value is proportional to the calculated sum of squared differences for all other blocks. 
 
@@ -291,7 +284,7 @@ Furthermore, to mitigate data dependencies, we employed a loop unroll with a fac
 This section aims to present the methodology employed in the experiments, including the hardware and software. Additionally, it will delve into the specific results obtained from the experiments, highlighting any significant observations or trends. The interpretation and analysis of these results will contribute to a deeper understanding of the results of our work.
 
 \mypar{Experimental setup} 
-Throughout our work, we employed various platforms and compiler flags to assess the outcomes of diverse configurations. Specifically, we utilized computers equipped with an AMD Ryzen 7 5800H @3.2GHz processor, boasting a cache size of 16 MVB, as well as an Intel(R) Core i7-10510U @1.8GHz processor, with a cache size of 8 MB. To ensure consistency and comparability across different platforms, we opted for the GCC 12.2.0 compiler, with three sets of flags: \texttt{-O3-ffast-math-march=native}, \texttt{-O3-fno-tree-vectorize} and \texttt{-O1}.
+Throughout our work, we employed various platforms and compiler flags to assess the outcomes of diverse configurations. Specifically, we utilized computers equipped with an AMD Ryzen 7 5800H @3.2GHz processor, boasting a cache size of 16 MB, as well as an Intel(R) Core i7-10510U @1.8GHz processor, with a cache size of 8 MB. To ensure consistency and comparability across different platforms, we opted for the GCC 12.2.0 compiler, with three sets of flags: \texttt{-O3-ffast-math-march=native}, \texttt{-O3-fno-tree-vectorize} and \texttt{-O1}.
 For input we used images of varying sizes, ranging from $2^{11}$ to $2^{18}$ in terms of pixel count.
 
 \mypar{Results}
@@ -372,6 +365,8 @@ Example and structure follows.
 \mypar{Gregory} ...
 
 \mypar{Jane} ...
+
+
 
 % References should be produced using the bibtex program from suitable
 % BiBTeX files (here: bibl_conf). The IEEEbib.bst bibliography
