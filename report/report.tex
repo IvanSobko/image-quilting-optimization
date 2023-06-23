@@ -288,12 +288,11 @@ Furthermore, to mitigate data dependencies, we employed a loop unroll with a fac
 
 \section{Experimental Results}\label{sec:exp}
 
-[TODO: short description]
+This section aims to present the methodology employed in the experiments, including the hardware and software. Additionally, it will delve into the specific results obtained from the experiments, highlighting any significant observations or trends. The interpretation and analysis of these results will contribute to a deeper understanding of the results of our work.
 
 \mypar{Experimental setup} 
 Throughout our work, we employed various platforms and compiler flags to assess the outcomes of diverse configurations. Specifically, we utilized computers equipped with an AMD Ryzen 7 5800H @3.2GHz processor, boasting a cache size of 16 MVB, as well as an Intel(R) Core i7-10510U @1.8GHz processor, with a cache size of 8 MB. To ensure consistency and comparability across different platforms, we opted for the GCC 12.2.0 compiler, with three sets of flags: \texttt{-O3-ffast-math-march=native}, \texttt{-O3-fno-tree-vectorize} and \texttt{-O1}.
 For input we used images of varying sizes, ranging from $2^{11}$ to $2^{18}$ in terms of pixel count.
-
 
 \mypar{Results}
 
