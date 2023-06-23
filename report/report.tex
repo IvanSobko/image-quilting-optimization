@@ -56,19 +56,19 @@
 %
 
 \begin{abstract}
-Image quilting is a widely used technique for texture synthesis. However, the computational complexity associated with image quilting can hinder its practical application in real-time scenarios or high-resolution images. This paper focuses on the optimization of image quilting algorithms to enhance their efficiency and performance without thread parallelization.
-Through a comprehensive study, we explore various optimization strategies such as straightforward algorithm improvement, unrolling, blocking and vectorization to reduce computational overhead and enhance the overall runtime performance.
+Image quilting is a widely used technique for texture synthesis. However, the computational complexity associated with image quilting can hinder its practical application in real-time scenarios or high-resolution images. This paper focuses on the optimization of image quilting algorithms without thread parallelization.
+Through a comprehensive study, we explore various optimization strategies such as straightforward algorithm improvement, unrolling, blocking and vectorization to reduce computational overhead and enhance the overall performance.
 Experimental results demonstrate that the proposed optimization strategies effectively reduce the execution time of image quilting algorithms. Furthermore, we analyze the impact of different optimization techniques on memory consumption, performance, and perceptual quality to provide a holistic understanding of their benefits and limitations.
 \end{abstract}
 
 \section{Introduction}\label{sec:intro}
 
-Image quilting algorithms have become indispensable tools in various image processing applications, providing solutions for texture synthesis, seamless image stitching, and image inpainting. However, with the ever-increasing demand for real-time performance and the handling of large-scale textures, there is a growing need for high-performance versions of image quilting algorithms that can efficiently and effectively process images, while maintaining visual quality. The objective of this paper is to introduce and evaluate a high-performance version of the image quilting algorithm that addresses the computational challenges and improves overall efficiency. 
+Image quilting algorithms have become indispensable tools in various image processing applications, providing solutions for texture synthesis, seamless image stitching, and image inpainting. However, with the ever-increasing demand for real-time performance and the handling of large-scale textures, there is a growing need for high-performance versions of image quilting algorithms. The objective of this paper is to introduce and evaluate a high-performance version of the image quilting algorithm that addresses the computational challenges and improves overall efficiency. 
 
-\mypar{Motivation} The motivation behind this research arises from the limitations of traditional image quilting algorithms in meeting the demands of modern applications. Standard approaches often struggle to handle high-resolution images hindering their usability in areas such as video games, virtual reality, and live video processing. Additionally, the computational complexity associated with large-scale textures poses challenges in terms of memory consumption and processing time. Therefore, a high-performance version of the image quilting algorithm is crucial to overcome these limitations and unlock its full potential in various domains.
+\mypar{Motivation} The motivation behind this research arises from the limitations of traditional image quilting algorithms in meeting the demands of modern applications. Standard approaches often struggle to handle high-resolution images and it poses a challenge in terms of memory consumption and processing time. Therefore, a high-performance version of the image quilting algorithm is crucial to overcome these limitations and unlock its full potential in various domains.
 
 \mypar{Contribution}
-In this study, we present an optimized implementation of the image quilting algorithm, focusing on key areas such as enhancements to a straightforward algorithm, loop unrolling, block processing and SIMD vectorization. We explore innovative approaches that leverage modern hardware architectures, including Central Processing Units (CPUs), to accelerate the algorithm's execution time. By harnessing the knowledge of modern CPU's execution units, we aim to significantly improve the overall performance of the algorithm while maintaining the quality of generated textures
+In this study, we present an optimized implementation of the image quilting algorithm, focusing on key areas such as enhancements to a straightforward algorithm, loop unrolling, block processing and SIMD vectorization. We explore innovative approaches that leverage modern hardware architectures, including Central Processing Units (CPUs), to accelerate the algorithm's execution time.
 
 \section{Background on Image Quilting}\label{sec:background}
 
@@ -383,11 +383,11 @@ steps if you want. Be brief.
 
 \mypar{Svitlana} Focused on the set of basic optimizations and the algorithmic improvement that improved spatial locality (for $\ell ^2$-norm function) that were discussed in Section 3 in the Basic optimizations block. Implemented unrolling with different unrolling factors for 2 cases of the algorithm - before and after the blocking and performed the corresponding analysis. Implemented loop reordering to reuse the data in the output texture and worked on the analysis of the spatial locality and blocking with Tal. Divided functions into case-specific types to reduce unnecessary computations - second point of the advanced optimization plan. Prepared the roofline plots.
 
-\mypar{Cary} ...
+\mypar{Ivan} Implemented SIMD vectorization optimizations, analysed the influence of unroll factor on vectorization performance. Worked on initial cost analysis, INTOPs and FLOPs calculation and identifying bottlenecks. Created performance and runtime plots. 
 
-\mypar{Gregory} ...
+\mypar{Tal} ...
 
-\mypar{Jane} ...
+\mypar{Baptiste} Did benchmarking analysis and benchmarking plots.
 
 
 
