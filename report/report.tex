@@ -56,7 +56,7 @@
 %
 
 \begin{abstract}
-Image Quilting is a widely used technique for texture synthesis. However, the computational complexity associated with Image Quilting can hinder its practical application in real-time scenarios or high-resolution images. This paper focuses on the optimization of Image Quilting algorithms without thread parallelization.
+Image Quilting is a widely used technique for texture synthesis. This paper focuses on the optimization of Image Quilting algorithms without thread parallelization.
 Through a comprehensive study, we explore various optimization strategies such as straightforward algorithm improvement, unrolling, blocking and vectorization to reduce computational overhead and enhance the overall performance.
 Experimental results demonstrate that the proposed optimization strategies effectively reduce the execution time of Image Quilting algorithms. Furthermore, we analyze the impact of different optimization techniques on memory consumption, performance, and perceptual quality to provide a holistic understanding of their benefits and limitations.
 \end{abstract}
@@ -345,7 +345,7 @@ Despite the decrease in runtime achieved through our unrolling technique, its pe
   \label{vectorize}}
 \end{figure}
 
-\textit{Vectorization:} Following the process of unrolling, we proceeded to optimize the code further with SIMD vectorization. In Fig.~\ref{vectorize} we show our results, as anticipated, this approach yielded superior results compared to simple unrolling. However, we observed that algorithm optimization performed comparably to manual vectorization. Compiler exhibited an ability to optimize the code as efficiently as our manual efforts, and in some cases, even surpassing our optimizations.
+\textit{Vectorization:} In Fig.~\ref{vectorize} we show our vectorization results, as anticipated, this approach yielded superior results compared to simple unrolling. However, we observed that algorithm optimization performed comparably to manual vectorization. Compiler exhibited an ability to optimize the code as efficiently as our manual efforts, and in some cases, even surpassing our optimizations.
 
 Transitioning to blocking vectorization, the notable improvement in blocking can be observed in Fig.~\ref{vectorizeBlock}. This improvement can be primarily attributed to the fact that the compiler encounters more difficulties in optimizing non-straightforward algorithms such as blocking.
 \begin{figure}[htb]
