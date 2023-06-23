@@ -85,10 +85,9 @@ if __name__ == "__main__":
         ("baseline_-O1.txt", "Benchmark Low"),
         ("baseline_-O3-fno-tree-vectorize.txt", "Benchmark Mid"),
         ("baseline_-O3-ffast-math-march=native.txt", "Benchmark High"),
-
-        ("default_-O1_06-06-23-50-22.txt", "Baseline Low"),
-        ("default_-O3-fno-tree-vectorize_06-07-00-04-54.txt", "Baseline Mid"),
-        ("default_-O3-ffast-math-march=native_06-07-00-17-47.txt", "Baseline High"),
+        ("StdC_Algorithm_-O1_06-06-23-57-34.txt", "Alg Opt Low"),
+        ("default_-O3-fno-tree-vectorize_06-07-00-04-54.txt", "Alg Opt Mid"),
+        ("StdC_Algorithm_-O3-ffast-math-march=native_06-07-00-22-13.txt", "Alg Opt High"),
     ]
     cpu = "Intel(R) Core i7-10510U @1.8GHz"
     compiler = "GCC 12.2.0"
