@@ -240,7 +240,7 @@ Hence, the next logical step is to block the inner two loops so that a smaller s
 
 The algorithm block width is at most the input texture width, and so only a single row of the input texture, a $B$ by $B$ block of the input texture, and a $B$ by $B$ subset of the corresponding array of $\ell ^2$-norms should fit into cache. A single row of the input texture will be considerably smaller than the $4B^2 + 4B^2$ bytes required for the block of the input texture and the subset of the corresponding array of $\ell ^2$-norms. A block size of $B = 90$ just barely fits the $4B^2 + 4B^2$ bytes into the 64 KB L1 cache of the Intel Skylake microarchitecture. This suggests experimenting with block sizes greater than zero to a bit above $B=90$.
 
-\textit{(2) Performing the Minimum Cut}
+\textit{(2) Performing the Minimum Cut.}
 
 While we did not spend much time optimizing performing the minimum cut, we still provide a brief locality analysis.
 
@@ -354,13 +354,11 @@ Our results illustrate that a combination of standard C optimizations, algorithm
 
 \mypar{Svitlana} Focused on the set of basic optimizations and the algorithmic improvement that improved spatial locality (for $\ell ^2$-norm function) that were discussed in Section 3 in the Basic optimizations block. Implemented unrolling with different unrolling factors for 2 cases of the algorithm - before and after the blocking and performed the corresponding analysis. Implemented loop reordering to reuse the data in the output texture and worked on the analysis of the spatial locality and blocking with Tal. Divided functions into case-specific types to reduce unnecessary computations - second point of the advanced optimization plan. Prepared the roofline plots.
 
-\mypar{Ivan} Implemented SIMD vectorization optimizations, analysed the influence of unroll factor on vectorization performance. Worked on initial cost analysis, INTOPs and FLOPs calculation and identifying bottlenecks. Created performance and runtime plots. 
+\mypar{Ivan} Implemented SIMD vectorization optimizations, analyzed the influence of unroll factor on vectorization performance. Worked on initial cost analysis, INTOPs and FLOPs calculation and identifying bottlenecks. Created performance and runtime plots. 
 
-\mypar{Tal} ...
+\mypar{Tal} Focused on the blocking optimizations. Implemented basic optimizations and loop unrolling for performing the minimum cut with Baptiste. Implemented loop reordering to reuse the data in the output texture and worked on the analysis of the spatial locality and blocking with Svitlana. Implemented a first unsuccessful blocking attempt alone; implemented a second successful loop blocking attempt with Svitlana. Used Ivan's code to create performance and runtime plots.
 
-\mypar{Baptiste} Did benchmarking analysis and benchmarking plots.
-
-
+\mypar{Baptiste} Implemented basic optimizations and loop unrolling for performing the minimum cut with Tal. Did benchmarking analysis and benchmarking plots.
 
 % References should be produced using the bibtex program from suitable
 % BiBTeX files (here: bibl_conf). The IEEEbib.bst bibliography
