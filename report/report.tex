@@ -300,8 +300,6 @@ For input we used images of varying sizes, ranging from $2^{11}$ to $2^{18}$ in 
 
 With algorithmic improvements, we merged the corner overlap case with the horizontal overlap, resulting in a simplified algorithm. With this modification we eliminated the need to process rows of the overlap region separately in distinct loops. As a result, data access became more contiguous and sequential, improving spatial locality.
 
-In Fig.~\ref{perfBase}, we present a performance comparison of the optimizations mentioned earlier with respect to our baseline implementation for different input sizes. The program was compiled using the flags \inline{-O3 -fno-tree-vectorize}. We will address a significant decline in performance observed across all implementations for larger image sizes in the further sections. Nevertheless, it is evident that we achieved a substantial increase in program performance. The specified machine has a peak performance of 4 ops/cycle for integer operations, and our basic optimizations, combined with algorithmic improvements, achieved over 3.5 ops/cycle for several input sizes. However, the achieved improvement is not solely attributable to the specified techniques. Rather, it stems from the successful simplification of the code and the resolution of certain dependencies that improved the compiler's ability to analyze and enhance performance through advanced optimizations that were applied automatically. 
-
 \begin{figure}[htbp]
 \centering
   \includegraphics[scale=0.45]{PerfBasic.pdf}
@@ -317,6 +315,10 @@ In Fig.~\ref{perfBase}, we present a performance comparison of the optimizations
   \caption{Performance of different unrolling factors comparing to the baseline implementation.
   \label{perfUnroll}}
 \end{figure}
+
+
+In Fig.~\ref{perfBase}, we present a performance comparison of the optimizations mentioned earlier with respect to our baseline implementation for different input sizes. The program was compiled using the flags \inline{-O3 -fno-tree-vectorize}. We will address a significant decline in performance observed across all implementations for larger image sizes in the further sections. Nevertheless, it is evident that we achieved a substantial increase in program performance. The specified machine has a peak performance of 4 ops/cycle for integer operations, and our basic optimizations, combined with algorithmic improvements, achieved over 3.5 ops/cycle for several input sizes. However, the achieved improvement is not solely attributable to the specified techniques. Rather, it stems from the successful simplification of the code and the resolution of certain dependencies that improved the compiler's ability to analyze and enhance performance through advanced optimizations that were applied automatically. 
+
 
 Despite the decrease in runtime achieved through our unrolling technique, its performance is slightly inferior to that of the previous improvements. This observation, combined with the significant performance drop for larger input sizes, led us to recognize that our program is memory-bound. To substantiate this, we constructed a roofline plot, depicted in Fig.~\ref{roofunroll}. As we optimize our program's computations further, we observe a decrease in operational intensity and an increasing dependency on memory access, indicating a more memory-bound nature.
 
