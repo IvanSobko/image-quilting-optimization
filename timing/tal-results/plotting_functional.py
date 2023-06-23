@@ -171,18 +171,14 @@ def get_best_performance_and_runtime_speedups(filenames):
 if __name__ == "__main__":
 
     # Tal's cpu and compiler
-    cpu = "AMD Ryzen 7 5800H @3.2GHz"
+    cpu = "Intel(R) Core i7-1068NG7 @2.3GHz"
     compiler = "GCC 12.2.0"
 
     
-    
     filenames_and_labels = [
-        ("StdC_Algorithm_-O3-ffast-math-march=native_06-15-22-24-16.txt", "2 +StdC+Alg"),
-        ("StdC_Algorithm_-O3-ffast-math-march=native_06-15-22-30-03.txt", "4 +StdC+Alg"),
-        ("StdC_Algorithm_-O3-ffast-math-march=native_06-15-22-42-43.txt", "8 +StdC+Alg"),
-        ("StdC_KSrc4Unroll_Vector_BoundsRefactor_LoopReorder_Blocking32_-O3-ffast-math-march=native_06-15-22-28-06.txt", "2 ++Vec+32+L4"),
-        ("StdC_KSrc4Unroll_Vector_BoundsRefactor_LoopReorder_Blocking32_-O3-ffast-math-march=native_06-15-22-39-52.txt", "4 ++Vec+32+L4"),
-        ("StdC_KSrc4Unroll_Vector_BoundsRefactor_LoopReorder_Blocking32_-O3-ffast-math-march=native_06-15-22-56-22.txt", "8 ++Vec+32+L4"),
+        ("StdC_Algorithm_-O3-ffast-math-march=native_06-15-22-24-16.txt", "1/2"),
+        ("StdC_Algorithm_-O3-ffast-math-march=native_06-15-22-30-03.txt", "1/4"),
+        ("StdC_Algorithm_-O3-ffast-math-march=native_06-15-22-42-43.txt", "1/8"),
     ]
 
     performance_plot(
