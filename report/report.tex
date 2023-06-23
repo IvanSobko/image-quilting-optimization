@@ -189,7 +189,7 @@ Assuming no dependencies are taken into account and we do not wait for any compu
 
 Now that we have determined the most optimal theoretical runtime for the given machine, let's proceed with calculating the runtime of the $\ell^2$-loss between two pixels, taking into account the dependencies present in the code. It is assumed that we have already unrolled the innermost loop, which iterates through the channels. As you can see in the dependency graph shown in Fig.~\ref{dg}, due to the presence of dependencies we require 2.5 times more cycles per iteration. The main problems arise from the delay caused by multiplication, where the machine has to wait for instructions to finish, and from not fully utilizing the machine's integer addition ports to their maximum capacity.
 
-\begin{figure}[htbp]
+\begin{figure}[htb]
 \centering
   \includegraphics[scale=0.35]{DependencyGraph.pdf}
   \caption{Dependency graph of the $\ell^2$-loss function between two pixels, considering Intel Skylake microarchitecture. Channels {$r_{1}, r_{2}, g_{1}, g_{2}, ...$} correspond to the respective pixel channels.
@@ -198,7 +198,7 @@ Now that we have determined the most optimal theoretical runtime for the given m
 
 To optimize the algorithm, let us determine the ideal unrolling factor that can effectively address these limitations. Within the algorithm, the number of additions outweighs the number of multiplications by a factor of two. Furthermore, the throughput of additions surpasses that of multiplications by a factor of four. Consequently, under optimal circumstances, it becomes feasible to parallelize slightly over half of all multiplications. Considering this, an unroll factor of 4 should suffice since it allows for parallelization of half of the multiplications. Specifically, for the first set of pixel pairs, the multiplication of differences can be executed in parallel with the subtractions of RGBA channel values from the subsequent 3 pairs. Similarly, for the final pixel pair, the multiplication can occur concurrently with the final additions. This assertion can be substantiated by examining the dependency graph provided in Fig.~\ref{unroll}. By employing this unrolling technique, we successfully minimized the number of cycles required per pixel to a mere 5.25. This value is only slightly larger than the best possible scenario for this algorithm. It serves as a favorable compromise since higher unrolling factors lead to increased code complexity and potential memory-related challenges arising from a larger number of accumulators.
 
-\begin{figure}[htbp]
+\begin{figure}[htb]
 \centering
   \includegraphics[scale=0.18]{Unrolling.pdf}
   \caption{Dependency graph of the $\ell^2$-loss function between two pixels with an unroll factor of 4, considering Intel Skylake microarchitecture.\label{unroll}}
@@ -295,7 +295,7 @@ For input we used square images of varying sizes, ranging from $2^{11}$ to $2^{1
 
 \textit{Basic optimizations and algorithmic improvements:} In Fig.~\ref{perfBase}, we present a performance comparison of the basic optimizations and algorithmic improvements with respect to our baseline implementation for different input sizes. The program was compiled using the flags \inline{-O3 -fno-tree-vectorize}. We will address a significant decline in performance observed across all implementations for larger image sizes in the further sections. Nevertheless, it is evident that we achieved a substantial increase in program performance. The specified machine has a peak performance of 4 ops/cycle for integer operations, and our basic optimizations, combined with algorithmic improvements, achieved over 3.5 ops/cycle for several input sizes. However, the achieved improvement is not solely attributable to the specified techniques. Rather, it stems from the successful simplification of the code and the resolution of certain dependencies that improved the compiler's ability to analyze and enhance performance through advanced optimizations that were applied automatically.
 
-\begin{figure}[htbp]
+\begin{figure}[htb]
 \centering
   \includegraphics[scale=0.45]{PerfBasic.pdf}
   \caption{Performance of the basic optimizations, algorithmic improvements, and baseline implementation.
@@ -304,16 +304,16 @@ For input we used square images of varying sizes, ranging from $2^{11}$ to $2^{1
 
 \textit{Benchmark}: How does the performance of our standard C and algorithm optimizations compare to the performance of a \href{https://github.com/AirGuanZ/ImageQuilting}{benchmark implementation} across the three sets of compiler flags? Fig.~\ref{BenchmarkPerformance} demonstrates that across the three sets of compiler flags, our standard C and algorithm optimizations consistently outperforms the benchmark implementation.
 
-\begin{figure}[htbp]
-  \centering
-    \includegraphics[scale=0.45]{BenchmarkPerformance.pdf}
-    \caption{Performance plot of the standard C and algorithm optimizations compared to a benchmark implementation.
-    \label{BenchmarkPerformance}}
-  \end{figure}
+\begin{figure}[htb]
+\centering
+  \includegraphics[scale=0.45]{BenchmarkPerformance.pdf}
+  \caption{Performance plot of the standard C and algorithm optimizations compared to a benchmark implementation.
+  \label{BenchmarkPerformance}}
+\end{figure}
 
 \textit{Loop Unrolling:} In Fig.~\ref{perfUnroll}, we compared different unrolling factors. While a theoretical analysis suggested that unrolling by a factor of 4 would provide the best performance, in practice, unrolling by a factor of 2 performed better in most cases. This could be due to increased memory traffic complications caused by a higher number of accumulators or the complexities introduced by larger unrolling factors, making it challenging for compiler optimizations. 
 
-\begin{figure}[htbp]
+\begin{figure}[htb]
 \centering
   \includegraphics[scale=0.45]{PerfUnroll.pdf}
   \caption{Performance of different unrolling factors comparing to the baseline implementation.
@@ -322,7 +322,7 @@ For input we used square images of varying sizes, ranging from $2^{11}$ to $2^{1
 
 Despite the decrease in runtime achieved through our unrolling technique, its performance is slightly inferior to that of the previous improvements. This observation, combined with the significant performance drop for larger input sizes, led us to recognize that our program is memory-bound. To substantiate this, we constructed a roofline plot, depicted in Fig.~\ref{roofunroll}. As we optimize our program's computations further, we observe a decrease in operational intensity and an increasing dependency on memory access, indicating a more memory-bound nature.
 
-\begin{figure}[htbp]
+\begin{figure}[htb]
 \centering
   \includegraphics[scale=0.25]{RooflineUnroll.pdf}
   \caption{Roofline plot for different unrolling factors
@@ -331,14 +331,14 @@ Despite the decrease in runtime achieved through our unrolling technique, its pe
 
 \textit{Blocking:} Does blocking help us become less memory bound and improve our performance? Fig.~\ref{RooflineBlocking} illustrates that blocking does in fact increase the operational intensity of the loop unrolling by 2 and loop unrolling by 4 optimization variants.
 
-\begin{figure}[htbp]
+\begin{figure}[htb]
   \centering
     \includegraphics[scale=0.3]{RooflineBlocking.pdf}
     \caption{Roofline plot illustrating the result of blocking the loop unrolling by 2 and 4 optimization variants.
     \label{RooflineBlocking}}
   \end{figure}
 
-\begin{figure}[htbp]
+\begin{figure}[htb]
 \centering
   \includegraphics[scale=0.4]{VectorizePlot.pdf}
   \caption{Performance of vectorization optimization compared to unrolling and algorithm optimization
@@ -348,7 +348,7 @@ Despite the decrease in runtime achieved through our unrolling technique, its pe
 \textit{Vectorization:} Following the process of unrolling, we proceeded to optimize the code further with SIMD vectorization. In Fig.~\ref{vectorize} we show our results, as anticipated, this approach yielded superior results compared to simple unrolling. However, we observed that algorithm optimization performed comparably to manual vectorization. Compiler exhibited an ability to optimize the code as efficiently as our manual efforts, and in some cases, even surpassing our optimizations.
 
 Transitioning to blocking vectorization, the notable improvement in blocking can be observed in Fig.~\ref{vectorizeBlock}. This improvement can be primarily attributed to the fact that the compiler encounters more difficulties in optimizing non-straightforward algorithms such as blocking.
-\begin{figure}[htbp]
+\begin{figure}[htb]
 \centering
   \includegraphics[scale=0.4]{VectorizeBlockingPlot.pdf}
   \caption{Performance of blocking vectorization compared to regular blocking
@@ -357,27 +357,20 @@ Transitioning to blocking vectorization, the notable improvement in blocking can
 
 \textit{Block Size:} How does the Image Quilting algorithm block size affect the standard C and algorithm optimizations implementation Performance? Fig.~\ref{248Performances} illustrates that the performance increases with a larger Image Quilting block size. This makes sense since a larger Image Quilting block sizes leads to larger contiguous regions of memory for the algorithm to access. Note that the performance of the 1/2 block size plummets on the largest input size, potentially because the blocks are no longer fitting into LLC.
 
-\begin{figure}[htbp]
+\begin{figure}[htb]
   \centering
     \includegraphics[scale=0.45]{248Performances.pdf}
-    \caption{Performance of the standard C and algorithm optmizations with Image Quilting block sizes of 1/2, 1/4, and 1/8.
+    \caption{Performance of the standard C and algorithm optimizations with Image Quilting block sizes of 1/2, 1/4, and 1/8.
     \label{248Performances}}
   \end{figure}
 
 \section{Conclusions}
 
-Here you need to briefly summarize what you did and why this is
-important. {\em Do not take the abstract} and put it in the past
-tense. Remember, now the reader has (hopefully) read the paper, so it
-is a very different situation from the abstract. Try to highlight
-important results and say the things you really want to get across
-(e.g., the results show that we are within 2x of the optimal performance ...
-Even though we only considered the DFT, our optimization
-techniques should be also applicable ....) You can also formulate next
-steps if you want. Be brief,
+Our results illustrate that both 
 
-\bigskip
-{\bf Up to here you have 8 pages.}
+Even though we only
+
+If we had more time, we would have
 
 \section{Contributions of Team Members}
 
