@@ -56,7 +56,11 @@
 %
 
 \begin{abstract}
+<<<<<<< Updated upstream
 Image Quilting is a widely used technique for texture synthesis. This paper focuses on the optimization of Image Quilting algorithms without thread parallelization.
+=======
+Image Quilting is a widely used technique for texture synthesis. However, the computational complexity associated with Image Quilting can hinder its practical application in real-time scenarios or high-resolution images. This paper focuses on the optimization of Image Quilting algorithms without thread parallelization.
+>>>>>>> Stashed changes
 Through a comprehensive study, we explore various optimization strategies such as straightforward algorithm improvement, unrolling, blocking and vectorization to reduce computational overhead and enhance the overall performance.
 Experimental results demonstrate that the proposed optimization strategies effectively reduce the execution time of Image Quilting algorithms. Furthermore, we analyze the impact of different optimization techniques on memory consumption, performance, and perceptual quality to provide a holistic understanding of their benefits and limitations.
 \end{abstract}
@@ -359,14 +363,31 @@ Transitioning to blocking vectorization, the notable improvement in blocking can
 
 \begin{figure}[htb]
   \centering
+<<<<<<< Updated upstream
     \includegraphics[scale=0.5]{248Performances.pdf}
     \caption{Performance of the standard C and algorithm optimizations with Image Quilting block sizes of 1/2, 1/4, and 1/8.
+=======
+    \includegraphics[scale=0.45]{248Performances.pdf}
+    \caption{Performance of the standard C and algorithm optmizations with Image Quilting block sizes of 1/2, 1/4, and 1/8.
+>>>>>>> Stashed changes
     \label{248Performances}}
   \end{figure}
 
 \section{Conclusions}
 
+<<<<<<< Updated upstream
 Our results illustrate that a combination of standard C optimizations, algorithm improvements, vectorization, and blocking, are all needed to produce a highly performant and efficient implementation of the Image Quilting algorithm. An important result is that applying standard C optimizations and algorithm improvements along with using the highest level of compiler optimization flags produced some of our most performant and efficient optimizations. Another key result is that blocking was mostly beneficial when paired with vectorization; otherwise, the performance and runtime gains were not significant.
+=======
+Here you need to briefly summarize what you did and why this is
+important. {\em Do not take the abstract} and put it in the past
+tense. Remember, now the reader has (hopefully) read the paper, so it
+is a very different situation from the abstract. Try to highlight
+important results and say the things you really want to get across
+(e.g., the results show that we are within 2x of the optimal performance ...
+Even though we only considered the DFT, our optimization
+techniques should be also applicable ....) You can also formulate next
+steps if you want. Be brief,
+>>>>>>> Stashed changes
 
 If we had more time, we would have liked to perform a roofline analysis on the Image Quilting algorithm with different input sizes, so we could investigate why the performances converge with the largest input sizes.
 
