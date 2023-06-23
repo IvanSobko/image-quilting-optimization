@@ -179,6 +179,8 @@ However, we can simplify the algorithm since we do not need squared root actual 
 
 Another of our algorithmic optimizations was to merge the loops covering the horizontal and corner overlap cases for the $\ell ^2$-norm computation. Not only did this result in a simplified algorithm, but by eliminating the need to process rows of the overlap region separately in distinct loops, data access became more contiguous and sequential, improving spatial locality.
 
+The algorithmic improvement is the next important optimization that we performed in the range of basic optimizations. In this optimization we merged the corner overlap case with the horizontal overlap, resulting in a simplified algorithm. With this modification, we eliminated the need to process rows of the overlap region separately in distinct loops. As a result, data access became more contiguous and sequential, improving spatial locality.
+
 \mypar{Loop Unrolling} 
 Another optimization that we implemented is loop unrolling with separate accumulators. The main objective of loop unrolling is to enhance Instruction Level Parallelism. To achieve maximum operation parallelization, we introduced multiple accumulators to ensure independence among operations and improve the computational efficiency of the algorithm. It is crucial to emphasize that one of the main challenges in this optimization lies in determining the appropriate unroll factor and the number of accumulators to use. 
 In accordance with the cost analysis detailed in the second section, it was discussed that the $\ell^2$-norm estimation function is responsible for approximately 85\% of the total runtime. Consequently, we prioritized the majority of our analysis and optimization efforts on this specific aspect of the algorithm. Moving forward, our analysis of loop unrolling will be conducted based on this function.
@@ -192,7 +194,7 @@ Now that we have determined the most optimal theoretical runtime for the given m
 
 \begin{figure}[htbp]
 \centering
-  \includegraphics[scale=0.4]{DependencyGraph.pdf}
+  \includegraphics[scale=0.35]{DependencyGraph.pdf}
   \caption{Dependency graph of the $\ell^2$-loss function between two pixels, considering Intel Skylake microarchitecture. Channels {$r_{1}, r_{2}, g_{1}, g_{2}, ...$} correspond to the respective pixel channels.
   \label{dg}}
 \end{figure}
@@ -287,7 +289,7 @@ For input we used images of varying sizes, ranging from $2^{11}$ to $2^{18}$ in 
 
 \mypar{Results}
 
-\textit{Basic optimizations and algorithmic improvements:}
+\textit{Basic optimizations and algorithmic improvements:} In Fig.~\ref{perfBase}, we present a performance comparison of the basic optimizations and algorithmic improvements with respect to our baseline implementation for different input sizes. The program was compiled using the flags \inline{-O3 -fno-tree-vectorize}. We will address a significant decline in performance observed across all implementations for larger image sizes in the further sections. Nevertheless, it is evident that we achieved a substantial increase in program performance. The specified machine has a peak performance of 4 ops/cycle for integer operations, and our basic optimizations, combined with algorithmic improvements, achieved over 3.5 ops/cycle for several input sizes. However, the achieved improvement is not solely attributable to the specified techniques. Rather, it stems from the successful simplification of the code and the resolution of certain dependencies that improved the compiler’s ability to analyze and enhance performance through advanced optimizations that were applied automatically.
 
 \begin{figure}[htbp]
 \centering
@@ -304,10 +306,6 @@ For input we used images of varying sizes, ranging from $2^{11}$ to $2^{18}$ in 
   \caption{Performance of different unrolling factors comparing to the baseline implementation.
   \label{perfUnroll}}
 \end{figure}
-
-
-In Fig.~\ref{perfBase}, we present a performance comparison of the optimizations mentioned earlier with respect to our baseline implementation for different input sizes. The program was compiled using the flags \inline{-O3 -fno-tree-vectorize}. We will address a significant decline in performance observed across all implementations for larger image sizes in the further sections. Nevertheless, it is evident that we achieved a substantial increase in program performance. The specified machine has a peak performance of 4 ops/cycle for integer operations, and our basic optimizations, combined with algorithmic improvements, achieved over 3.5 ops/cycle for several input sizes. However, the achieved improvement is not solely attributable to the specified techniques. Rather, it stems from the successful simplification of the code and the resolution of certain dependencies that improved the compiler's ability to analyze and enhance performance through advanced optimizations that were applied automatically. 
-
 
 Despite the decrease in runtime achieved through our unrolling technique, its performance is slightly inferior to that of the previous improvements. This observation, combined with the significant performance drop for larger input sizes, led us to recognize that our program is memory-bound. To substantiate this, we constructed a roofline plot, depicted in Fig.~\ref{roofunroll}. As we optimize our program's computations further, we observe a decrease in operational intensity and an increasing dependency on memory access, indicating a more memory-bound nature.
 
@@ -337,24 +335,9 @@ steps if you want. Be brief.
 \bigskip
 {\bf Up to here you have 8 pages.}
 
-\section{Contributions of Team Members (Mandatory)}
+\section{Contributions of Team Members}
 
-In this mandatory section (which is not included in the 8 pages limit) each team member should very briefly (telegram style is welcome) explain what she/he did for the project. I imagine this section to be between one column and one page (absolute maximum).
-
-Include only 
-\begin{itemize}
-	\item What relates to optimizing your chosen algorithm / application. This means writing actual code for optimization or for analysis.
-	\item What you did before the submission of the presentation.
-\end{itemize}
-Do not include
-\begin{itemize}
-	\item Work on infrastructure and testing.
-	\item Work done after the presentation took place.
-\end{itemize}
-
-Example and structure follows.
-
-\mypar{Marylin} Focused on non-SIMD optimization for the variant 2 of the algorithm. Cache optimization, basic block optimizations, small generator for the innermost kernel (Section 3.2). Roofline plot. Worked with Cary and Jane on the SIMD optimization of variant 1, in particular implemented the bit-masking trick discussed.
+\mypar{Svitlana} Focused on the set of basic optimizations and the algorithmic improvement that improved spatial locality (for $\ell ^2$-norm function) that were discussed in Section 3 in the Basic optimizations block. Implemented unrolling with different unrolling factors for 2 cases of the algorithm - before and after the blocking and performed the corresponding analysis. Implemented loop reordering to reuse the data in the output texture and worked on the analysis of the spatial locality and blocking with Tal. Divided functions into case-specific types to reduce unnecessary computations - second point of the advanced optimization plan. Prepared the roofline plots.
 
 \mypar{Cary} ...
 
