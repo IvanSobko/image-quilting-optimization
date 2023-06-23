@@ -4,7 +4,7 @@
 % --------------------------------------------------------------------------
 
 \documentclass[letterpaper]{article}
-\usepackage{spconf,amsmath,amssymb,graphicx,bm,xcolor,listings,enumitem}
+\usepackage{spconf,amsmath,amssymb,graphicx,bm,xcolor,listings,enumitem,hyperref}
 
 % Example definitions.
 % --------------------
@@ -290,6 +290,15 @@ We employed various platforms and compiler flags to assess the outcomes of diver
 For input we used images of varying sizes, ranging from $2^{11}$ to $2^{18}$ in terms of pixel count.
 
 \mypar{Results}
+
+\textit{Benchmark}: How does the performance of our baseline implementation compare to the performance of a \href{https://github.com/AirGuanZ/ImageQuilting}{benchmark implementation} across our three sets of flags? Fig.~\ref{BenchmarkPerformance} demonstrates that while the benchmark implementation is better adapted for the higher levels of compiler optimizations, our baseline implementation performs better with the least amount of compiler optimization. This illustrated our baseline implementation had a lot of room to improve its performance.
+
+\begin{figure}[htbp]
+  \centering
+    \includegraphics[scale=0.5]{BenchmarkPerformance.pdf}
+    \caption{Performance of the basic optimizations, algorithmic improvements, and baseline implementation.
+    \label{BenchmarkPerformance}}
+  \end{figure}
 
 \textit{Basic optimizations and algorithmic improvements:} In Fig.~\ref{perfBase}, we present a performance comparison of the basic optimizations and algorithmic improvements with respect to our baseline implementation for different input sizes. The program was compiled using the flags \inline{-O3 -fno-tree-vectorize}. We will address a significant decline in performance observed across all implementations for larger image sizes in the further sections. Nevertheless, it is evident that we achieved a substantial increase in program performance. The specified machine has a peak performance of 4 ops/cycle for integer operations, and our basic optimizations, combined with algorithmic improvements, achieved over 3.5 ops/cycle for several input sizes. However, the achieved improvement is not solely attributable to the specified techniques. Rather, it stems from the successful simplification of the code and the resolution of certain dependencies that improved the compiler’s ability to analyze and enhance performance through advanced optimizations that were applied automatically.
 
