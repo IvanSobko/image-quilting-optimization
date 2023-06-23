@@ -204,7 +204,7 @@ if __name__ == "__main__":
 
     performance_plot(
        [(filename, label.split(" ")[0]) for (filename, label) in filenames_and_labels_1 if "Mid" in label],
-        cpu, compiler, "../plots/bounds_reorder_blocking_performance.png")
+        cpu, compiler, "../plots/bounds_reorder_blocking_performance.pdf")
 
     filenames_and_labels_2 = [
         ("default_-O3-ffast-math-march=native_06-06-19-43-23.txt", "Default"),
@@ -215,9 +215,9 @@ if __name__ == "__main__":
     ]
 
     performance_plot(
-        filenames_and_labels_2, cpu, compiler, "../plots/best_performances.png")
+        filenames_and_labels_2, cpu, compiler, "../plots/best_performances.pdf")
     runtime_plot(
-        filenames_and_labels_2,cpu, compiler, "../plots/best_runtimes.png", True)
+        filenames_and_labels_2,cpu, compiler, "../plots/best_runtimes.pdf", True)
 
     # Best performances and runtimes for high compiler optimizations
     default_performance_runtime = (1.63626, 1.42794e+11, "Default")

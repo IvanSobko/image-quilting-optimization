@@ -291,16 +291,7 @@ For input we used images of varying sizes, ranging from $2^{11}$ to $2^{18}$ in 
 
 \mypar{Results}
 
-\textit{Benchmark}: How does the performance of our standard C and algorithm optimizations compare to the performance of a \href{https://github.com/AirGuanZ/ImageQuilting}{benchmark implementation} across the three sets of compiler flags? Fig.~\ref{BenchmarkPerformance} demonstrates that across the three sets of compiler flags, our standard C and algorithm optimizations consistently outperforms the benchmark implementation.
-
-\begin{figure}[htbp]
-  \centering
-    \includegraphics[scale=0.5]{BenchmarkPerformance.pdf}
-    \caption{Performance of the basic optimizations, algorithmic improvements, and baseline implementation.
-    \label{BenchmarkPerformance}}
-  \end{figure}
-
-\textit{Basic optimizations and algorithmic improvements:} In Fig.~\ref{perfBase}, we present a performance comparison of the basic optimizations and algorithmic improvements with respect to our baseline implementation for different input sizes. The program was compiled using the flags \inline{-O3 -fno-tree-vectorize}. We will address a significant decline in performance observed across all implementations for larger image sizes in the further sections. Nevertheless, it is evident that we achieved a substantial increase in program performance. The specified machine has a peak performance of 4 ops/cycle for integer operations, and our basic optimizations, combined with algorithmic improvements, achieved over 3.5 ops/cycle for several input sizes. However, the achieved improvement is not solely attributable to the specified techniques. Rather, it stems from the successful simplification of the code and the resolution of certain dependencies that improved the compiler’s ability to analyze and enhance performance through advanced optimizations that were applied automatically.
+\textit{Basic optimizations and algorithmic improvements:} In Fig.~\ref{perfBase}, we present a performance comparison of the basic optimizations and algorithmic improvements with respect to our baseline implementation for different input sizes. The program was compiled using the flags \inline{-O3 -fno-tree-vectorize}. We will address a significant decline in performance observed across all implementations for larger image sizes in the further sections. Nevertheless, it is evident that we achieved a substantial increase in program performance. The specified machine has a peak performance of 4 ops/cycle for integer operations, and our basic optimizations, combined with algorithmic improvements, achieved over 3.5 ops/cycle for several input sizes. However, the achieved improvement is not solely attributable to the specified techniques. Rather, it stems from the successful simplification of the code and the resolution of certain dependencies that improved the compiler's ability to analyze and enhance performance through advanced optimizations that were applied automatically.
 
 \begin{figure}[htbp]
 \centering
@@ -308,6 +299,15 @@ For input we used images of varying sizes, ranging from $2^{11}$ to $2^{18}$ in 
   \caption{Performance of the basic optimizations, algorithmic improvements, and baseline implementation.
   \label{perfBase}}
 \end{figure}
+
+\textit{Benchmark}: How does the performance of our standard C and algorithm optimizations compare to the performance of a \href{https://github.com/AirGuanZ/ImageQuilting}{benchmark implementation} across the three sets of compiler flags? Fig.~\ref{BenchmarkPerformance} demonstrates that across the three sets of compiler flags, our standard C and algorithm optimizations consistently outperforms the benchmark implementation.
+
+\begin{figure}[htbp]
+  \centering
+    \includegraphics[scale=0.45]{BenchmarkPerformance.pdf}
+    \caption{Performance plot of the standard C and algorithm optimizations compared to a benchmark implementation.
+    \label{BenchmarkPerformance}}
+  \end{figure}
 
 \textit{Loop Unrolling:} In Fig.~\ref{perfUnroll}, we compared different unrolling factors. While a theoretical analysis suggested that unrolling by a factor of 4 would provide the best performance, in practice, unrolling by a factor of 2 performed better in most cases. This could be due to increased memory traffic complications caused by a higher number of accumulators or the complexities introduced by larger unrolling factors, making it challenging for compiler optimizations. 
 
@@ -327,9 +327,20 @@ Despite the decrease in runtime achieved through our unrolling technique, its pe
   \label{roofunroll}}
 \end{figure}
 
-\textit{Blocking:} 
+\textit{Blocking:} Does blocking help us become less memory bound and improve our performance? Fig.~\ref{RooflineBlocking} illustrates that blocking does in fact increase the operational intensity of the loop unrolling by 2 and loop unrolling by 4 optimization variants.
+
+\begin{figure}[htbp]
+  \centering
+    \includegraphics[scale=0.3]{RooflineBlocking.pdf}
+    \caption{Roofline plot illustrating the result of blocking the loop unrolling by 2 and loop unrolling by 4 optimization variants.
+    \label{RooflineBlocking}}
+  \end{figure}
 
 \textit{Vectorization:} 
+
+\textit{Block Size:} How does the image quilting algorithm block size affect the 
+
+\textit{Best Optimizations:} 
 
 \section{Conclusions}
 
