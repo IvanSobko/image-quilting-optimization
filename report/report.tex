@@ -198,7 +198,8 @@ Now that we have determined the most optimal theoretical runtime for the given m
 \begin{figure}[htbp]
 \centering
   \includegraphics[scale=0.4]{DependencyGraph.pdf}
-  \caption{Dependency graph of the $\ell^2$-loss function between two pixels, considering Intel Skylake microarchitecture. Channels {$r_{1}, r_{2}, g_{1}, g_{2}, ...$} correspond to the respective pixel channels.\label{dg}}
+  \caption{Dependency graph of the $\ell^2$-loss function between two pixels, considering Intel Skylake microarchitecture. Channels {$r_{1}, r_{2}, g_{1}, g_{2}, ...$} correspond to the respective pixel channels.
+  \label{dg}}
 \end{figure}
 
 To optimize the algorithm, let us determine the ideal unrolling factor that can effectively address these limitations. Within the algorithm, the number of additions outweighs the number of multiplications by a factor of two. Furthermore, the throughput of additions surpasses that of multiplications by a factor of four. Consequently, under optimal circumstances, it becomes feasible to parallelize slightly over half of all multiplications. Considering this, an unroll factor of 4 should suffice since it allows for parallelization of half of the multiplications. Specifically, for the first set of pixel pairs, the multiplication of differences can be executed in parallel with the subtractions of RGBA channel values from the subsequent 3 pairs. Similarly, for the final pixel pair, the multiplication can occur concurrently with the final additions. This assertion can be substantiated by examining the dependency graph provided in Fig.~\ref{unroll}. By employing this unrolling technique, we successfully minimized the number of cycles required per pixel to a mere 5.25. This value is only slightly larger than the best possible scenario for this algorithm. It serves as a favorable compromise since higher unrolling factors lead to increased code complexity and potential memory-related challenges arising from a larger number of accumulators.
@@ -275,11 +276,13 @@ In the case of the vertical minimum cut, we have spatial locality since we are i
 
 In the case of the horizontal minimum cut, we have spatial since we are iterating over pixels of the overlap region; however, the baseline implementation does not take advantage of the spatial locality since we iterate through the overlap region column-by-column. We also have a small amount of temporal locality since we construct the horizontal path by traversing the dynamic programming table from the last column to the first column.
 
-\mypar{Vectorization} When utilizing SIMD (Single Instruction, Multiple Data) vectorization, there are several considerations to keep in mind to maximize performance and efficiency: \\ 
+\mypar{Vectorization}
+The majority of our vectorization efforts are dedicated to computing the $\ell^2$-loss function, as it is the most computationally expensive operation in our code. By optimizing this function, we can achieve significant performance improvements. \\
+When utilizing SIMD (Single Instruction, Multiple Data) vectorization, there are several considerations to keep in mind to maximize performance and efficiency: \\ 
 \textit{Data alignment}: SIMD operations typically require data to be aligned on specific boundaries. We ensure that data is aligned by using \texttt{malloc}, which is guaranteed to be properly aligned for objects of any type. Maximum alignment size of \texttt{malloc} is determined by \texttt{max\_align\_t} which usually equals to size of \texttt{long double} (16 bytes). Maximum alignment will influence vector width selection.  \\
 \textit{Data dependency}: Minimizing data dependencies within vectorized code is crucial for enabling parallel execution and fully utilizing SIMD capabilities. To achieve this, we apply insights discussed in the loop unrolling section, reducing idle CPU time. \\
 \textit{Vector width}: In our case, we represent each pixel value as a 16-bit value with four components, each occupying one byte. To perform operations correctly, we load 16 8-bit values into a 128-bit integer variable and convert it into a 256-bit variable of 16-bit integers. This approach prevents overflow during multiplication and addition and maximizes performance by utilizing the available memory in the vector.\\
-The majority of our vectorization efforts are dedicated to computing the $\ell^2$-loss function, as it is the most computationally expensive operation in our code. By optimizing this function, we can achieve significant performance improvements. \\
+
 Through our experiments, we found that the "madd" (multiply-add) function is well-suited for our specific purpose of calculating the norm and performing horizontal component addition.
 Furthermore, to mitigate data dependencies, we employed a loop unroll with a factor of x2 of the vector width. This approach allowed us to effectively reorder operations and minimize periods of idle CPU time. 
 
@@ -288,6 +291,9 @@ Furthermore, to mitigate data dependencies, we employed a loop unroll with a fac
 [TODO: short description]
 
 \mypar{Experimental setup} 
+Throughout our work, we employed various platforms and compiler flags to assess the outcomes of diverse configurations. Specifically, we utilized computers equipped with an AMD Ryzen 7 5800H @3.2GHz processor, boasting a cache size of 16 MVB, as well as an Intel(R) Core i7-10510U @1.8GHz processor, with a cache size of 8 MB. To ensure consistency and comparability across different platforms, we opted for the GCC 12.2.0 compiler, with three sets of flags: \texttt{-O3-ffast-math-march=native}, \texttt{-O3-fno-tree-vectorize} and \texttt{-O1}.
+For input we used images of varying sizes, ranging from $2^{11}$ to $2^{18}$ in terms of pixel count.
+
 
 \mypar{Results}
 
@@ -300,7 +306,8 @@ In Fig.~\ref{perfBase}, we present a performance comparison of the optimizations
 \begin{figure}[htbp]
 \centering
   \includegraphics[scale=0.45]{PerfBasic.pdf}
-  \caption{Performance of the basic optimizations, algorithmic improvements, and baseline implementation.\label{perfBase}}
+  \caption{Performance of the basic optimizations, algorithmic improvements, and baseline implementation.
+  \label{perfBase}}
 \end{figure}
 
 \textit{Loop Unrolling:} In Fig.~\ref{perfUnroll}, we compared different unrolling factors. While a theoretical analysis suggested that unrolling by a factor of 4 would provide the best performance, in practice, unrolling by a factor of 2 performed better in most cases. This could be due to increased memory traffic complications caused by a higher number of accumulators or the complexities introduced by larger unrolling factors, making it challenging for compiler optimizations. 
@@ -308,7 +315,8 @@ In Fig.~\ref{perfBase}, we present a performance comparison of the optimizations
 \begin{figure}[htbp]
 \centering
   \includegraphics[scale=0.45]{PerfUnroll.pdf}
-  \caption{Performance of different unrolling factors comparing to the baseline implementation.\label{perfUnroll}}
+  \caption{Performance of different unrolling factors comparing to the baseline implementation.
+  \label{perfUnroll}}
 \end{figure}
 
 Despite the decrease in runtime achieved through our unrolling technique, its performance is slightly inferior to that of the previous improvements. This observation, combined with the significant performance drop for larger input sizes, led us to recognize that our program is memory-bound. To substantiate this, we constructed a roofline plot, depicted in Fig.~\ref{roofunroll}. As we optimize our program's computations further, we observe a decrease in operational intensity and an increasing dependency on memory access, indicating a more memory-bound nature.
@@ -316,7 +324,8 @@ Despite the decrease in runtime achieved through our unrolling technique, its pe
 \begin{figure}[htbp]
 \centering
   \includegraphics[scale=0.25]{RooflineUnroll.pdf}
-  \caption{Roofline plot for different unrolling factors\label{roofunroll}}
+  \caption{Roofline plot for different unrolling factors
+  \label{roofunroll}}
 \end{figure}
 
 \textit{Blocking:} 
