@@ -282,12 +282,14 @@ This section presents the methodology employed in the experiments, including the
 
 \mypar{Experimental setup} 
 We employed various platforms and compiler flags to assess the outcomes of diverse configurations. To ensure consistency and comparability across different platforms, we opted for the GCC 12.2.0 compiler, with three sets of flags: \inline{-O3-ffast-math-march=native}, \inline{-O3-fno-tree-vectorize} and \inline{-O1}. We used three different platforms to perform the experiments.
-\begin{enumerate}[leftmargin=*,itemsep=0pt,topsep=0pt]
-  \item An AMD Ryzen 7 5800H @3.2GHz processor; L3: 16 MB. For most of the experiments.
-  \item An Intel(R) Core i7-10510U @1.8GHz processor; L3: 8 MB. To compare to an benchmark implementation.
-  \item An Intel(R) Core i7-1068NG7 @2.3GHz; L1: 64 KB, L2: 256 KB, L3: 8 MB. For different block sizes.
-\end{enumerate}
-For input we used images of varying sizes, ranging from $2^{11}$ to $2^{18}$ in terms of pixel count.
+
+(1) An AMD Ryzen 7 5800H @3.2GHz processor; L3: 16 MB. For most of the experiments.
+
+(2) An Intel(R) Core i7-10510U @1.8GHz processor; L3: 8 MB. To compare to an benchmark implementation.
+
+(3) An Intel(R) Core i7-1068NG7 @2.3GHz; L1: 64 KB, L2: 256 KB, L3: 8 MB. For different block sizes.
+
+For input we used square images of varying sizes, ranging from $2^{11}$ to $2^{18}$ in terms of pixel count. We always use a square image quilting block with width 1/4 of the input width, unless specified otherwise.
 
 \mypar{Results}
 
@@ -336,7 +338,6 @@ Despite the decrease in runtime achieved through our unrolling technique, its pe
     \label{RooflineBlocking}}
   \end{figure}
 
-
 \begin{figure}[htbp]
 \centering
   \includegraphics[scale=0.4]{VectorizePlot.pdf}
@@ -354,9 +355,14 @@ Transitioning to blocking vectorization, the notable improvement in blocking can
   \label{vectorizeBlock}}
 \end{figure}
 
-\textit{Block Size:} How does the image quilting algorithm block size affect the 
+\textit{Block Size:} How does the image quilting algorithm block size affect the standard C and algorithm optimizations implementation Performance? Fig.~\ref{248Performances} illustrates that the performance increases with a larger image quilting block size. This makes sense since a larger image quilting block sizes leads to larger contiguous regions of memory for the algorithm to access. Note that the performance of the 1/2 block size plummets on the largest input size, potentially because the blocks are no longer fitting into LLC.
 
-\textit{Best Optimizations:} 
+\begin{figure}[htbp]
+  \centering
+    \includegraphics[scale=0.45]{248Performances.pdf}
+    \caption{Performance of the standard C and algorithm optmizations with image quilting block sizes of 1/2, 1/4, and 1/8.
+    \label{248Performances}}
+  \end{figure}
 
 \section{Conclusions}
 
