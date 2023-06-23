@@ -82,27 +82,17 @@ def runtime_plot(filenames_and_labels, cpu, compiler, output_filename):
 if __name__ == "__main__":
     # Filenames, cpu, and compiler for the plots
     filenames_and_labels = [
-        ("baseline_-O1.txt", "Baseline Low"),
-        ("baseline_-O3-fno-tree-vectorize.txt", "Baseline Mid"),
-        ("baseline_-O3-ffast-math-march=native.txt", "Baseline High"),
+        ("baseline_-O1.txt", "Benchmark Low"),
+        ("baseline_-O3-fno-tree-vectorize.txt", "Benchmark Mid"),
+        ("baseline_-O3-ffast-math-march=native.txt", "Benchmark High"),
 
-        ("default_-O1_06-06-23-50-22.txt", "Default Low"),
-        ("default_-O3-fno-tree-vectorize_06-07-00-04-54.txt", "Default Mid"),
-        ("default_-O3-ffast-math-march=native_06-07-00-17-47.txt", "Default High"),
-
-        ("StdC_Algorithm_-O1_06-06-23-57-34.txt", "StdC_Algo Low"),
-        ("StdC_Algorithm_-O3-fno-tree-vectorize_06-07-00-11-58.txt", "StdC_Algo Mid"),
-        ("StdC_Algorithm_-O3-ffast-math-march=native_06-07-00-22-13.txt", "StdC_Algo High"),
-
-        ("StdC_Algorithm_ChannelsUnroll_-O1_06-07-00-01-58.txt", "StdC_Unroll Low"),
-        ("StdC_Algorithm_ChannelsUnroll_-O3-fno-tree-vectorize_06-07-00-14-51.txt", "StdC_Unroll Mid"),
-        ("StdC_Algorithm_ChannelsUnroll_-O3-ffast-math-march=native_06-07-00-23-12.txt", "StdC_Unroll High"),
-
-        ("StdC_Algorithm_Vectorize_-O3-ffast-math-march=native_06-07-00-25-40.txt", "StdC_Vectorize High"),
+        ("default_-O1_06-06-23-50-22.txt", "Baseline Low"),
+        ("default_-O3-fno-tree-vectorize_06-07-00-04-54.txt", "Baseline Mid"),
+        ("default_-O3-ffast-math-march=native_06-07-00-17-47.txt", "Baseline High"),
     ]
-    cpu = "Intel(R) Core(TM) i7-10510U @1.8GHz"
+    cpu = "Intel(R) Core i7-10510U @1.8GHz"
     compiler = "GCC 12.2.0"
 
     # Generate the desired plots
-    performance_plot(filenames_and_labels, cpu, compiler, "my_performance.pdf")
-    runtime_plot(filenames_and_labels, cpu, compiler, "my_runtime.pdf")
+    performance_plot(filenames_and_labels, cpu, compiler, "benchmark_performance.pdf")
+    runtime_plot(filenames_and_labels, cpu, compiler, "benchmark_runtime.pdf")
