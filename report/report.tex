@@ -173,7 +173,7 @@ Now that we have determined the most optimal theoretical runtime for the given m
 
 \begin{figure}[htb]
 \centering
-  \includegraphics[scale=0.35]{DependencyGraph.pdf}
+  \includegraphics[scale=0.30]{DependencyGraph.pdf}
   \caption{Dependency graph of the $\ell^2$-loss function between two pixels, considering Intel Skylake microarchitecture. Channels {$r_{1}, r_{2}, g_{1}, g_{2}, ...$} correspond to the respective pixel channels.
   \label{dg}}
 \end{figure}
@@ -279,7 +279,7 @@ For input we used square images of varying sizes, ranging from $2^{11}$ to $2^{1
 
 \begin{figure}[htb]
 \centering
-  \includegraphics[scale=0.5]{PerfBasic.pdf}
+  \includegraphics[scale=0.4]{PerfBasic.pdf}
   \caption{Performance of the basic optimizations, algorithmic improvements, and baseline implementation.
   \label{perfBase}}
 \end{figure}
@@ -288,7 +288,7 @@ For input we used square images of varying sizes, ranging from $2^{11}$ to $2^{1
 
 \begin{figure}[htb]
 \centering
-  \includegraphics[scale=0.5]{BenchmarkPerformance.pdf}
+  \includegraphics[scale=0.4]{BenchmarkPerformance.pdf}
   \caption{Performance plot of the standard C and algorithm optimizations compared to a benchmark implementation.
   \label{BenchmarkPerformance}}
 \end{figure}
@@ -297,7 +297,7 @@ For input we used square images of varying sizes, ranging from $2^{11}$ to $2^{1
 
 \begin{figure}[htb]
 \centering
-  \includegraphics[scale=0.5]{PerfUnroll.pdf}
+  \includegraphics[scale=0.4]{PerfUnroll.pdf}
   \caption{Performance of different unrolling factors comparing to the baseline implementation.
   \label{perfUnroll}}
 \end{figure}
@@ -322,7 +322,7 @@ Despite the decrease in runtime achieved through our unrolling technique, its pe
 
 \begin{figure}[htb]
 \centering
-  \includegraphics[scale=0.5]{VectorizePlot.pdf}
+  \includegraphics[scale=0.4]{VectorizePlot.pdf}
   \caption{Performance of vectorization optimization compared to unrolling and algorithm optimization
   \label{vectorize}}
 \end{figure}
@@ -332,7 +332,7 @@ Despite the decrease in runtime achieved through our unrolling technique, its pe
 Transitioning to blocking vectorization, the notable improvement in blocking can be observed in Fig.~\ref{vectorizeBlock}. This improvement can be primarily attributed to the fact that the compiler encounters more difficulties in optimizing non-straightforward algorithms such as blocking.
 \begin{figure}[htb]
 \centering
-  \includegraphics[scale=0.5]{VectorizeBlockingPlot.pdf}
+  \includegraphics[scale=0.4]{VectorizeBlockingPlot.pdf}
   \caption{Performance of blocking vectorization compared to regular blocking.
   \label{vectorizeBlock}}
 \end{figure}
@@ -341,7 +341,7 @@ Transitioning to blocking vectorization, the notable improvement in blocking can
 
 \begin{figure}[htb]
   \centering
-    \includegraphics[scale=0.45]{248Performances.pdf}
+    \includegraphics[scale=0.4]{248Performances.pdf}
     \caption{Performance of the standard C and algorithm optimizations with Image Quilting block sizes of 1/2, 1/4, and 1/8.
     \label{248Performances}}
   \end{figure}
