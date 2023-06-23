@@ -56,11 +56,7 @@
 %
 
 \begin{abstract}
-<<<<<<< Updated upstream
 Image Quilting is a widely used technique for texture synthesis. This paper focuses on the optimization of Image Quilting algorithms without thread parallelization.
-=======
-Image Quilting is a widely used technique for texture synthesis. However, the computational complexity associated with Image Quilting can hinder its practical application in real-time scenarios or high-resolution images. This paper focuses on the optimization of Image Quilting algorithms without thread parallelization.
->>>>>>> Stashed changes
 Through a comprehensive study, we explore various optimization strategies such as straightforward algorithm improvement, unrolling, blocking and vectorization to reduce computational overhead and enhance the overall performance.
 Experimental results demonstrate that the proposed optimization strategies effectively reduce the execution time of Image Quilting algorithms. Furthermore, we analyze the impact of different optimization techniques on memory consumption, performance, and perceptual quality to provide a holistic understanding of their benefits and limitations.
 \end{abstract}
@@ -371,8 +367,6 @@ Transitioning to blocking vectorization, the notable improvement in blocking can
 \section{Conclusions}
 
 Our results illustrate that a combination of standard C optimizations, algorithm improvements, vectorization, and blocking, are all needed to produce a highly performant and efficient implementation of the Image Quilting algorithm. An important result is that applying standard C optimizations and algorithm improvements along with using the highest level of compiler optimization flags produced some of our most performant and efficient optimizations. Another key result is that blocking was mostly beneficial when paired with vectorization; otherwise, the performance and runtime gains were not significant.
-
-If we had more time, we would have liked to perform a roofline analysis on the Image Quilting algorithm with different input sizes, so we could investigate why the performances converge with the largest input sizes.
 
 \section{Contributions of Team Members}
 
