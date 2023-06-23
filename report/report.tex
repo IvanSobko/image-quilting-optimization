@@ -366,11 +366,9 @@ Transitioning to blocking vectorization, the notable improvement in blocking can
 
 \section{Conclusions}
 
-Our results illustrate that both 
+Our results illustrate that a combination of standard C optimizations, algorithm improvements, vectorization, and blocking, are all needed to produce a highly performant and efficient implementation of the Image Quilting algorithm. An important result is that applying standard C optimizations and algorithm improvements along with using the highest level of compiler optimization flags produced some of our most performant and efficient optimizations. Another key result is that blocking was mostly beneficial when paired with vectorization; otherwise, the performance and runtime gains were not significant.
 
-Even though we only
-
-If we had more time, we would have
+If we had more time, we would have liked to perform a roofline analysis on the Image Quilting algorithm with different input sizes, so we could investigate why the performances converge with the largest input sizes.
 
 \section{Contributions of Team Members}
 
