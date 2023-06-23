@@ -336,7 +336,23 @@ Despite the decrease in runtime achieved through our unrolling technique, its pe
     \label{RooflineBlocking}}
   \end{figure}
 
-\textit{Vectorization:} 
+
+\begin{figure}[htbp]
+\centering
+  \includegraphics[scale=0.4]{VectorizePlot.pdf}
+  \caption{Performance of vectorization optimization compared to unrolling and algorithm optimization
+  \label{vectorize}}
+\end{figure}
+
+\textit{Vectorization:} Following the process of unrolling, we proceeded to optimize the code further with SIMD vectorization. In Fig.~\ref{vectorize} we show our results, as anticipated, this approach yielded superior results compared to simple unrolling. However, we observed that algorithm optimization performed comparably to manual vectorization. Compiler exhibited an ability to optimize the code as efficiently as our manual efforts, and in some cases, even surpassing our optimizations.
+
+Transitioning to blocking vectorization, the notable improvement in blocking can be observed in Fig.~\ref{vectorizeBlock}. This improvement can be primarily attributed to the fact that the compiler encounters more difficulties in optimizing non-straightforward algorithms such as blocking.
+\begin{figure}[htbp]
+\centering
+  \includegraphics[scale=0.4]{VectorizeBlockingPlot.pdf}
+  \caption{Performance of blocking vectorization compared to regular blocking
+  \label{vectorizeBlock}}
+\end{figure}
 
 \textit{Block Size:} How does the image quilting algorithm block size affect the 
 
