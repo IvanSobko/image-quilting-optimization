@@ -56,19 +56,19 @@
 %
 
 \begin{abstract}
-Image quilting is a widely used technique for texture synthesis. However, the computational complexity associated with image quilting can hinder its practical application in real-time scenarios or high-resolution images. This paper focuses on the optimization of image quilting algorithms without thread parallelization.
+Image Quilting is a widely used technique for texture synthesis. However, the computational complexity associated with Image Quilting can hinder its practical application in real-time scenarios or high-resolution images. This paper focuses on the optimization of Image Quilting algorithms without thread parallelization.
 Through a comprehensive study, we explore various optimization strategies such as straightforward algorithm improvement, unrolling, blocking and vectorization to reduce computational overhead and enhance the overall performance.
-Experimental results demonstrate that the proposed optimization strategies effectively reduce the execution time of image quilting algorithms. Furthermore, we analyze the impact of different optimization techniques on memory consumption, performance, and perceptual quality to provide a holistic understanding of their benefits and limitations.
+Experimental results demonstrate that the proposed optimization strategies effectively reduce the execution time of Image Quilting algorithms. Furthermore, we analyze the impact of different optimization techniques on memory consumption, performance, and perceptual quality to provide a holistic understanding of their benefits and limitations.
 \end{abstract}
 
 \section{Introduction}\label{sec:intro}
 
-Image quilting algorithms have become indispensable tools in various image processing applications, providing solutions for texture synthesis, seamless image stitching, and image inpainting. However, with the ever-increasing demand for real-time performance and the handling of large-scale textures, there is a growing need for high-performance versions of image quilting algorithms. The objective of this paper is to introduce and evaluate a high-performance version of the image quilting algorithm that addresses the computational challenges and improves overall efficiency. 
+Image Quilting algorithms have become indispensable tools in various image processing applications, providing solutions for texture synthesis, seamless image stitching, and image inpainting. However, with the ever-increasing demand for real-time performance and the handling of large-scale textures, there is a growing need for high-performance versions of Image Quilting algorithms. The objective of this paper is to introduce and evaluate a high-performance version of the Image Quilting algorithm that addresses the computational challenges and improves overall efficiency. 
 
-\mypar{Motivation} The motivation behind this research arises from the limitations of traditional image quilting algorithms in meeting the demands of modern applications. Standard approaches often struggle to handle high-resolution images and it poses a challenge in terms of memory consumption and processing time. Therefore, a high-performance version of the image quilting algorithm is crucial to overcome these limitations and unlock its full potential in various domains.
+\mypar{Motivation} The motivation behind this research arises from the limitations of traditional Image Quilting algorithms in meeting the demands of modern applications. Standard approaches often struggle to handle high-resolution images and it poses a challenge in terms of memory consumption and processing time. Therefore, a high-performance version of the Image Quilting algorithm is crucial to overcome these limitations and unlock its full potential in various domains.
 
 \mypar{Contribution}
-In this study, we present an optimized implementation of the image quilting algorithm, focusing on key areas such as enhancements to a straightforward algorithm, loop unrolling, block processing and SIMD vectorization. We explore innovative approaches that leverage modern hardware architectures, including Central Processing Units (CPUs), to accelerate the algorithm's execution time.
+In this study, we present an optimized implementation of the Image Quilting algorithm, focusing on key areas such as enhancements to a straightforward algorithm, loop unrolling, block processing and SIMD vectorization. We explore innovative approaches that leverage modern hardware architectures, including Central Processing Units (CPUs), to accelerate the algorithm's execution time.
 
 \section{Background on Image Quilting}\label{sec:background}
 
@@ -88,7 +88,7 @@ The minimum value in the last row of the table represents the end of the best st
 
 \mypar{Cost Analysis} Our definition of the cost measure is informed by our initial profiling of our baseline implementation. In particular, generating a flame graph (made using CLion's DTtrace-based CPU profiler on MacOS) revealed that about 85\% of the runtime of the algorithm was devoted to computing the $\ell ^2$-norm between block overlap regions. About only 3\% of the runtime was devoted to computing the minimum cut and writing the block. Because the computation of the $\ell ^2$-norm dominates the runtime of the algorithm, we decided to define our cost measure in terms of the operations required to compute the $\ell ^2$-norm.
 
-Because the input to our algorithm is an image, which are most commonly encoded as two-dimensional arrays of packed 1-byte wide red, green, blue, and alpha channels, we decided to focus our implementation and cost measure on integer operations. CPUs are designed to have many more integer ALUs than Floating Point execution units because integer arithmetic is much more common than floating point arithmetic. Furthermore, using the narrowest numeric type appropriate would allow higher performance when applying applying SIMD intrinsics.
+Because the input to our algorithm is an image, which are most commonly encoded as two-dimensional arrays of packed 1-byte wide red, green, blue, and alpha channels (RGBA), we decided to focus our implementation and cost measure on integer operations. CPUs are designed to have many more integer ALUs than Floating Point execution units because integer arithmetic is much more common than floating point arithmetic. Furthermore, using the narrowest numeric type appropriate would allow higher performance when applying applying SIMD intrinsics.
 
 To define our cost measure let's derive the number of operations needed to compute the $\ell ^2$-norm between two pixels. Let's assume that each pixel $\bm{p}_i$ has 4 channels, namely the RGBA channels. We then have that
 \begin{align*}
@@ -118,9 +118,9 @@ It is important to note that addition and subtraction usually have smaller laten
 
 This means that the cost of an integer multiplication is greater than the cost of an integer addition or subtraction.
 
-An asymptotic analysis of the image quilting algorithm further justifies our choice of cost measure. The original image quilting paper \cite{Efros:01} does not perform an asymptotic analysis and so we provide one here. For the purpose of the asymptotic analysis, assume that the input image is square and has $n \in \N$ pixels. Then, it has a width and height of $I_w = I_h := \sqrt{n} \in \N$ pixels. Further assume that the output image is also square and linearly proportional to the dimensions of the input image. Then, the ouput image has a width and height of $O_w = O_h := a \sqrt{n} \in \N$ pixels (for some valid $a \ge 1$ with $a \in \R$). Further assume that the blocks are square and their dimensions are linearly proportional to the dimensions of the input image. Then, the block size has a width and height of $B_w = B_h := b \sqrt{n} \in \N$ pixels (for some valid $0 < b < 1$ with $b \in \R$). Each block then consists of $b^2 n \in \N$ pixels.
+An asymptotic analysis of the Image Quilting algorithm further justifies our choice of cost measure. The original Image Quilting paper \cite{Efros:01} does not perform an asymptotic analysis and so we provide one here. For the purpose of the asymptotic analysis, assume that the input image is square and has $n \in \N$ pixels. Then, it has a width and height of $I_w = I_h := \sqrt{n} \in \N$ pixels. Further assume that the output image is also square and linearly proportional to the dimensions of the input image. Then, the ouput image has a width and height of $O_w = O_h := a \sqrt{n} \in \N$ pixels (for some valid $a \ge 1$ with $a \in \R$). Further assume that the blocks are square and their dimensions are linearly proportional to the dimensions of the input image. Then, the block size has a width and height of $B_w = B_h := b \sqrt{n} \in \N$ pixels (for some valid $0 < b < 1$ with $b \in \R$). Each block then consists of $b^2 n \in \N$ pixels.
 
-The image quilting algorithm will then need to select
+The Image Quilting algorithm will then need to select
 \[
   \frac{O_h}{B_h} \cdot \frac{O_w}{B_w} = \frac{(a \sqrt{n})^2}{(b \sqrt{n})^2} = \frac{a^2}{b^2} = c_0 \; \text{blocks},
 \]
@@ -130,7 +130,7 @@ for some constant $c_0 \in N$. Selecting a block consists of iterating over ever
   & = (1-b) ^2 n \\
   & = c_1 n
 \end{align*}
-for some constant $c_1 \in N$. The overlap region between a potential source block and the output texture will always consist of one or two rectangular sub-regions. The original image quilting paper chooses the overlap width to be one sixth of the block width; we chose the same value in our implementation. Hence, the dimensions of the rectangular sub-regions are linear in the dimensions of the block width. In the worst case we have a corner overlap, and so the overlap region will consist of
+for some constant $c_1 \in N$. The overlap region between a potential source block and the output texture will always consist of one or two rectangular sub-regions. The original Image Quilting paper chooses the overlap width to be one sixth of the block width; we chose the same value in our implementation. Hence, the dimensions of the rectangular sub-regions are linear in the dimensions of the block width. In the worst case we have a corner overlap, and so the overlap region will consist of
 \begin{align*}
   B_h \frac{1}{6} B_w + B_w \frac{1}{6} B_h - \frac{1}{6} B_w \frac{1}{6} B_h & = \frac{b^2}{6} n + \frac{b^2}{6} n - \frac{b^2}{36} n \\ & = c_2 n \; \text{pixels}.
 \end{align*}
@@ -140,11 +140,11 @@ Randomly sampling a block within a threshold of the lowest $\ell ^2$-norm can be
 
 Performing the minimum cut requires computing the error surface, filling up a dynamic programming table, and traversing the dynamic programming table to retrieve the cut. Each of these steps in the worst case iterates over every pixel of an overlap region. So computing the minimum cut and writing the block together achieve a linear complexity $c_3 n$ for some constant $c_3 \in \R$.
 
-Putting it all together, the image quilting algorithm selects a constant number of $c_0$ blocks. To select each of those blocks, it must iterate over every $c_1 n$ potential source block. For each source block, it must iterate over $c_2 n$ pixels to compute the $\ell ^2$-norm. Next, a random block is sampled within a specified threshold of the minimum by linearly iterating over the $c_1 n$ $\ell ^2$-norms. Lastly, the algorithm computes the minimum cut and writes the block iterating over $c_3 n$ pixels. This means the algorithm iterates over
+Putting it all together, we conclude that the Image Quilting algorithm iterates over
 \[
   c_0 \big [(c_1 n)(c_2 n) + c_1 n + c_3 n \big ] \approx n^2 + O(n) \; \text{pixels}.
 \]
-Thus the image quilting algorithm is quadratic in the number of input pixels $n$ and we say that image quilting $ \in O(n^2)$.
+Thus the Image Quilting algorithm is quadratic in the number of input pixels $n$ and we say that Image Quilting $ \in O(n^2)$.
 
 This asymptotic analysis further justifies our choice of cost measure because the highest order $n^2$ term comes from having to compute the $\ell ^2$-norm of the overlap region with respect to ever potential source block.
 
@@ -153,7 +153,7 @@ This asymptotic analysis further justifies our choice of cost measure because th
  This section will delve into the specific optimization strategies implemented during the study, providing a comprehensive overview of the methods used and their corresponding rationale. The results and impact of each optimization strategy will be discussed in the next section, showcasing the effectiveness and benefits they brought to performance improvement.
 
 \mypar{Optimization plan} 
-To formulate our optimization plan, we initially classified the potential optimizations for our algorithm into two subcategories: basic and advanced. The basic optimizations are general techniques that are applicable to a wide range of algorithms, usually yielding light but consistent improvements in speed. These optimizations may lead to a marginal reduction in the number of operations. Additionally, these optimizations typically simplify the code, which can aid the compiler in optimizing the algorithm more effectively.
+To formulate our optimization plan, we initially classified the potential optimizations for our algorithm into two categories: basic and advanced. The basic optimizations are general techniques that are applicable to a wide range of algorithms, usually yielding light but consistent improvements in speed. These optimizations may lead to a marginal reduction in the number of operations. Additionally, these optimizations typically simplify the code, which can aid the compiler in optimizing the algorithm more effectively.
 
 Advanced optimizations require significant analysis of the algorithm. Upon careful examination, we have identified several potential optimizations in this block:
 
@@ -226,7 +226,7 @@ We can address the temporal locality of iterating over the overlap region in the
           l2(i, j) += |op - ip|^2
 \end{lstlisting}
 
-Here $|S_b| =$ maxBlockY $ * $ maxBlockX; hence the outer two loops iterate over every potential source block and the inner two loops iterate over the pixels of the overlap region. The output pixel \inline{op} depends only on its position within the overlap region, determined by \inline{k} and \inline{l}. The input pixel \inline{ip} depends on its position within the overlap region as well as which source block it comes from, determined by \inline{i} and \inline{j}. Fixing \inline{k} and \inline{l}, the output pixel \inline{op = output(k, l)} is read $|S_b|$ times, and the input pixel \inline{ip = input(i, j, k, l)} iterates over almost every pixel of the input texture. Letting \inline{k} and \inline{l} vary we have that the input pixel \inline{ip = input(i, j, k, l)} iterates over almost every pixel of the input texture multiple times. 
+Here $|S_b| =$ maxBlockY $ * $ maxBlockX; hence the outer two loops iterate over every potential source block and the inner two loops iterate over the pixels of the overlap region. Fixing \inline{k} and \inline{l}, the output pixel \inline{op = output(k, l)} is read $|S_b|$ times, and the input pixel \inline{ip = input(i, j, k, l)} iterates over almost every pixel of the input texture. Letting \inline{k} and \inline{l} vary we have that the input pixel \inline{ip = input(i, j, k, l)} iterates over almost every pixel of the input texture multiple times. 
 
 The above pseudocode analysis tells us that (1) the output overlap region is read multiple times and (2) the input texture is read multiple times. Ideally, both the output overlap region and input texture need to fit into cache. However, by reordering the inner two and outer two, we can iterate over the pixels of the output overlap region exactly once:
 
@@ -289,7 +289,7 @@ We employed various platforms and compiler flags to assess the outcomes of diver
 
 (3) An Intel(R) Core i7-1068NG7 @2.3GHz; L1: 64 KB, L2: 256 KB, L3: 8 MB. For different block sizes.
 
-For input we used square images of varying sizes, ranging from $2^{11}$ to $2^{18}$ in terms of pixel count. We always use a square image quilting block with width 1/4 of the input width, unless specified otherwise.
+For input we used square images of varying sizes, ranging from $2^{11}$ to $2^{18}$ in terms of pixel count. We always use a square Image Quilting block with width 1/4 of the input width, unless specified otherwise.
 
 \mypar{Results}
 
@@ -355,12 +355,12 @@ Transitioning to blocking vectorization, the notable improvement in blocking can
   \label{vectorizeBlock}}
 \end{figure}
 
-\textit{Block Size:} How does the image quilting algorithm block size affect the standard C and algorithm optimizations implementation Performance? Fig.~\ref{248Performances} illustrates that the performance increases with a larger image quilting block size. This makes sense since a larger image quilting block sizes leads to larger contiguous regions of memory for the algorithm to access. Note that the performance of the 1/2 block size plummets on the largest input size, potentially because the blocks are no longer fitting into LLC.
+\textit{Block Size:} How does the Image Quilting algorithm block size affect the standard C and algorithm optimizations implementation Performance? Fig.~\ref{248Performances} illustrates that the performance increases with a larger Image Quilting block size. This makes sense since a larger Image Quilting block sizes leads to larger contiguous regions of memory for the algorithm to access. Note that the performance of the 1/2 block size plummets on the largest input size, potentially because the blocks are no longer fitting into LLC.
 
 \begin{figure}[htbp]
   \centering
     \includegraphics[scale=0.45]{248Performances.pdf}
-    \caption{Performance of the standard C and algorithm optmizations with image quilting block sizes of 1/2, 1/4, and 1/8.
+    \caption{Performance of the standard C and algorithm optmizations with Image Quilting block sizes of 1/2, 1/4, and 1/8.
     \label{248Performances}}
   \end{figure}
 
@@ -374,7 +374,7 @@ important results and say the things you really want to get across
 (e.g., the results show that we are within 2x of the optimal performance ...
 Even though we only considered the DFT, our optimization
 techniques should be also applicable ....) You can also formulate next
-steps if you want. Be brief.
+steps if you want. Be brief,
 
 \bigskip
 {\bf Up to here you have 8 pages.}
