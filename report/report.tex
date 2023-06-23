@@ -169,13 +169,15 @@ Advanced optimizations require significant analysis of the algorithm. Upon caref
 Some of these optimizations will be further explored in this section.
 
 \mypar{Basic optimizations}
-This optimization block involves introducing precomputations to improve temporal locality, inlining function calls, replacing computationally expensive operations with more optimal alternatives, rewriting the code in a C-style fashion, and replacing library functions with our own implementations to eliminate unnecessary computations. Now, let's examine the most noteworthy optimizations from this list within the context of the Image Quilting algorithm.
+This optimization block involves introducing precomputations to improve temporal locality, inlining function calls, replacing computationally expensive operations with more optimal alternatives, rewriting the code in a C-style fashion, and replacing library functions with our own implementations to eliminate unnecessary computations.
 
 Our initial implementation of texture synthesis required numerous index computations to access specific parts of the output texture and the blocks from the set \textit{$S_{B}$} to determine overlap regions. To optimize this process, we precomputed various values, such as row and column shifts to align with the beginning of overlap regions. Moreover, we stored pointers to the start of these rows for both the output texture and the blocks, enabling us to easily increment the pointers while iterating over the columns to efficiently calculate the error between the overlapping blocks. By implementing this modification, we removed a total of 20 integer additions per pixel. However, the impact was even more substantial due to the removal of 8 multiplications and the elimination of various operational dependencies. These changes are particularly significant as they mitigate high latency and enhance performance through improved parallelization.
 
-Another optimization in this context involves reducing the number of square root operations. In the original paper \cite{Efros:01}, the squared root of sum differences for each block is computed. The minimum value among these values then determines the best matching block, and a set of blocks within 0.1 times the error of this block is considered suitable for pasting into the desired output texture.
+\mypar{Algorithmic Optimizations} One of our algorithmic optimizations was to reduce the number of square root operations, as we know that they are very costly. In the original paper \cite{Efros:01}, the squared root of sum differences for each block is computed. The minimum value among these values then determines the best matching block, and a set of blocks within 0.1 times the error of this block is considered suitable for pasting into the desired output texture.
 
-However, we can simplify the algorithm since we do not need squared root actual values. As the square root function is monotonically increasing, finding the minimum sum of squared differences suffices to identify the best matching block. To ensure consistency in the set of suitable blocks, we calculate the square root solely for the minimum value. To ensure that the set of suitable blocks remains the same, we can obtain the square root only for the minimum value, multiply it by the error tolerance to determine the threshold, and then square it again. With this approach the resulting value is proportional to the calculated sum of squared differences for all other blocks. 
+However, we can simplify the algorithm since we do not need squared root actual values. As the square root function is monotonically increasing, finding the minimum sum of squared differences suffices to identify the best matching block. To ensure consistency in the set of suitable blocks, we calculate the square root solely for the minimum value. To ensure that the set of suitable blocks remains the same, we can obtain the square root only for the minimum value, multiply it by the error tolerance to determine the threshold, and then square it again. With this approach the resulting value is proportional to the calculated sum of squared differences for all other blocks.
+
+Another of our algorithmic optimizations was to merge the loops covering the horizontal and corner overlap cases for the $\ell ^2$-norm computation. Not only did this result in a simplified algorithm, but by eliminating the need to process rows of the overlap region separately in distinct loops, data access became more contiguous and sequential, improving spatial locality.
 
 \mypar{Loop Unrolling} 
 Another optimization that we implemented is loop unrolling with separate accumulators. The main objective of loop unrolling is to enhance Instruction Level Parallelism. To achieve maximum operation parallelization, we introduced multiple accumulators to ensure independence among operations and improve the computational efficiency of the algorithm. It is crucial to emphasize that one of the main challenges in this optimization lies in determining the appropriate unroll factor and the number of accumulators to use. 
@@ -285,9 +287,7 @@ For input we used images of varying sizes, ranging from $2^{11}$ to $2^{18}$ in 
 
 \mypar{Results}
 
-\textit{Basic optimizations and algorithmic improvements:} While the previous section covered the details of basic optimizations, the explanation for algorithmic improvements was not provided. Hence, we will present it here.
-
-With algorithmic improvements, we merged the corner overlap case with the horizontal overlap, resulting in a simplified algorithm. With this modification we eliminated the need to process rows of the overlap region separately in distinct loops. As a result, data access became more contiguous and sequential, improving spatial locality.
+\textit{Basic optimizations and algorithmic improvements:}
 
 \begin{figure}[htbp]
 \centering
