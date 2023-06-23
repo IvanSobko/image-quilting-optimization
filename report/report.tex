@@ -86,7 +86,7 @@ While the previous approach has significantly improved the output, there are sti
 \[ E = e_{i,j} + min(E_{i-1,j-1}, E_{i-1,j}, E_{i-1,j+1}). \]
 The minimum value in the last row of the table represents the end of the best stitching path. To obtain the whole path, we traverse back from this minimum value, selecting the cells with the minimum cumulative error at each step until we reach the first row.
 
-\mypar{Cost Analysis} Our definition of the cost measure is informed by our initial profiling of our baseline implementation. In particular, generating a flame graph (made using CLion's DTtrace-based CPU profiler on MacOS) revealed that about 85\% of the runtime of the algorithm was devoted to computing the $\ell ^2$-norm between block overlap regions. About only 3\% of the runtime was devoted to computing the minimum cut and writing the block. Because the computation of the $\ell ^2$-norm dominates the runtime of the algorithm, we decided to define our cost measure in terms of the operations required to compute the $\ell ^2$-norm.
+\mypar{Cost Analysis} Our definition of the cost measure is informed by our initial profiling of our baseline implementation. In particular, generating a flame graph revealed that about 85\% of the runtime of the algorithm was devoted to computing the $\ell ^2$-norm between block overlap regions. About only 3\% of the runtime was devoted to computing the minimum cut and writing the block. Because the computation of the $\ell ^2$-norm dominates the runtime of the algorithm, we decided to define our cost measure in terms of the operations required to compute the $\ell ^2$-norm.
 
 Because the input to our algorithm is an image, which are most commonly encoded as two-dimensional arrays of packed 1-byte wide red, green, blue, and alpha channels (RGBA), we decided to focus our implementation and cost measure on integer operations. CPUs are designed to have many more integer ALUs than Floating Point execution units because integer arithmetic is much more common than floating point arithmetic. Furthermore, using the narrowest numeric type appropriate would allow higher performance when applying applying SIMD intrinsics.
 
@@ -118,35 +118,17 @@ It is important to note that addition and subtraction usually have smaller laten
 
 This means that the cost of an integer multiplication is greater than the cost of an integer addition or subtraction.
 
-An asymptotic analysis of the Image Quilting algorithm further justifies our choice of cost measure. The original Image Quilting paper \cite{Efros:01} does not perform an asymptotic analysis and so we provide one here. For the purpose of the asymptotic analysis, assume that the input image is square and has $n \in \N$ pixels. Then, it has a width and height of $I_w = I_h := \sqrt{n} \in \N$ pixels. Further assume that the output image is also square and linearly proportional to the dimensions of the input image. Then, the ouput image has a width and height of $O_w = O_h := a \sqrt{n} \in \N$ pixels (for some valid $a \ge 1$ with $a \in \R$). Further assume that the blocks are square and their dimensions are linearly proportional to the dimensions of the input image. Then, the block size has a width and height of $B_w = B_h := b \sqrt{n} \in \N$ pixels (for some valid $0 < b < 1$ with $b \in \R$). Each block then consists of $b^2 n \in \N$ pixels.
+An asymptotic analysis of the Image Quilting algorithm further justifies our choice of cost measure. The original Image Quilting paper \cite{Efros:01} does not perform an asymptotic analysis and so we provide a brief one here. For the purpose of the asymptotic analysis, assume that the input image is square and has $n \in \N$ pixels. Then, its width and height are $\sqrt{n}$ pixels. Further assume that the output image is also square and linearly proportional to the dimensions of the input image. Then, the output image has a width and height of $O(\sqrt{n})$ pixels. Further assume that the blocks are square and their dimensions are linearly proportional to the dimensions of the input image. Then, the block size has a width and height of $O(\sqrt{n})$ pixels.
 
-The Image Quilting algorithm will then need to select
-\[
-  \frac{O_h}{B_h} \cdot \frac{O_w}{B_w} = \frac{(a \sqrt{n})^2}{(b \sqrt{n})^2} = \frac{a^2}{b^2} = c_0 \; \text{blocks},
-\]
-for some constant $c_0 \in N$. Selecting a block consists of iterating over every potential source block in $S_b$, computing its $\ell ^2$-norm with respect to the overlap region in the output texture, randomly sampling a block within a threshold of the lowest $\ell ^2$-norm, and computing the minimum cut to write the new block. Because our input image is square and the block size is square, we have that the size of the set of potential source blocks is
-\begin{align*}
-  |S_b| & = (I_w - B_w) \cdot (I_h - B_h) \\
-  & = (1-b) ^2 n \\
-  & = c_1 n
-\end{align*}
-for some constant $c_1 \in N$. The overlap region between a potential source block and the output texture will always consist of one or two rectangular sub-regions. The original Image Quilting paper chooses the overlap width to be one sixth of the block width; we chose the same value in our implementation. Hence, the dimensions of the rectangular sub-regions are linear in the dimensions of the block width. In the worst case we have a corner overlap, and so the overlap region will consist of
-\begin{align*}
-  B_h \frac{1}{6} B_w + B_w \frac{1}{6} B_h - \frac{1}{6} B_w \frac{1}{6} B_h & = \frac{b^2}{6} n + \frac{b^2}{6} n - \frac{b^2}{36} n \\ & = c_2 n \; \text{pixels}.
-\end{align*}
-for some constant $c_2 \in \N$.
+Because the output image dimensions are linearly proportional the dimensions of the input image, the Image Quilting algorithm will select some constant number of blocks. Furthermore, we also have that the size of the set of potential source blocks is linear in the number of input pixels; that is, $|S_b| \in O(n)$. Selecting a block consists of iterating over every potential source block in $S_b$, computing its $\ell ^2$-norm with respect to the overlap region in the output texture, randomly sampling a block within a threshold of the lowest $\ell ^2$-norm, and computing the minimum cut to write the new block.
 
-Randomly sampling a block within a threshold of the lowest $\ell ^2$-norm can be achieved with a linear complexity by iterating over the $c_1 n$ $\ell ^2$-norms to find the minimum.
+The overlap region between a potential source block and the output texture will always consist of one or two rectangular sub-regions. The original Image Quilting paper chooses the overlap width to be one sixth of the block width; we chose the same value in our implementation. Hence, the dimensions of the rectangular sub-regions are linear in the dimensions of the block width, and so the number of pixels of the overlap region will be linear in the number of input pixels, $O(n)$. Iterating over every potential source block in $S_b$ and computing its $\ell ^2$-norm with respect to the overlap region in the output texture then contributes $O(n^2)$ to the algorithm complexity.
 
-Performing the minimum cut requires computing the error surface, filling up a dynamic programming table, and traversing the dynamic programming table to retrieve the cut. Each of these steps in the worst case iterates over every pixel of an overlap region. So computing the minimum cut and writing the block together achieve a linear complexity $c_3 n$ for some constant $c_3 \in \R$.
+Randomly sampling a block within a threshold of the lowest $\ell ^2$-norm can be achieved with a linear complexity by iterating over the $n$ $\ell ^2$-norms to find the minimum, contributing $O(n)$ to the algorithm complexity.
 
-Putting it all together, we conclude that the Image Quilting algorithm iterates over
-\[
-  c_0 \big [(c_1 n)(c_2 n) + c_1 n + c_3 n \big ] \approx n^2 + O(n) \; \text{pixels}.
-\]
-Thus the Image Quilting algorithm is quadratic in the number of input pixels $n$ and we say that Image Quilting $ \in O(n^2)$.
+Performing the minimum cut requires computing the error surface, filling up a dynamic programming table, and traversing the dynamic programming table to retrieve the cut. Each of these steps in the worst case iterates over every pixel of an overlap region. So computing the minimum cut and writing the block together is linear in the number of input pixels, , contributing $O(n)$ to the algorithm complexity.
 
-This asymptotic analysis further justifies our choice of cost measure because the highest order $n^2$ term comes from having to compute the $\ell ^2$-norm of the overlap region with respect to ever potential source block.
+Putting it all together, we conclude that the Image Quilting algorithm is quadratic in the number of input pixels $n$ because; we say that Image Quilting $ \in O(n^2)$.
 
 \section{Optimization Strategies}\label{sec:yourmethod}
 
