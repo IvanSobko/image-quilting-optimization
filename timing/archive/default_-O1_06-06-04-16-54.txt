@@ -1,8 +1,0 @@
-label=default, compileFlags=-O1, time=06-06-04-16-54, outputScale=2, blockDivisor=4, seed=0
-size=128x128, n=16384, performance=0.922542, flops=3411810706, cycles=3.69827e+09
-size=512x512, n=262144, performance=0.144546, flops=146299546666, cycles=1.01213e+12
-size=64x64, n=4096, performance=0.935148, flops=168908909, cycles=1.80623e+08
-size=362x362, n=131044, performance=0.909332, flops=231940248781, cycles=2.55067e+11
-size=90x90, n=8100, performance=0.908006, flops=701051082, cycles=7.72078e+08
-size=45x45, n=2025, performance=0.571018, flops=15428748, cycles=2.70197e+07
-size=181x181, n=32761, performance=0.915436, flops=13471242619, cycles=1.47157e+10
