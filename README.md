@@ -4,6 +4,8 @@ Image Quilting is a method for stitching sampled patches from a texture image to
 
 The algorithm is described in http://graphics.cs.cmu.edu/people/efros/research/quilting/quilting.pdf, chapter 2 (Quilting), page 2.
 
+This project is done in collaboration with Tal Rastopchin (@trastopchin) and Svitlana Morkva (@SvetaMorkva) in scope of Advanced Systems Laboratory course in ETH Zurich.
+
 ## Basic Implementation
 
 Our implementation was written from scratch based on the original paper. We implemented our algorithm by expanding from the most naive method - Random Block Sampling, 
