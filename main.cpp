@@ -4,13 +4,13 @@
 #include <string>
 #include <utility>
 #include <vector>
-#include "image_quilting.h"
-#include "png_reader.h"
 
-#include "blocking.h"
-#include "src/advance_alg_optimiz.h"
-#include "src/benchmarking/timing.h"
-#include "src/comp_overlap_optimiz.h"
+#include "algorithm/advance_alg_optimiz.h"
+#include "algorithm/blocking.h"
+#include "algorithm/comp_overlap_optimiz.h"
+#include "algorithm/image_quilting.h"
+#include "benchmarking/timing.h"
+#include "png_reader.h"
 #include "testing.h"
 
 struct Args {
@@ -70,7 +70,19 @@ Args parse_args(int argc, char* argv[]) {
     return args;
 }
 
-void test_all_optimizations() {
+static void run_benchmarking() {
+    // Run timings for 3 block divisors.
+    timing::run_timing(2);
+    timing::run_timing(4);
+    timing::run_timing(8);
+}
+
+static void generate_outputs() {
+    Testing testing(2);
+    testing.GenerateOutputFiles();
+}
+
+static void run_base_tests() {
     Testing testing = Testing(2);
     testing.RegisterTestFunction(Testing::ImageQuiltingFunction, "default");
     testing.RegisterTestFunction(CompOverlapOptimiz::BasicOpt, "basic");
@@ -107,22 +119,6 @@ void test_all_optimizations() {
                                  "unroll8_bounds_loop_block32_simd");
 #endif
     testing.TestCorrectness();
-}
-
-static void run_benchmarking() {
-    // Run timings for 3 block divisors.
-    timing::run_timing(2);
-    timing::run_timing(4);
-    timing::run_timing(8);
-}
-
-static void generate_outputs() {
-    Testing testing(2);
-    testing.GenerateOutputFiles();
-}
-
-static void run_base_tests() {
-    test_all_optimizations();
 }
 
 static void run_tests_and_timing(const Args& args) {

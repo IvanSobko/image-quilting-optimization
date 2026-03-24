@@ -9,20 +9,23 @@ add_executable(${PROJECT_NAME}
         main.cpp
         src/png_reader.cpp
         src/png_reader.h
-        src/image_quilting.cpp
-        src/image_quilting.h
-        src/advance_alg_optimiz.cpp
-        src/advance_alg_optimiz.h
-        src/comp_overlap_optimiz.cpp
-        src/comp_overlap_optimiz.h
+
+        src/algorithm/image_quilting.cpp
+        src/algorithm/image_quilting.h
+        src/algorithm/advance_alg_optimiz.cpp
+        src/algorithm/advance_alg_optimiz.h
+        src/algorithm/comp_overlap_optimiz.cpp
+        src/algorithm/comp_overlap_optimiz.h
+        src/algorithm/blocking.h
+        src/algorithm/blocking.cpp
+
         src/img_data.h
         src/testing.cpp
         src/testing.h
+        
         src/benchmarking/tsc_x86.h
         src/benchmarking/timing.h
-        src/benchmarking/timing.cpp
-        src/blocking.h
-        src/blocking.cpp)
+        src/benchmarking/timing.cpp)
 
 # We can use different compiler flags
 set(CompileFlags "-g" "-O3" "-ffast-math" "-march=native")

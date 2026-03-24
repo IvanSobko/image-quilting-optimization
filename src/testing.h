@@ -8,8 +8,8 @@
 #include <tuple>
 #include <vector>
 
+#include "algorithm/image_quilting.h"
 #include "benchmarking/tsc_x86.h"
-#include "image_quilting.h"
 #include "png_reader.h"
 
 // Defines for timing
@@ -40,8 +40,7 @@ public:
     // Register a function to test
     void RegisterTestFunction(const TestFunction& testFunction, std::string label);
     // Register a component function to test
-    void RegisterComponentTestFunction(const TestFunction& baseFunction, const TestFunction& testFunction,
-                                       std::string label);
+    void RegisterComponentTestFunction(const TestFunction& baseFunction, const TestFunction& testFunction, std::string label);
     // Test the correctness of all the registered functions on every input
     void TestCorrectness();
     // Set the input for the TestCorrectnessAndTiming test suite
