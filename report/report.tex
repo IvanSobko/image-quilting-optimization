@@ -173,7 +173,7 @@ Now that we have determined the most optimal theoretical runtime for the given m
 
 \begin{figure}[htb]
 \centering
-  \includegraphics[scale=0.30]{DependencyGraph.pdf}
+  \includegraphics[scale=0.30]{fig/DependencyGraph.pdf}
   \caption{Dependency graph of the $\ell^2$-loss function between two pixels, considering Intel Skylake microarchitecture. Channels {$r_{1}, r_{2}, g_{1}, g_{2}, ...$} correspond to the respective pixel channels.
   \label{dg}}
 \end{figure}
@@ -182,7 +182,7 @@ To optimize the algorithm, let us determine the ideal unrolling factor that can 
 
 \begin{figure}[htb]
 \centering
-  \includegraphics[scale=0.18]{Unrolling.pdf}
+  \includegraphics[scale=0.18]{fig/Unrolling.pdf}
   \caption{Dependency graph of the $\ell^2$-loss function between two pixels with an unroll factor of 4, considering Intel Skylake microarchitecture.\label{unroll}}
 \end{figure}
 
@@ -279,7 +279,7 @@ For input we used square images of varying sizes, ranging from $2^{11}$ to $2^{1
 
 \begin{figure}[htb]
 \centering
-  \includegraphics[scale=0.4]{PerfBasic.pdf}
+  \includegraphics[scale=0.4]{fig/PerfBasic.pdf}
   \caption{Performance of the basic optimizations, algorithmic improvements, and baseline implementation.
   \label{perfBase}}
 \end{figure}
@@ -288,7 +288,7 @@ For input we used square images of varying sizes, ranging from $2^{11}$ to $2^{1
 
 \begin{figure}[htb]
 \centering
-  \includegraphics[scale=0.4]{BenchmarkPerformance.pdf}
+  \includegraphics[scale=0.4]{fig/BenchmarkPerformance.pdf}
   \caption{Performance plot of the standard C and algorithm optimizations compared to a benchmark implementation.
   \label{BenchmarkPerformance}}
 \end{figure}
@@ -297,7 +297,7 @@ For input we used square images of varying sizes, ranging from $2^{11}$ to $2^{1
 
 \begin{figure}[htb]
 \centering
-  \includegraphics[scale=0.4]{PerfUnroll.pdf}
+  \includegraphics[scale=0.4]{fig/PerfUnroll.pdf}
   \caption{Performance of different unrolling factors comparing to the baseline implementation.
   \label{perfUnroll}}
 \end{figure}
@@ -306,7 +306,7 @@ Despite the decrease in runtime achieved through our unrolling technique, its pe
 
 \begin{figure}[htb]
 \centering
-  \includegraphics[scale=0.25]{RooflineUnroll.pdf}
+  \includegraphics[scale=0.25]{fig/RooflineUnroll.pdf}
   \caption{Roofline plot for different unrolling factors
   \label{roofunroll}}
 \end{figure}
@@ -315,14 +315,14 @@ Despite the decrease in runtime achieved through our unrolling technique, its pe
 
 \begin{figure}[htb]
   \centering
-    \includegraphics[scale=0.3]{RooflineBlocking.pdf}
+    \includegraphics[scale=0.3]{fig/RooflineBlocking.pdf}
     \caption{Roofline plot illustrating the result of blocking the loop unrolling by 2 and 4 optimization variants.
     \label{RooflineBlocking}}
   \end{figure}
 
 \begin{figure}[htb]
 \centering
-  \includegraphics[scale=0.4]{VectorizePlot.pdf}
+  \includegraphics[scale=0.4]{fig/VectorizePlot.pdf}
   \caption{Performance of vectorization optimization compared to unrolling and algorithm optimization
   \label{vectorize}}
 \end{figure}
@@ -332,7 +332,7 @@ Despite the decrease in runtime achieved through our unrolling technique, its pe
 Transitioning to blocking vectorization, the notable improvement in blocking can be observed in Fig.~\ref{vectorizeBlock}. This improvement can be primarily attributed to the fact that the compiler encounters more difficulties in optimizing non-straightforward algorithms such as blocking.
 \begin{figure}[htb]
 \centering
-  \includegraphics[scale=0.4]{VectorizeBlockingPlot.pdf}
+  \includegraphics[scale=0.4]{fig/VectorizeBlockingPlot.pdf}
   \caption{Performance of blocking vectorization compared to regular blocking.
   \label{vectorizeBlock}}
 \end{figure}
@@ -341,7 +341,7 @@ Transitioning to blocking vectorization, the notable improvement in blocking can
 
 \begin{figure}[htb]
   \centering
-    \includegraphics[scale=0.4]{248Performances.pdf}
+    \includegraphics[scale=0.4]{fig/248Performances.pdf}
     \caption{Performance of the standard C and algorithm optimizations with Image Quilting block sizes of 1/2, 1/4, and 1/8.
     \label{248Performances}}
   \end{figure}
