@@ -1,11 +1,11 @@
 cmake_minimum_required(VERSION 3.18)
-project(team19)
+project(image_quilting)
 
 set(CMAKE_FIND_FRAMEWORK LAST)
 set(CMAKE_CXX_STANDARD 17)
 
 include_directories(src)
-add_executable(team19
+add_executable(${PROJECT_NAME}
         main.cpp
         src/png_reader.cpp
         src/png_reader.h
@@ -34,9 +34,9 @@ add_definitions(-D_CompileFlags="-O3-ffast-math-march=native") # pass variable _
 #set(CompileFlags "-g" "-O1")
 #add_definitions(-D_CompileFlags="-O1")
 
-target_compile_options(team19 PRIVATE ${CompileFlags})
+target_compile_options(${PROJECT_NAME} PRIVATE ${CompileFlags})
 
 find_package(PNG 1.6 REQUIRED)
 include_directories(${PNG_INCLUDE_DIR})
-target_link_libraries(team19 ${PNG_LIBRARY})
+target_link_libraries(${PROJECT_NAME} ${PNG_LIBRARY})
 
